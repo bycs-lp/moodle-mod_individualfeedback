@@ -15,15 +15,17 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 defined('MOODLE_INTERNAL') OR die('not allowed');
-require_once($CFG->dirroot.'/mod/feedback/item/feedback_item_class.php');
 
-class feedback_item_captcha extends feedback_item_base {
+global $CFG;
+require_once($CFG->dirroot.'/mod/individualfeedback/item/individualfeedback_item_class.php');
+
+class individualfeedback_item_captcha extends individualfeedback_item_base {
     protected $type = "captcha";
 
     public function build_editform($item, $feedback, $cm) {
         global $DB;
 
-        $editurl = new moodle_url('/mod/feedback/edit.php', array('id'=>$cm->id));
+        $editurl = new moodle_url('/mod/individualfeedback/edit.php', array('id'=>$cm->id));
 
         // There are no settings for recaptcha.
         if (isset($item->id) AND $item->id > 0) {
@@ -31,9 +33,9 @@ class feedback_item_captcha extends feedback_item_base {
             exit;
         }
 
-        // Only one recaptcha can be in a feedback.
+        // Only one recaptcha can be in a individualfeedback.
         $params = array('feedback' => $feedback->id, 'typ' => $this->type);
-        if ($DB->record_exists('feedback_item', $params)) {
+        if ($DB->record_exists('individualfeedback_item', $params)) {
             notice(get_string('only_one_captcha_allowed', 'feedback'), $editurl->out());
             exit;
         }
@@ -41,7 +43,7 @@ class feedback_item_captcha extends feedback_item_base {
         $this->item = $item;
         $this->item_form = true; // Dummy.
 
-        $lastposition = $DB->count_records('feedback_item', array('feedback'=>$feedback->id));
+        $lastposition = $DB->count_records('individualfeedback_item', array('feedback'=>$feedback->id));
 
         $this->item->feedback = $feedback->id;
         $this->item->template = 0;
@@ -76,12 +78,12 @@ class feedback_item_captcha extends feedback_item_base {
         }
 
         if (empty($this->item->id)) {
-            $this->item->id = $DB->insert_record('feedback_item', $this->item);
+            $this->item->id = $DB->insert_record('individualfeedback_item', $this->item);
         } else {
-            $DB->update_record('feedback_item', $this->item);
+            $DB->update_record('individualfeedback_item', $this->item);
         }
 
-        return $DB->get_record('feedback_item', array('id'=>$this->item->id));
+        return $DB->get_record('individualfeedback_item', array('id'=>$this->item->id));
     }
 
     public function get_printval($item, $value) {
@@ -113,13 +115,13 @@ class feedback_item_captcha extends feedback_item_base {
      * Adds an input element to the complete form
      *
      * @param stdClass $item
-     * @param mod_feedback_complete_form $form
+     * @param mod_individualfeedback_complete_form $form
      */
     public function complete_form_element($item, $form) {
         $name = $this->get_display_name($item);
         $inputname = $item->typ . '_' . $item->id;
 
-        if ($form->get_mode() != mod_feedback_complete_form::MODE_COMPLETE) {
+        if ($form->get_mode() != mod_individualfeedback_complete_form::MODE_COMPLETE) {
             // Span to hold the element id. The id is used for drag and drop reordering.
             $form->add_form_element($item,
                     ['static', $inputname, $name, html_writer::span('', '', ['id' => 'feedback_item_' . $item->id])],

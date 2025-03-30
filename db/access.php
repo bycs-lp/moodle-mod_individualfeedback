@@ -17,7 +17,7 @@
 /**
  * Plugin capabilities
  *
- * @package    mod_feedback
+ * @package    mod_individualfeedback
  * @copyright  Andreas Grabs
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -26,7 +26,7 @@ defined('MOODLE_INTERNAL') || die();
 
 $capabilities = array(
 
-    'mod/feedback:addinstance' => array(
+    'mod/individualfeedback:addinstance' => array(
         'riskbitmask' => RISK_XSS,
 
         'captype' => 'write',
@@ -38,7 +38,7 @@ $capabilities = array(
         'clonepermissionsfrom' => 'moodle/course:manageactivities'
     ),
 
-    'mod/feedback:view' => array(
+    'mod/individualfeedback:view' => array(
 
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
@@ -52,7 +52,7 @@ $capabilities = array(
         )
     ),
 
-    'mod/feedback:complete' => array(
+    'mod/individualfeedback:complete' => array(
 
         'riskbitmask' => RISK_SPAM,
 
@@ -60,11 +60,13 @@ $capabilities = array(
         'contextlevel' => CONTEXT_MODULE,
         'archetypes' => array(
             'frontpage' => CAP_ALLOW,
-            'student' => CAP_ALLOW
+            'student' => CAP_ALLOW,
+            'teacher' => CAP_ALLOW,
+            'editingteacher' => CAP_ALLOW
         )
     ),
 
-    'mod/feedback:viewanalysepage' => array(
+    'mod/individualfeedback:viewanalysepage' => array(
 
         'riskbitmask' => RISK_PERSONAL,
 
@@ -77,7 +79,7 @@ $capabilities = array(
         )
     ),
 
-    'mod/feedback:deletesubmissions' => array(
+    'mod/individualfeedback:deletesubmissions' => array(
 
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
@@ -87,7 +89,7 @@ $capabilities = array(
         )
     ),
 
-    'mod/feedback:mapcourse' => array(
+    'mod/individualfeedback:mapcourse' => array(
 
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
@@ -96,7 +98,7 @@ $capabilities = array(
         )
     ),
 
-    'mod/feedback:edititems' => array(
+    'mod/individualfeedback:edititems' => array(
 
         'riskbitmask' => RISK_SPAM | RISK_XSS,
 
@@ -108,7 +110,7 @@ $capabilities = array(
         )
     ),
 
-    'mod/feedback:createprivatetemplate' => array(
+    'mod/individualfeedback:createprivatetemplate' => array(
 
         'riskbitmask' => RISK_SPAM,
 
@@ -120,19 +122,17 @@ $capabilities = array(
         )
     ),
 
-    'mod/feedback:createpublictemplate' => array(
+    'mod/individualfeedback:createpublictemplate' => array(
 
         'riskbitmask' => RISK_SPAM,
 
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
         'archetypes' => array(
-            'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
         )
     ),
 
-    'mod/feedback:deletetemplate' => array(
+    'mod/individualfeedback:deleteprivatetemplate' => array(
 
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
@@ -142,7 +142,15 @@ $capabilities = array(
         )
     ),
 
-    'mod/feedback:viewreports' => array(
+    'mod/individualfeedback:deletepublictemplate' => array(
+
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => array(
+        )
+    ),
+
+    'mod/individualfeedback:viewreports' => array(
 
         'riskbitmask' => RISK_PERSONAL,
 
@@ -155,11 +163,23 @@ $capabilities = array(
         )
     ),
 
-    'mod/feedback:receivemail' => array(
+    'mod/individualfeedback:receivemail' => array(
 
         'riskbitmask' => RISK_PERSONAL,
 
         'captype' => 'read',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => array(
+            'teacher' => CAP_ALLOW,
+            'editingteacher' => CAP_ALLOW
+        )
+    ),
+
+    'mod/individualfeedback:selfassessment' => array(
+
+        'riskbitmask' => RISK_PERSONAL,
+
+        'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
         'archetypes' => array(
             'teacher' => CAP_ALLOW,

@@ -17,26 +17,18 @@
 /**
  * Defines message providers (types of messages being sent)
  *
- * @package mod_feedback
+ * @package mod_individualfeedback
  * @copyright  2010 onwards  Aparup Banerjee  http://moodle.com
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 $messageproviders = array (
 
-    // Submitting a feedback.
-    'submission' => [
-        'defaults' => [
-            'popup' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
-            'email' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
-        ],
-    ],
+/// Submitting a individualfeedback
+    'submission' => array (
+    ),
+/// Message to nonrespondents
+    'message' => array (
+    )
 
-    // Message to nonrespondents.
-    'message' => [
-        'defaults' => [
-            'popup' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
-            'email' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
-        ],
-    ],
 );

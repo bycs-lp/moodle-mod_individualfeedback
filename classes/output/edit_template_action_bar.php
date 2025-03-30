@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace mod_feedback\output;
+namespace mod_individualfeedback\output;
 
 use confirm_action;
 use context_system;
@@ -24,8 +24,8 @@ use action_link;
 /**
  * Class actionbar - Display the action bar
  *
- * @package   mod_feedback
- * @copyright 2021 Peter Dias
+ * @package   mod_individualfeedback
+ * @copyright 2025 Marcelo Augusto Rauh Schmitt
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class edit_template_action_bar extends base_action_bar {
@@ -54,7 +54,7 @@ class edit_template_action_bar extends base_action_bar {
     public function get_items(): array {
         global $DB;
         $additionalparams = ($this->mode ? ['mode' => $this->mode] : []);
-        $templateurl = new moodle_url('/mod/feedback/manage_templates.php', $this->urlparams + $additionalparams);
+        $templateurl = new moodle_url('/mod/individualfeedback/manage_templates.php', $this->urlparams + $additionalparams);
         $items['left'][]['actionlink'] = new action_link($templateurl, get_string('back'), null, ['class' => 'btn btn-secondary']);
 
         if (has_capability('mod/feedback:edititems', $this->context)) {
@@ -63,7 +63,7 @@ class edit_template_action_bar extends base_action_bar {
             ];
         }
 
-        $template = $DB->get_record('feedback_template', array('id' => $this->templateid), '*', MUST_EXIST);
+        $template = $DB->get_record('individualfeedback_template', array('id' => $this->templateid), '*', MUST_EXIST);
         $systemcontext = context_system::instance();
         $showdelete = has_capability('mod/feedback:deletetemplate', $this->context);
         if ($template->ispublic) {
@@ -76,8 +76,8 @@ class edit_template_action_bar extends base_action_bar {
                 'deletetemplate' => $this->templateid,
                 'sesskey' => sesskey()
             ];
-            $deleteurl = new moodle_url('/mod/feedback/manage_templates.php', $params);
-            $deleteaction = new confirm_action(get_string('confirmdeletetemplate', 'feedback'));
+            $deleteurl = new moodle_url('/mod/individualfeedback/manage_templates.php', $params);
+            $deleteaction = new confirm_action(get_string('confirmdeletetemplate', 'individualfeedback'));
             $items['export'] = new action_link($deleteurl, get_string('delete'), $deleteaction, ['class' => 'btn btn-secondary']);
         }
 

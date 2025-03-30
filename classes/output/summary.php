@@ -15,46 +15,51 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Contains class mod_feedback\output\summary
+ * Contains class mod_individualfeedback\output\summary
  *
- * @package   mod_feedback
+ * @package   mod_individualfeedback
  * @copyright 2016 Marina Glancy
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_feedback\output;
+namespace mod_individualfeedback\output;
 
 use renderable;
 use templatable;
 use renderer_base;
 use stdClass;
 use moodle_url;
-use mod_feedback_structure;
+use mod_individualfeedback_structure;
 
 /**
- * Class to help display feedback summary
+ * Class to help display individualfeedback summary
  *
- * @package   mod_feedback
+ * @package   mod_individualfeedback
  * @copyright 2016 Marina Glancy
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class summary implements renderable, templatable {
 
-    /** @var mod_feedback_structure */
-    protected $feedbackstructure;
+    /** @var mod_individualfeedback_structure */
+    protected $individualfeedbackstructure;
 
     /** @var int */
     protected $mygroupid;
 
+    /** @var bool  */
+    protected $extradetails;
+
     /**
      * Constructor.
      *
-     * @param mod_feedback_structure $feedbackstructure
+     * @param mod_individualfeedback_structure $individualfeedbackstructure
      * @param int $mygroupid currently selected group
+     * @param bool $extradetails display additional details (time open, time closed)
      */
-    public function __construct($feedbackstructure, $mygroupid = false) {
-        $this->feedbackstructure = $feedbackstructure;
+    public function __construct($individualfeedbackstructure, $mygroupid = false, $extradetails = false) {
+        $this->individualfeedbackstructure = $individualfeedbackstructure;
         $this->mygroupid = $mygroupid;
+        $this->extradetails = $extradetails;
     }
 
     /**
@@ -65,8 +70,14 @@ class summary implements renderable, templatable {
      */
     public function export_for_template(renderer_base $output) {
         $r = new stdClass();
-        $r->completedcount = $this->feedbackstructure->count_completed_responses($this->mygroupid);
-        $r->itemscount = count($this->feedbackstructure->get_items(true));
+        $r->completedcount = $this->individualfeedbackstructure->count_completed_responses();
+        $r->itemscount = count($this->individualfeedbackstructure->get_items(true));
+        if ($this->extradetails && ($timeopen = $this->individualfeedbackstructure->get_individualfeedback()->timeopen)) {
+            $r->timeopen = userdate($timeopen);
+        }
+        if ($this->extradetails && ($timeclose = $this->individualfeedbackstructure->get_individualfeedback()->timeclose)) {
+            $r->timeclose = userdate($timeclose);
+        }
 
         return $r;
     }

@@ -15,10 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Contains class mod_feedback_templates_table
+ * Contains class mod_individualfeedback_templates_table
  *
- * @package   mod_feedback
- * @copyright 2016 Marina Glancy
+ * @package   mod_individualfeedback
+ * @copyright 2025 Marcelo Augusto Rauh Schmitt
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -28,13 +28,13 @@ global $CFG;
 require_once($CFG->libdir . '/tablelib.php');
 
 /**
- * Class mod_feedback_templates_table
+ * Class mod_individualfeedback_templates_table
  *
- * @package   mod_feedback
- * @copyright 2016 Marina Glancy
+ * @package   mod_individualfeedback
+ * @copyright 2025 Marcelo Augusto Rauh Schmitt
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_feedback_templates_table extends flexible_table {
+class mod_individualfeedback_templates_table extends flexible_table {
     /** @var string|null Indicate whether we are managing template or not. */
     private $mode;
 
@@ -52,7 +52,7 @@ class mod_feedback_templates_table extends flexible_table {
         if ($this->mode) {
             $tablecolumns[] = 'actions';
         }
-
+        
         $tableheaders = array(get_string('template', 'feedback'), '');
 
         $this->set_attribute('class', 'templateslist');
@@ -87,11 +87,11 @@ class mod_feedback_templates_table extends flexible_table {
 
             // Only show the actions if we are managing templates.
             if ($this->mode && has_capability('mod/feedback:deletetemplate', $this->get_context())) {
-                $deleteurl = new moodle_url('/mod/feedback/manage_templates.php',
+                $deleteurl = new moodle_url('/mod/individualfeedback/manage_templates.php',
                     $url->params() + ['deletetemplate' => $template->id]);
                 $deleteaction = new confirm_action(get_string('confirmdeletetemplate', 'feedback'));
                 $deleteicon = $OUTPUT->action_icon($deleteurl, new pix_icon('t/delete', $strdeletefeedback), $deleteaction);
-                if ($template->ispublic) {
+                if ($template->ispublic == 1) {
                     $systemcontext = context_system::instance();
                     if (!(has_capability('mod/feedback:createpublictemplate', $systemcontext) &&
                         has_capability('mod/feedback:deletetemplate', $systemcontext))) {

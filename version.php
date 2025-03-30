@@ -15,18 +15,24 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Feedback version information
+ * individualfeedback version information
  *
- * @package mod_feedback
+ * @package mod_individualfeedback
  * @author     Andreas Grabs
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2024100700;       // The current module version (Date: YYYYMMDDXX).
-$plugin->requires  = 2024100100;    // Requires this Moodle version.
-$plugin->component = 'mod_feedback';   // Full name of the plugin (used for diagnostics)
+$plugin->version   = 2025033001;       // The current module version (Baseversion Date: 2020070900)
+$plugin->requires  = 2017050500;    // Requires this Moodle version
+$plugin->component = 'mod_individualfeedback';   // Full name of the plugin (used for diagnostics)
+$plugin->maturity = MATURITY_ALPHA;
+$plugin->release  = '4.6';      // Release version (Baseversion Date: 2020070900)
 $plugin->cron      = 0;
 
-$feedback_version_intern = 1; //this version is used for restore older backups
+$individualfeedback_version_intern = 1; //this version is used for restore older backups
+
+// Hinweise zum Refactoring Prozess. Die hier referenzierte Moodle Version v3.0 (2020070900). muss auf 4.4 / 4.5 angehoben werden.
+// General Notes on the depreaching process: https://moodle.org/mod/forum/discuss.php?d=457946&lang=de
+// A list with all depreached functions since 2.4 https://phpdoc.moodledev.io/main/da/d58/deprecated.html

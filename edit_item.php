@@ -25,7 +25,7 @@
 require_once("../../config.php");
 require_once("lib.php");
 
-feedback_init_feedback_session();
+individualfeedback_init_individualfeedback_session();
 
 $itemid = optional_param('id', false, PARAM_INT);
 if (!$itemid) {
@@ -34,23 +34,23 @@ if (!$itemid) {
 }
 
 if ($itemid) {
-    $item = $DB->get_record('feedback_item', array('id' => $itemid), '*', MUST_EXIST);
-    list($course, $cm) = get_course_and_cm_from_instance($item->feedback, 'feedback');
-    $url = new moodle_url('/mod/feedback/edit_item.php', array('id' => $itemid));
+    $item = $DB->get_record('individualfeedback_item', array('id' => $itemid), '*', MUST_EXIST);
+    list($course, $cm) = get_course_and_cm_from_instance($item->feedback, 'individualfeedback');
+    $url = new moodle_url('/mod/individualfeedback/edit_item.php', array('id' => $itemid));
     $typ = $item->typ;
 } else {
     $item = null;
-    list($course, $cm) = get_course_and_cm_from_cmid($cmid, 'feedback');
-    $url = new moodle_url('/mod/feedback/edit_item.php', array('cmid' => $cm->id, 'typ' => $typ));
+    list($course, $cm) = get_course_and_cm_from_cmid($cmid, 'individualfeedback');
+    $url = new moodle_url('/mod/individualfeedback/edit_item.php', array('cmid' => $cm->id, 'typ' => $typ));
     $item = (object)['id' => null, 'position' => -1, 'typ' => $typ, 'options' => ''];
 }
 
 require_login($course, true, $cm);
 $context = context_module::instance($cm->id);
-require_capability('mod/feedback:edititems', $context);
+require_capability('mod/individualfeedback:edititems', $context);
 $feedback = $PAGE->activityrecord;
 
-$editurl = new moodle_url('/mod/feedback/edit.php', array('id' => $cm->id));
+$editurl = new moodle_url('/mod/individualfeedback/edit.php', array('id' => $cm->id));
 
 $PAGE->set_url($url);
 
@@ -59,19 +59,23 @@ if (!$item->id && $typ === 'pagebreak') {
     require_sesskey();
 
     $redirectmessage = '';
-    if (!feedback_create_pagebreak($feedback->id)) {
+    if (!individualfeedback_create_pagebreak($feedback->id)) {
         $redirectmessage = get_string('cannotcreatepagebreak', 'mod_feedback');
     }
 
     redirect($editurl, $redirectmessage, null, \core\output\notification::NOTIFY_WARNING);
 }
 
-//get the existing item or create it
-if (!$typ) {
-    throw new \moodle_exception('typemissing', 'feedback', $editurl->out(false));
+// get the existing item or create it
+// $formdata->itemid = isset($formdata->itemid) ? $formdata->itemid : NULL;
+if (!$typ || !file_exists($CFG->dirroot.'/mod/individualfeedback/item/'.$typ.'/lib.php')) {
+    throw new \moodle_exception('typemissing', 'individualfeedback', $editurl->out(false));
 }
 
-$itemobj = feedback_get_item_class($typ);
+require_once($CFG->dirroot.'/mod/individualfeedback/item/'.$typ.'/lib.php');
+
+$itemobj = individualfeedback_get_item_class($typ);
+
 $itemobj->build_editform($item, $feedback, $cm);
 
 if ($itemobj->is_cancelled()) {
@@ -80,7 +84,7 @@ if ($itemobj->is_cancelled()) {
 }
 if ($itemobj->get_data()) {
     if ($item = $itemobj->save_item()) {
-        feedback_move_item($item, $item->position);
+        individualfeedback_move_item($item, $item->position);
         redirect($editurl);
     }
 }
@@ -90,7 +94,7 @@ if ($itemobj->get_data()) {
 $strfeedbacks = get_string("modulenameplural", "feedback");
 $strfeedback  = get_string("modulename", "feedback");
 
-navigation_node::override_active_url(new moodle_url('/mod/feedback/edit.php',
+navigation_node::override_active_url(new moodle_url('/mod/individualfeedback/edit.php',
         array('id' => $cm->id, 'do_show' => 'edit')));
 if ($item->id) {
     $PAGE->navbar->add(get_string('edit_item', 'feedback'));
@@ -99,7 +103,7 @@ if ($item->id) {
 }
 $PAGE->set_heading($course->fullname);
 
-$renderer = $PAGE->get_renderer('mod_feedback');
+$renderer = $PAGE->get_renderer('mod_individualfeedback');
 $pagetitle = ($itemid) ? get_string('edit_item', 'feedback') : get_string('add_item', 'feedback');
 $renderer->set_title(
     [format_string($feedback->name), format_string($course->fullname)],

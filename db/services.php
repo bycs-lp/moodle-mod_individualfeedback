@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Feedback external functions and service definitions.
+ * individualfeedback external functions and service definitions.
  *
- * @package    mod_feedback
+ * @package    mod_individualfeedback
  * @category   external
  * @copyright  2017 Juan Leyva <juan@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -28,117 +28,117 @@ defined('MOODLE_INTERNAL') || die;
 
 $functions = array(
 
-    'mod_feedback_get_feedbacks_by_courses' => array(
-        'classname'     => 'mod_feedback_external',
-        'methodname'    => 'get_feedbacks_by_courses',
-        'description'   => 'Returns a list of feedbacks in a provided list of courses, if no list is provided all feedbacks that
+    'mod_individualfeedback_get_individualfeedbacks_by_courses' => array(
+        'classname'     => 'mod_individualfeedback_external',
+        'methodname'    => 'get_individualfeedbacks_by_courses',
+        'description'   => 'Returns a list of individualfeedbacks in a provided list of courses, if no list is provided all individualfeedbacks that
                             the user can view will be returned.',
         'type'          => 'read',
-        'capabilities'  => 'mod/feedback:view',
+        'capabilities'  => 'mod/individualfeedback:view',
         'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE),
     ),
-    'mod_feedback_get_feedback_access_information' => array(
-        'classname'     => 'mod_feedback_external',
-        'methodname'    => 'get_feedback_access_information',
-        'description'   => 'Return access information for a given feedback.',
+    'mod_individualfeedback_get_individualfeedback_access_information' => array(
+        'classname'     => 'mod_individualfeedback_external',
+        'methodname'    => 'get_individualfeedback_access_information',
+        'description'   => 'Return access information for a given individualfeedback.',
         'type'          => 'read',
-        'capabilities'  => 'mod/feedback:view',
+        'capabilities'  => 'mod/individualfeedback:view',
         'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE),
     ),
-    'mod_feedback_view_feedback' => array(
-        'classname'     => 'mod_feedback_external',
-        'methodname'    => 'view_feedback',
+    'mod_individualfeedback_view_individualfeedback' => array(
+        'classname'     => 'mod_individualfeedback_external',
+        'methodname'    => 'view_individualfeedback',
         'description'   => 'Trigger the course module viewed event and update the module completion status.',
         'type'          => 'write',
-        'capabilities'  => 'mod/feedback:view',
+        'capabilities'  => 'mod/individualfeedback:view',
         'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
     ),
-    'mod_feedback_get_current_completed_tmp' => array(
-        'classname'     => 'mod_feedback_external',
+    'mod_individualfeedback_get_current_completed_tmp' => array(
+        'classname'     => 'mod_individualfeedback_external',
         'methodname'    => 'get_current_completed_tmp',
         'description'   => 'Returns the temporary completion record for the current user.',
         'type'          => 'read',
-        'capabilities'  => 'mod/feedback:view',
+        'capabilities'  => 'mod/individualfeedback:view',
         'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
     ),
-    'mod_feedback_get_items' => array(
-        'classname'     => 'mod_feedback_external',
+    'mod_individualfeedback_get_items' => array(
+        'classname'     => 'mod_individualfeedback_external',
         'methodname'    => 'get_items',
-        'description'   => 'Returns the items (questions) in the given feedback.',
+        'description'   => 'Returns the items (questions) in the given individualfeedback.',
         'type'          => 'read',
-        'capabilities'  => 'mod/feedback:view',
+        'capabilities'  => 'mod/individualfeedback:view',
         'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
     ),
-    'mod_feedback_launch_feedback' => array(
-        'classname'     => 'mod_feedback_external',
-        'methodname'    => 'launch_feedback',
-        'description'   => 'Starts or continues a feedback submission.',
+    'mod_individualfeedback_launch_individualfeedback' => array(
+        'classname'     => 'mod_individualfeedback_external',
+        'methodname'    => 'launch_individualfeedback',
+        'description'   => 'Starts or continues a individualfeedback submission.',
         'type'          => 'write',
-        'capabilities'  => 'mod/feedback:complete',
+        'capabilities'  => 'mod/individualfeedback:complete',
         'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
     ),
-    'mod_feedback_get_page_items' => array(
-        'classname'     => 'mod_feedback_external',
+    'mod_individualfeedback_get_page_items' => array(
+        'classname'     => 'mod_individualfeedback_external',
         'methodname'    => 'get_page_items',
-        'description'   => 'Get a single feedback page items.',
+        'description'   => 'Get a single individualfeedback page items.',
         'type'          => 'read',
-        'capabilities'  => 'mod/feedback:complete',
+        'capabilities'  => 'mod/individualfeedback:complete',
         'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
     ),
-    'mod_feedback_process_page' => array(
-        'classname'     => 'mod_feedback_external',
+    'mod_individualfeedback_process_page' => array(
+        'classname'     => 'mod_individualfeedback_external',
         'methodname'    => 'process_page',
         'description'   => 'Process a jump between pages.',
         'type'          => 'write',
-        'capabilities'  => 'mod/feedback:complete',
+        'capabilities'  => 'mod/individualfeedback:complete',
         'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
     ),
-    'mod_feedback_get_analysis' => array(
-        'classname'     => 'mod_feedback_external',
+    'mod_individualfeedback_get_analysis' => array(
+        'classname'     => 'mod_individualfeedback_external',
         'methodname'    => 'get_analysis',
-        'description'   => 'Retrieves the feedback analysis.',
+        'description'   => 'Retrieves the individualfeedback analysis.',
         'type'          => 'read',
-        'capabilities'  => 'mod/feedback:viewanalysepage',
+        'capabilities'  => 'mod/individualfeedback:viewanalysepage',
         'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
     ),
-    'mod_feedback_get_unfinished_responses' => array(
-        'classname'     => 'mod_feedback_external',
+    'mod_individualfeedback_get_unfinished_responses' => array(
+        'classname'     => 'mod_individualfeedback_external',
         'methodname'    => 'get_unfinished_responses',
         'description'   => 'Retrieves responses from the current unfinished attempt.',
         'type'          => 'read',
-        'capabilities'  => 'mod/feedback:view',
+        'capabilities'  => 'mod/individualfeedback:view',
         'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
     ),
-    'mod_feedback_get_finished_responses' => array(
-        'classname'     => 'mod_feedback_external',
+    'mod_individualfeedback_get_finished_responses' => array(
+        'classname'     => 'mod_individualfeedback_external',
         'methodname'    => 'get_finished_responses',
         'description'   => 'Retrieves responses from the last finished attempt.',
         'type'          => 'read',
-        'capabilities'  => 'mod/feedback:view',
+        'capabilities'  => 'mod/individualfeedback:view',
         'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
     ),
-    'mod_feedback_get_non_respondents' => array(
-        'classname'     => 'mod_feedback_external',
+    'mod_individualfeedback_get_non_respondents' => array(
+        'classname'     => 'mod_individualfeedback_external',
         'methodname'    => 'get_non_respondents',
-        'description'   => 'Retrieves a list of students who didn\'t submit the feedback.',
+        'description'   => 'Retrieves a list of students who didn\'t submit the individualfeedback.',
         'type'          => 'read',
-        'capabilities'  => 'mod/feedback:viewreports',
+        'capabilities'  => 'mod/individualfeedback:viewreports',
         'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
     ),
-    'mod_feedback_get_responses_analysis' => array(
-        'classname'     => 'mod_feedback_external',
+    'mod_individualfeedback_get_responses_analysis' => array(
+        'classname'     => 'mod_individualfeedback_external',
         'methodname'    => 'get_responses_analysis',
-        'description'   => 'Return the feedback user responses analysis.',
+        'description'   => 'Return the individualfeedback user responses analysis.',
         'type'          => 'read',
-        'capabilities'  => 'mod/feedback:viewreports',
+        'capabilities'  => 'mod/individualfeedback:viewreports',
         'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
     ),
-    'mod_feedback_get_last_completed' => array(
-        'classname'     => 'mod_feedback_external',
+    'mod_individualfeedback_get_last_completed' => array(
+        'classname'     => 'mod_individualfeedback_external',
         'methodname'    => 'get_last_completed',
         'description'   => 'Retrieves the last completion record for the current user.',
         'type'          => 'read',
-        'capabilities'  => 'mod/feedback:view',
+        'capabilities'  => 'mod/individualfeedback:view',
         'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
     ),
 );

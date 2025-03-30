@@ -15,10 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 defined('MOODLE_INTERNAL') OR die('not allowed');
-require_once($CFG->dirroot.'/mod/feedback/item/feedback_item_class.php');
+require_once($CFG->dirroot.'/mod/individualfeedback/item/individualfeedback_item_class.php');
 require_once($CFG->libdir.'/formslib.php');
 
-class feedback_item_label extends feedback_item_base {
+class individualfeedback_item_label extends individualfeedback_item_base {
     protected $type = "label";
     private $presentationoptions = null;
     private $context;
@@ -36,9 +36,9 @@ class feedback_item_label extends feedback_item_base {
         global $DB, $CFG;
         require_once('label_form.php');
 
-        //get the lastposition number of the feedback_items
+        //get the lastposition number of the individualfeedback_items
         $position = $item->position;
-        $lastposition = $DB->count_records('feedback_item', array('feedback'=>$feedback->id));
+        $lastposition = $DB->count_records('individualfeedback_item', array('feedback'=>$feedback->id));
         if ($position == -1) {
             $i_formselect_last = $lastposition + 1;
             $i_formselect_value = $lastposition + 1;
@@ -51,7 +51,7 @@ class feedback_item_label extends feedback_item_base {
         $positionlist = array_slice(range(0, $i_formselect_last), 1, $i_formselect_last, true);
 
         //all items for dependitem
-        $feedbackitems = feedback_get_depend_candidates_for_item($feedback, $item);
+        $feedbackitems = individualfeedback_get_depend_candidates_for_item($feedback, $item);
         $commonparams = array('cmid'=>$cm->id,
                              'id'=>isset($item->id) ? $item->id : null,
                              'typ'=>$item->typ,
@@ -72,7 +72,7 @@ class feedback_item_label extends feedback_item_base {
                                             'presentation', //name of the form element
                                             $this->presentationoptions,
                                             $this->context,
-                                            'mod_feedback',
+                                            'mod_individualfeedback',
                                             'item', //the filearea
                                             $item->id);
 
@@ -103,22 +103,22 @@ class feedback_item_label extends feedback_item_base {
 
         $item->hasvalue = $this->get_hasvalue();
         if (!$item->id) {
-            $item->id = $DB->insert_record('feedback_item', $item);
+            $item->id = $DB->insert_record('individualfeedback_item', $item);
         } else {
-            $DB->update_record('feedback_item', $item);
+            $DB->update_record('individualfeedback_item', $item);
         }
 
         $item = file_postupdate_standard_editor($item,
                                                 'presentation',
                                                 $this->presentationoptions,
                                                 $this->context,
-                                                'mod_feedback',
+                                                'mod_individualfeedback',
                                                 'item',
                                                 $item->id);
 
-        $DB->update_record('feedback_item', $item);
+        $DB->update_record('individualfeedback_item', $item);
 
-        return $DB->get_record('feedback_item', array('id'=>$item->id));
+        return $DB->get_record('individualfeedback_item', array('id'=>$item->id));
     }
 
     /**
@@ -133,7 +133,7 @@ class feedback_item_label extends feedback_item_base {
 
         //is the item a template?
         if (!$item->feedback AND $item->template) {
-            $template = $DB->get_record('feedback_template', array('id'=>$item->template));
+            $template = $DB->get_record('individualfeedback_template', array('id'=>$item->template));
             if ($template->ispublic) {
                 $context = context_system::instance();
             } else {
@@ -141,7 +141,7 @@ class feedback_item_label extends feedback_item_base {
             }
             $filearea = 'template';
         } else {
-            $cm = get_coursemodule_from_instance('feedback', $item->feedback);
+            $cm = get_coursemodule_from_instance('individualfeedback', $item->feedback);
             $context = context_module::instance($cm->id);
             $filearea = 'item';
         }
@@ -152,7 +152,7 @@ class feedback_item_label extends feedback_item_base {
         $output = file_rewrite_pluginfile_urls($item->presentation,
                                                'pluginfile.php',
                                                $context->id,
-                                               'mod_feedback',
+                                               'mod_individualfeedback',
                                                $filearea,
                                                $item->id);
 
@@ -173,13 +173,13 @@ class feedback_item_label extends feedback_item_base {
      * Adds an input element to the complete form
      *
      * @param stdClass $item
-     * @param mod_feedback_complete_form $form
+     * @param mod_individualfeedback_complete_form $form
      */
     public function complete_form_element($item, $form) {
         global $DB;
         if (!$item->feedback AND $item->template) {
             // This is a template.
-            $template = $DB->get_record('feedback_template', array('id' => $item->template));
+            $template = $DB->get_record('individualfeedback_template', array('id' => $item->template));
             if ($template->ispublic) {
                 $context = context_system::instance();
             } else {
@@ -187,12 +187,12 @@ class feedback_item_label extends feedback_item_base {
             }
             $filearea = 'template';
         } else {
-            // This is a question in the current feedback.
+            // This is a question in the current individualfeedback.
             $context = $form->get_cm()->context;
             $filearea = 'item';
         }
         $output = file_rewrite_pluginfile_urls($item->presentation, 'pluginfile.php',
-                $context->id, 'mod_feedback', $filearea, $item->id);
+                $context->id, 'mod_individualfeedback', $filearea, $item->id);
         $formatoptions = array('overflowdiv' => true, 'noclean' => true);
         $output = format_text($output, FORMAT_HTML, $formatoptions);
         $output = html_writer::div($output, '', ['id' => 'feedback_item_' . $item->id]);
@@ -215,11 +215,11 @@ class feedback_item_label extends feedback_item_base {
                                                 'presentation',
                                                 $this->presentationoptions,
                                                 $context,
-                                                'mod_feedback',
+                                                'mod_individualfeedback',
                                                 'item',
                                                 $item->id);
 
-        $DB->update_record('feedback_item', $item);
+        $DB->update_record('individualfeedback_item', $item);
         return $item->id;
     }
 
