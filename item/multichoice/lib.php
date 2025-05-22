@@ -15,24 +15,25 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 defined('MOODLE_INTERNAL') OR die('not allowed');
-require_once($CFG->dirroot.'/mod/feedback/item/feedback_item_class.php');
+require_once($CFG->dirroot.'/mod/individualfeedback/item/individualfeedback_item_class.php');
 
-define('FEEDBACK_MULTICHOICE_TYPE_SEP', '>>>>>');
-define('FEEDBACK_MULTICHOICE_LINE_SEP', '|');
-define('FEEDBACK_MULTICHOICE_ADJUST_SEP', '<<<<<');
-define('FEEDBACK_MULTICHOICE_IGNOREEMPTY', 'i');
-define('FEEDBACK_MULTICHOICE_HIDENOSELECT', 'h');
+define('INDIVIDUALFEEDBACK_MULTICHOICE_TYPE_SEP', '>>>>>');
+define('INDIVIDUALFEEDBACK_MULTICHOICE_LINE_SEP', '|');
+define('INDIVIDUALFEEDBACK_MULTICHOICE_ADJUST_SEP', '<<<<<');
+define('INDIVIDUALFEEDBACK_MULTICHOICE_IGNOREEMPTY', 'i');
+define('INDIVIDUALFEEDBACK_MULTICHOICE_NEGATIVEFORMULATED', 'n');
+define('INDIVIDUALFEEDBACK_MULTICHOICE_HIDENOSELECT', 'h');
 
-class feedback_item_multichoice extends feedback_item_base {
+class individualfeedback_item_multichoice extends individualfeedback_item_base {
     protected $type = "multichoice";
 
     public function build_editform($item, $feedback, $cm) {
         global $DB, $CFG;
         require_once('multichoice_form.php');
 
-        //get the lastposition number of the feedback_items
+        //get the lastposition number of the individualfeedback_items
         $position = $item->position;
-        $lastposition = $DB->count_records('feedback_item', array('feedback'=>$feedback->id));
+        $lastposition = $DB->count_records('individualfeedback_item', array('feedback'=>$feedback->id));
         if ($position == -1) {
             $i_formselect_last = $lastposition + 1;
             $i_formselect_value = $lastposition + 1;
@@ -47,11 +48,12 @@ class feedback_item_multichoice extends feedback_item_base {
         $item->presentation = empty($item->presentation) ? '' : $item->presentation;
         $info = $this->get_info($item);
 
+        $item->negativeformulated = $this->negativeformulated($item);
         $item->ignoreempty = $this->ignoreempty($item);
         $item->hidenoselect = $this->hidenoselect($item);
 
         //all items for dependitem
-        $feedbackitems = feedback_get_depend_candidates_for_item($feedback, $item);
+        $feedbackitems = individualfeedback_get_depend_candidates_for_item($feedback, $item);
         $commonparams = array('cmid'=>$cm->id,
                              'id'=>isset($item->id) ? $item->id : null,
                              'typ'=>$item->typ,
@@ -65,7 +67,7 @@ class feedback_item_multichoice extends feedback_item_base {
                             'position' => $position,
                             'info' => $info);
 
-        $this->item_form = new feedback_multichoice_form('edit_item.php', $customdata);
+        $this->item_form = new individualfeedback_multichoice_form('edit_item.php', $customdata);
     }
 
     public function save_item() {
@@ -82,18 +84,30 @@ class feedback_item_multichoice extends feedback_item_base {
         }
 
         $this->set_ignoreempty($item, $item->ignoreempty);
+        $this->set_negativeformulated($item, $item->negativeformulated);
         $this->set_hidenoselect($item, $item->hidenoselect);
 
         $item->hasvalue = $this->get_hasvalue();
         if (!$item->id) {
-            $item->id = $DB->insert_record('feedback_item', $item);
+            $item->id = $DB->insert_record('individualfeedback_item', $item);
         } else {
-            $DB->update_record('feedback_item', $item);
+            $DB->update_record('individualfeedback_item', $item);
         }
 
-        return $DB->get_record('feedback_item', array('id'=>$item->id));
+        return $DB->get_record('individualfeedback_item', array('id'=>$item->id));
     }
 
+    /**
+     * Helper function for collected data, for detailed analysis
+     *
+     * @param stdClass $item the db-object from individualfeedback_item
+     * @param int $groupid
+     * @param int $courseid
+     * @return array
+     */
+    public function get_answer_data($item, $groupid = false, $courseid = false) {
+        return $this->get_item_answer_data($item, INDIVIDUALFEEDBACK_MULTICHOICE_LINE_SEP, $groupid, $courseid);
+    }
 
     //gets an array with three values(typ, name, XXX)
     //XXX is an object with answertext, answercount and quotient
@@ -101,10 +115,10 @@ class feedback_item_multichoice extends feedback_item_base {
     /**
      * Helper function for collected data, both for analysis page and export to excel
      *
-     * @param stdClass $item the db-object from feedback_item
+     * @param stdClass $item the db-object from individualfeedback_item
      * @param int $groupid
      * @param int $courseid
-     * @return array|null
+     * @return array
      */
     protected function get_analysed($item, $groupid = false, $courseid = false) {
         $info = $this->get_info($item);
@@ -115,13 +129,13 @@ class feedback_item_multichoice extends feedback_item_base {
 
         //get the possible answers
         $answers = null;
-        $answers = explode (FEEDBACK_MULTICHOICE_LINE_SEP, $info->presentation);
+        $answers = explode (INDIVIDUALFEEDBACK_MULTICHOICE_LINE_SEP, $info->presentation);
         if (!is_array($answers)) {
             return null;
         }
 
         //get the values
-        $values = feedback_get_group_values($item, $groupid, $courseid, $this->ignoreempty($item));
+        $values = individualfeedback_get_group_values($item, $groupid, $courseid, $this->negativeformulated($item), $this->ignoreempty($item));
         if (!$values) {
             return null;
         }
@@ -136,7 +150,7 @@ class feedback_item_multichoice extends feedback_item_base {
                 $ans->answercount = 0;
                 foreach ($values as $value) {
                     //ist die Antwort gleich dem index der Antworten + 1?
-                    $vallist = explode(FEEDBACK_MULTICHOICE_LINE_SEP, $value->value);
+                    $vallist = explode(INDIVIDUALFEEDBACK_MULTICHOICE_LINE_SEP, $value->value);
                     foreach ($vallist as $val) {
                         if ($val == $i) {
                             $ans->answercount++;
@@ -175,10 +189,10 @@ class feedback_item_multichoice extends feedback_item_base {
             return $printval;
         }
 
-        $presentation = explode (FEEDBACK_MULTICHOICE_LINE_SEP, $info->presentation);
+        $presentation = explode (INDIVIDUALFEEDBACK_MULTICHOICE_LINE_SEP, $info->presentation);
 
         if ($info->subtype == 'c') {
-            $vallist = array_values(explode (FEEDBACK_MULTICHOICE_LINE_SEP, $value->value));
+            $vallist = array_values(explode (INDIVIDUALFEEDBACK_MULTICHOICE_LINE_SEP, $value->value));
             $sizeofvallist = count($vallist);
             $sizeofpresentation = count($presentation);
             for ($i = 0; $i < $sizeofvallist; $i++) {
@@ -209,14 +223,14 @@ class feedback_item_multichoice extends feedback_item_base {
         if ($analysed_item) {
             $itemname = $analysed_item[1];
             echo "<table class=\"analysis itemtype_{$item->typ}\">";
-            echo '<tr><th class="text-start">';
+            echo '<tr><th colspan="2" class="text-start">';
             echo $itemnr . ' ';
             if (strval($item->label) !== '') {
                 echo '('. format_string($item->label).') ';
             }
             echo format_string($itemname);
             echo '</th></tr>';
-
+            echo "</table>";
             $analysed_vals = $analysed_item[2];
             $count = 0;
             $data = [];
@@ -241,8 +255,7 @@ class feedback_item_multichoice extends feedback_item_base {
             $chart->add_series($series);
             $chart->set_labels($data['labels']);
 
-            echo '<tr><td>'. $OUTPUT->render($chart) . '</td></tr>';
-            echo "</table>";
+            echo $OUTPUT->render($chart);
         }
     }
 
@@ -292,7 +305,7 @@ class feedback_item_multichoice extends feedback_item_base {
      */
     protected function get_options($item) {
         $info = $this->get_info($item);
-        $presentation = explode (FEEDBACK_MULTICHOICE_LINE_SEP, $info->presentation);
+        $presentation = explode (INDIVIDUALFEEDBACK_MULTICHOICE_LINE_SEP, $info->presentation);
         $options = array();
         foreach ($presentation as $idx => $optiontext) {
             $options[$idx + 1] = format_text($optiontext, FORMAT_HTML, array('noclean' => true, 'para' => false));
@@ -304,14 +317,14 @@ class feedback_item_multichoice extends feedback_item_base {
         return $options;
     }
 
-    /**
+        /**
      * Adds an input element to the complete form
      *
      * This element has many options - it can be displayed as group or radio elements,
      * group of checkboxes or a dropdown list.
      *
      * @param stdClass $item
-     * @param mod_feedback_complete_form $form
+     * @param mod_individualfeedback_complete_form $form
      */
     public function complete_form_element($item, $form) {
         $info = $this->get_info($item);
@@ -319,7 +332,8 @@ class feedback_item_multichoice extends feedback_item_base {
         $class = 'multichoice-' . $info->subtype;
         $inputname = $item->typ . '_' . $item->id;
         $options = $this->get_options($item);
-        $separator = !empty($info->horizontal) ? ' ' : \html_writer::div('', 'w-100');
+        $separator = !empty($info->horizontal) ? ' ' : '<br>';
+        // From here on lines backported from commit - MDL-62947 mod_feedback: c96c9601af41f9fe05b7a5259bc1590b8df17d9b.
         $tmpvalue = $form->get_item_value($item) ?? 0; // Used for element defaults, so must be a valid value (not null).
 
         // Subtypes:
@@ -336,7 +350,7 @@ class feedback_item_multichoice extends feedback_item_base {
         } else if ($info->subtype === 'c' && $form->is_frozen()) {
             // Display list of checkbox values in the response view.
             $objs = [];
-            foreach (explode(FEEDBACK_MULTICHOICE_LINE_SEP, $form->get_item_value($item)) as $v) {
+            foreach (explode(INDIVIDUALFEEDBACK_MULTICHOICE_LINE_SEP, $form->get_item_value($item)) as $v) {
                 $objs[] = ['static', $inputname."[$v]", '', isset($options[$v]) ? $options[$v] : ''];
             }
             $element = $form->add_form_group_element($item, 'group_'.$inputname, $name, $objs, $separator, $class);
@@ -356,7 +370,7 @@ class feedback_item_multichoice extends feedback_item_base {
                 $objs[] = ['static', '', '', html_writer::span('', '', ['id' => 'feedback_item_' . $item->id])];
                 $element = $form->add_form_group_element($item, 'group_'.$inputname, $name, $objs, $separator, $class);
                 if ($tmpvalue) {
-                    foreach (explode(FEEDBACK_MULTICHOICE_LINE_SEP, $tmpvalue) as $v) {
+                    foreach (explode(INDIVIDUALFEEDBACK_MULTICHOICE_LINE_SEP, $tmpvalue) as $v) {
                         $form->set_element_default($inputname.'['.$v.']', $v);
                     }
                 }
@@ -394,11 +408,12 @@ class feedback_item_multichoice extends feedback_item_base {
      * @return string
      */
     public function create_value($value) {
+        // Next line backported commit - MDL-62947 mod_feedback: c96c9601af41f9fe05b7a5259bc1590b8df17d9b.
         // Could be an array (multichoice checkbox) or single value (multichoice radio or dropdown).
         $value = is_array($value) ? $value : [$value];
 
         $value = array_unique(array_filter($value));
-        return join(FEEDBACK_MULTICHOICE_LINE_SEP, $value);
+        return join(INDIVIDUALFEEDBACK_MULTICHOICE_LINE_SEP, $value);
     }
 
     /**
@@ -413,11 +428,11 @@ class feedback_item_multichoice extends feedback_item_base {
         if (is_array($dbvalue)) {
             $dbvalues = $dbvalue;
         } else {
-            $dbvalues = explode(FEEDBACK_MULTICHOICE_LINE_SEP, $dbvalue);
+            $dbvalues = explode(INDIVIDUALFEEDBACK_MULTICHOICE_LINE_SEP, $dbvalue);
         }
 
         $info = $this->get_info($item);
-        $presentation = explode (FEEDBACK_MULTICHOICE_LINE_SEP, $info->presentation);
+        $presentation = explode (INDIVIDUALFEEDBACK_MULTICHOICE_LINE_SEP, $info->presentation);
         $index = 1;
         foreach ($presentation as $pres) {
             foreach ($dbvalues as $dbval) {
@@ -440,21 +455,38 @@ class feedback_item_multichoice extends feedback_item_base {
         $info->presentation = '';
         $info->horizontal = false;
 
-        $parts = explode(FEEDBACK_MULTICHOICE_TYPE_SEP, $item->presentation);
-        $info->subtype = $parts[0];
-        if (count($parts) > 1) {
-            $info->presentation = $parts[1];
-        }
+        $parts = explode(INDIVIDUALFEEDBACK_MULTICHOICE_TYPE_SEP, $item->presentation);
+
+        // Here we happen to override the predefined  $info->presentation = ''; which can lead to a NULL value, messing up
+        // in the next if-loop, when we try to explode(INDIVIDUALFEEDBACK_MULTICHOICE_ADJUST_SEP, $info->presentation);
+        @list($info->subtype, $info->presentation) = $parts;
+        /**
+         * When $item is
+         * object(stdClass)#210 (5) {
+         * ["id"]=> NULL
+         * ["position"]=> int(4)
+         * ["typ"]=> string(11) "multichoice"
+         * ["options"]=> string(0) ""
+         * ["presentation"]=> string(0) "" }
+         *
+         * Than $parts is only a single cell array with an empty string. This will fail the next if-statement.
+         * array(1) { [0]=> string(0) "" }
+         */
         if (!isset($info->subtype)) {
             $info->subtype = 'r';
         }
+        if (!isset($info->presentation)) {
+            $info->presentation = '';
+        }
+
+        #echo("Item<br>");
+        #var_dump($item);
+        #echo("Parts<br>");
+        #var_dump($parts);
 
         if ($info->subtype != 'd') {
-            $parts = explode(FEEDBACK_MULTICHOICE_ADJUST_SEP, $info->presentation);
-            $info->presentation = $parts[0];
-            if (count($parts) > 1) {
-                $info->horizontal = $parts[1];
-            }
+            $parts = explode(INDIVIDUALFEEDBACK_MULTICHOICE_ADJUST_SEP, $info->presentation);
+            @list($info->presentation, $info->horizontal) = $parts;
             if (isset($info->horizontal) AND $info->horizontal == 1) {
                 $info->horizontal = true;
             } else {
@@ -465,28 +497,42 @@ class feedback_item_multichoice extends feedback_item_base {
     }
 
     public function set_ignoreempty($item, $ignoreempty=true) {
-        $item->options = str_replace(FEEDBACK_MULTICHOICE_IGNOREEMPTY, '', $item->options);
+        $item->options = str_replace(INDIVIDUALFEEDBACK_MULTICHOICE_IGNOREEMPTY, '', $item->options);
         if ($ignoreempty) {
-            $item->options .= FEEDBACK_MULTICHOICE_IGNOREEMPTY;
+            $item->options .= INDIVIDUALFEEDBACK_MULTICHOICE_IGNOREEMPTY;
         }
     }
 
     public function ignoreempty($item) {
-        if (strstr($item->options, FEEDBACK_MULTICHOICE_IGNOREEMPTY)) {
+        if (strstr($item->options, INDIVIDUALFEEDBACK_MULTICHOICE_IGNOREEMPTY)) {
+            return true;
+        }
+        return false;
+    }
+
+    public function set_negativeformulated($item, $negativeformulated=true) {
+        $item->options = str_replace(INDIVIDUALFEEDBACK_MULTICHOICE_NEGATIVEFORMULATED, '', $item->options);
+        if ($negativeformulated) {
+            $item->options .= INDIVIDUALFEEDBACK_MULTICHOICE_NEGATIVEFORMULATED;
+        }
+    }
+
+    public function negativeformulated($item) {
+        if (strstr($item->options, INDIVIDUALFEEDBACK_MULTICHOICE_NEGATIVEFORMULATED)) {
             return true;
         }
         return false;
     }
 
     public function set_hidenoselect($item, $hidenoselect=true) {
-        $item->options = str_replace(FEEDBACK_MULTICHOICE_HIDENOSELECT, '', $item->options);
+        $item->options = str_replace(INDIVIDUALFEEDBACK_MULTICHOICE_HIDENOSELECT, '', $item->options);
         if ($hidenoselect) {
-            $item->options .= FEEDBACK_MULTICHOICE_HIDENOSELECT;
+            $item->options .= INDIVIDUALFEEDBACK_MULTICHOICE_HIDENOSELECT;
         }
     }
 
     public function hidenoselect($item) {
-        if (strstr($item->options, FEEDBACK_MULTICHOICE_HIDENOSELECT)) {
+        if (strstr($item->options, INDIVIDUALFEEDBACK_MULTICHOICE_HIDENOSELECT)) {
             return true;
         }
         return false;
@@ -506,7 +552,7 @@ class feedback_item_multichoice extends feedback_item_base {
         $externaldata = array();
         $data = $this->get_analysed($item, $groupid, $courseid);
 
-        if ($data && !empty($data[2]) && is_array($data[2])) {
+        if (!empty($data[2]) && is_array($data[2])) {
             foreach ($data[2] as $d) {
                 $externaldata[] = json_encode($d);
             }

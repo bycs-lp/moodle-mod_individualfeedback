@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Contains class mod_feedback_complete_form
+ * Contains class mod_individualfeedback_complete_form
  *
- * @package   mod_feedback
+ * @package   mod_individualfeedback
  * @copyright 2016 Marina Glancy
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -25,13 +25,13 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Class mod_feedback_complete_form
+ * Class mod_individualfeedback_complete_form
  *
- * @package   mod_feedback
+ * @package   mod_individualfeedback
  * @copyright 2016 Marina Glancy
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_feedback_complete_form extends moodleform {
+class mod_individualfeedback_complete_form extends moodleform {
 
     /** @var int */
     const MODE_COMPLETE = 1;
@@ -46,9 +46,9 @@ class mod_feedback_complete_form extends moodleform {
 
     /** @var int */
     protected $mode;
-    /** @var mod_feedback_structure|mod_feedback_completion */
+    /** @var mod_individualfeedback_structure|mod_individualfeedback_completion */
     protected $structure;
-    /** @var mod_feedback_completion */
+    /** @var mod_individualfeedback_completion */
     protected $completion;
     /** @var int */
     protected $gopage;
@@ -59,17 +59,17 @@ class mod_feedback_complete_form extends moodleform {
      * Constructor
      *
      * @param int $mode
-     * @param mod_feedback_structure $structure
+     * @param mod_individualfeedback_structure $structure
      * @param string $formid CSS id attribute of the form
      * @param array $customdata
      */
-    public function __construct($mode, mod_feedback_structure $structure, $formid, $customdata = null) {
+    public function __construct($mode, mod_individualfeedback_structure $structure, $formid, $customdata = null) {
         $this->mode = $mode;
         $this->structure = $structure;
         $this->gopage = isset($customdata['gopage']) ? $customdata['gopage'] : 0;
         $isanonymous = $this->structure->is_anonymous() ? ' ianonymous' : '';
         parent::__construct(null, $customdata, 'POST', '',
-                array('id' => $formid, 'class' => 'feedback_form' . $isanonymous), true);
+                array('id' => $formid, 'class' => 'individualfeedback_form' . $isanonymous), true);
         $this->set_display_vertical();
     }
 
@@ -104,7 +104,7 @@ class mod_feedback_complete_form extends moodleform {
             $element->setAttributes($element->getAttributes() + ['class' => 'feedback_mode']);
         }
 
-        // Add buttons to go to previous/next pages and submit the feedback.
+        // Add buttons to go to previous/next pages and submit the individualfeedback.
         if ($this->mode == self::MODE_COMPLETE) {
             $buttonarray = array();
             $buttonarray[] = &$mform->createElement('submit', 'gopreviouspage', get_string('previous_page', 'feedback'));
@@ -130,10 +130,10 @@ class mod_feedback_complete_form extends moodleform {
     /**
      * Called from definition_after_data() in the completion mode
      *
-     * This will add only items from a current page to the feedback and adjust the buttons
+     * This will add only items from a current page to the individualfeedback and adjust the buttons
      */
     protected function definition_complete() {
-        if (!$this->structure instanceof mod_feedback_completion) {
+        if (!$this->structure instanceof mod_individualfeedback_completion) {
             // We should not really be here but just in case.
             return;
         }
@@ -145,7 +145,7 @@ class mod_feedback_complete_form extends moodleform {
 
         // Add elements.
         foreach ($pageitems as $item) {
-            $itemobj = feedback_get_item_class($item->typ);
+            $itemobj = individualfeedback_get_item_class($item->typ);
             $itemobj->complete_form_element($item, $this);
         }
 
@@ -167,9 +167,9 @@ class mod_feedback_complete_form extends moodleform {
      * This will add all items to the form, including pagebreaks as horizontal rules.
      */
     protected function definition_preview() {
-        foreach ($this->structure->get_items() as $feedbackitem) {
-            $itemobj = feedback_get_item_class($feedbackitem->typ);
-            $itemobj->complete_form_element($feedbackitem, $this);
+        foreach ($this->structure->get_items() as $individualfeedbackitem) {
+            $itemobj = individualfeedback_get_item_class($individualfeedbackitem->typ);
+            $itemobj->complete_form_element($individualfeedbackitem, $this);
         }
     }
 
@@ -196,18 +196,18 @@ class mod_feedback_complete_form extends moodleform {
      * @return string
      */
     public function get_item_value($item) {
-        if ($this->structure instanceof mod_feedback_completion) {
+        if ($this->structure instanceof mod_individualfeedback_completion) {
             return $this->structure->get_item_value($item);
         }
         return null;
     }
 
     /**
-     * Can be used by the items to get the course id for which feedback is taken
+     * Can be used by the items to get the course id for which individualfeedback is taken
      *
-     * This function returns 0 for feedbacks that are located inside the courses.
-     * $this->get_feedback()->course will return the course where feedback is located.
-     * $this->get_current_course_id() will return the course where user was before taking the feedback
+     * This function returns 0 for individualfeedbacks that are located inside the courses.
+     * $this->get_individualfeedback()->course will return the course where individualfeedback is located.
+     * $this->get_current_course_id() will return the course where user was before taking the individualfeedback
      *
      * @return int
      */
@@ -216,15 +216,15 @@ class mod_feedback_complete_form extends moodleform {
     }
 
     /**
-     * Record from 'feedback' table corresponding to the current feedback
+     * Record from 'individualfeedback' table corresponding to the current individualfeedback
      * @return stdClass
      */
-    public function get_feedback() {
-        return $this->structure->get_feedback();
+    public function get_individualfeedback() {
+        return $this->structure->get_individualfeedback();
     }
 
     /**
-     * Current feedback mode, see constants on the top of this class
+     * Current individualfeedback mode, see constants on the top of this class
      * @return int
      */
     public function get_mode() {
@@ -260,15 +260,15 @@ class mod_feedback_complete_form extends moodleform {
     }
 
     /**
-     * Returns the course where user was before taking the feedback.
+     * Returns the course where user was before taking the individualfeedback.
      *
-     * For feedbacks inside the course it will be the same as $this->get_feedback()->course.
-     * For feedbacks on the frontpage it will be the same as $this->get_course_id()
+     * For individualfeedbacks inside the course it will be the same as $this->get_individualfeedback()->course.
+     * For individualfeedbacks on the frontpage it will be the same as $this->get_course_id()
      *
      * @return int
      */
     public function get_current_course_id() {
-        return $this->structure->get_courseid() ?: $this->get_feedback()->course;
+        return $this->structure->get_courseid() ?: $this->get_individualfeedback()->course;
     }
 
     /**
@@ -277,14 +277,16 @@ class mod_feedback_complete_form extends moodleform {
      * @return string
      */
     protected function get_suggested_class($item) {
-        $class = "feedback_itemlist feedback-item-{$item->typ}";
+        $class = "individualfeedback_itemlist individualfeedback-item-{$item->typ} questiongroupmoveitem";
         if ($item->dependitem) {
-            $class .= " feedback_is_dependent";
+            if ($item->typ != 'questiongroupend') {
+                $class .= " individualfeedback_is_dependent";
+            }
         }
         if ($item->typ !== 'pagebreak') {
-            $itemobj = feedback_get_item_class($item->typ);
+            $itemobj = individualfeedback_get_item_class($item->typ);
             if ($itemobj->get_hasvalue()) {
-                $class .= " feedback_hasvalue";
+                $class .= " individualfeedback_hasvalue";
             }
         }
         return $class;
@@ -328,7 +330,7 @@ class mod_feedback_complete_form extends moodleform {
 
         // Set default value.
         if ($setdefaultvalue && ($tmpvalue = $this->get_item_value($item))) {
-            $this->_form->setDefault($element->getName(), htmlspecialchars_decode($tmpvalue, ENT_QUOTES));
+            $this->_form->setDefault($element->getName(), $tmpvalue);
         }
 
         // Freeze if needed.
@@ -336,14 +338,9 @@ class mod_feedback_complete_form extends moodleform {
             $element->freeze();
         }
 
-        // For read-only forms, just disable each added element.
-        if ($this->is_readonly()) {
-            $this->_form->disabledIf($element->getName(), 'id');
-        }
-
         // Add red asterisks on required fields.
         if ($item->required) {
-            $required = $OUTPUT->pix_icon('req', get_string('requiredelement', 'form'), 'moodle', ['class' => 'ms-2']);
+            $required = $OUTPUT->pix_icon('req', get_string('requiredelement', 'form'));
             $element->setLabel($element->getLabel() . $required);
             $this->hasrequired = true;
         }
@@ -355,6 +352,40 @@ class mod_feedback_complete_form extends moodleform {
 
         if ($this->mode == self::MODE_EDIT) {
             $this->enhance_name_for_edit($item, $element);
+        }
+
+        return $element;
+    }
+
+    /**
+     * Adds a dummy element to this form - to be used by items in their complete_form_element() method
+     *
+     * @param stdClass $item
+     * @param HTML_QuickForm_element|array $element either completed form element or an array that
+     *      can be passed as arguments to $this->_form->createElement() function
+     * @return HTML_QuickForm_element
+     */
+    public function add_dumy_form_element($item, $element) {
+        global $OUTPUT;
+        // Add element to the form.
+        if (is_array($element)) {
+            if ($this->is_frozen() && $element[0] === 'text') {
+                // Convert 'text' element to 'static' when freezing for better display.
+                $element = ['static', $element[1], $element[2]];
+            }
+            $element = call_user_func_array(array($this->_form, 'createElement'), $element);
+        }
+        $element = $this->_form->addElement($element);
+
+        // Prepend standard CSS classes to the element classes.
+        $attributes = $element->getAttributes();
+        $class = !empty($attributes['class']) ? ' ' . $attributes['class'] : '';
+        $attributes['class'] = 'dummy hidden' . $class;
+        $element->setAttributes($attributes);
+
+        // Freeze if needed.
+        if ($this->is_frozen()) {
+            $element->freeze();
         }
 
         return $element;
@@ -391,12 +422,12 @@ class mod_feedback_complete_form extends moodleform {
     }
 
     /**
-     * Adds an item number to the question name (if feedback autonumbering is on)
+     * Adds an item number to the question name (if individualfeedback autonumbering is on)
      * @param stdClass $item
      * @param HTML_QuickForm_element $element
      */
     protected function add_item_number($item, $element) {
-        if ($this->get_feedback()->autonumbering && !empty($item->itemnr)) {
+        if ($this->get_individualfeedback()->autonumbering && !empty($item->itemnr)) {
             $name = $element->getLabel();
             $element->setLabel(html_writer::span($item->itemnr. '.', 'itemnr') . ' ' . $name);
         }
@@ -409,8 +440,8 @@ class mod_feedback_complete_form extends moodleform {
      */
     protected function add_item_label($item, $element) {
         if (strlen($item->label) && ($this->mode == self::MODE_EDIT || $this->mode == self::MODE_VIEW_TEMPLATE)) {
-            $name = get_string('nameandlabelformat', 'mod_feedback',
-                (object)['label' => format_string($item->label), 'name' => $element->getLabel()]);
+            $name = $element->getLabel();
+            $name = '('.format_string($item->label).') '.$name;
             $element->setLabel($name);
         }
     }
@@ -425,10 +456,14 @@ class mod_feedback_complete_form extends moodleform {
         if ($item->dependitem && ($this->mode == self::MODE_EDIT || $this->mode == self::MODE_VIEW_TEMPLATE)) {
             if (isset($allitems[$item->dependitem])) {
                 $dependitem = $allitems[$item->dependitem];
-                $name = $element->getLabel();
-                $name .= html_writer::span(' ('.format_string($dependitem->label).'-&gt;'.$item->dependvalue.')',
-                        'feedback_depend');
-                $element->setLabel($name);
+                if ($dependitem->typ == 'questiongroup') {
+                    $element->setLabel('');
+                } else {
+                    $name = $element->getLabel();
+                    $name .= html_writer::span(' ('.format_string($dependitem->label).'-&gt;'.$item->dependvalue.')',
+                            'individualfeedback_depend');
+                    $element->setLabel($name);
+                }
             }
         }
     }
@@ -457,13 +492,28 @@ class mod_feedback_complete_form extends moodleform {
      */
     protected function enhance_name_for_edit($item, $element) {
         global $OUTPUT;
+        if ($item->typ == 'questiongroupend') {
+            return;
+        }
+
         $menu = new action_menu();
         $menu->set_owner_selector('#' . $this->guess_element_id($item, $element));
-        $menu->set_kebab_trigger(get_string('edit'));
+
+        // @Depreached since m4.3
+        // $menu->set_constraint('.individualfeedback_form');
+        // Instead using (Danou)
+        $menu->set_boundary('scrollParent');
+
+        // @Depreached since m4.0
+        // $menu->set_alignment(action_menu::TR, action_menu::BR);
+        // Instead using (Danou)
+        $menu->set_menu_left();
+
+        $menu->set_menu_trigger(get_string('edit'));
         $menu->prioritise = true;
 
-        $itemobj = feedback_get_item_class($item->typ);
-        $actions = $itemobj->edit_actions($item, $this->get_feedback(), $this->get_cm());
+        $itemobj = individualfeedback_get_item_class($item->typ);
+        $actions = $itemobj->edit_actions($item, $this->get_individualfeedback(), $this->get_cm());
         foreach ($actions as $action) {
             $menu->add($action);
         }
@@ -471,10 +521,10 @@ class mod_feedback_complete_form extends moodleform {
 
         $name = $element->getLabel();
 
-        $name = html_writer::span('', 'itemdd', array('id' => 'feedback_item_box_' . $item->id)) .
+        $name = html_writer::span('', 'itemdd', array('id' => 'individualfeedback_item_box_' . $item->id)) .
                 html_writer::span($name, 'itemname') .
                 html_writer::span($editmenu, 'itemactions');
-        $element->setLabel(html_writer::span($name, 'itemtitle', ['class' => 'mx-5']));
+        $element->setLabel(html_writer::span($name, 'itemtitle'));
     }
 
     /**
@@ -582,7 +632,7 @@ class mod_feedback_complete_form extends moodleform {
         $this->_form->display();
 
         if ($this->mode == self::MODE_EDIT) {
-            $PAGE->requires->js_call_amd('mod_feedback/edit', 'setup');
+            $PAGE->requires->js_call_amd('mod_individualfeedback/edit', 'setup');
         }
     }
 }

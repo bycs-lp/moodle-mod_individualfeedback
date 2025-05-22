@@ -17,9 +17,9 @@
 /**
  * prints the form to import items from xml-file
  *
- * @author Andreas Grabs
+ * @author Marcelo Augusto Rauh Schmit
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
- * @package mod_feedback
+ * @package mod_individualfeedback
  */
 
 require_once("../../config.php");
@@ -31,7 +31,7 @@ $id = required_param('id', PARAM_INT);
 $choosefile = optional_param('choosefile', false, PARAM_PATH);
 $action = optional_param('action', false, PARAM_ALPHA);
 
-$url = new moodle_url('/mod/feedback/import.php', ['id' => $id]);
+$url = new moodle_url('/mod/individualfeedback/import.php', array('id'=>$id));
 if ($choosefile !== false) {
     $url->param('choosefile', $choosefile);
 }
@@ -39,17 +39,17 @@ if ($action !== false) {
     $url->param('action', $action);
 }
 $PAGE->set_url($url);
-navigation_node::override_active_url(new moodle_url('/mod/feedback/edit.php'));
+navigation_node::override_active_url(new moodle_url('/mod/individualfeedback/edit.php'));
 
-if (! $cm = get_coursemodule_from_id('feedback', $id)) {
+if (! $cm = get_coursemodule_from_id('individualfeedback', $id)) {
     throw new \moodle_exception('invalidcoursemodule');
 }
 
-if (! $course = $DB->get_record("course", ["id" => $cm->course])) {
+if (! $course = $DB->get_record("course", array("id"=>$cm->course))) {
     throw new \moodle_exception('coursemisconf');
 }
 
-if (! $feedback = $DB->get_record("feedback", ["id" => $cm->instance])) {
+if (! $feedback = $DB->get_record("individualfeedback", array("id"=>$cm->instance))) {
     throw new \moodle_exception('invalidcoursemodule');
 }
 
@@ -78,11 +78,11 @@ if ($mform->is_cancelled()) {
 if ($choosefile) {
     $xmlcontent = $mform->get_file_content('choosefile');
 
-    if (!$xmldata = feedback_load_xml_data($xmlcontent)) {
-        throw new \moodle_exception('cannotloadxml', 'feedback', 'edit.php?id='.$id);
+    if (!$xmldata = individualfeedback_load_xml_data($xmlcontent)) {
+        throw new \moodle_exception('cannotloadxml', 'individualfeedback', 'edit.php?id='.$id);
     }
 
-    $importerror = feedback_import_loaded_data($xmldata, $feedback->id);
+    $importerror = individualfeedback_import_loaded_data($xmldata, $feedback->id);
     if ($importerror->stat == true) {
         $url = 'edit.php?id='.$id.'&do_show=templates';
         redirect($url, get_string('import_successfully', 'feedback'), 3);
@@ -113,45 +113,50 @@ $renderer = $PAGE->get_renderer('mod_feedback');
 ///////////////////////////////////////////////////////////////////////////
 echo $OUTPUT->heading(get_string('import_questions', 'feedback'), 3);
 
-if (isset($importerror->msg) AND is_array($importerror->msg)) {
-    echo $OUTPUT->box_start('generalbox errorboxcontent boxaligncenter');
-    foreach ($importerror->msg as $msg) {
-        echo $msg.'<br />';
+// Check if it is a linked individual feedback activity.
+if ($linkedid = individualfeedback_get_linkedid($feedback->id)) {
+    echo html_writer::tag('p', get_string('individualfeedback_is_linked', 'feedback'), array('class' => 'error'));
+} else {
+    if (isset($importerror->msg) AND is_array($importerror->msg)) {
+        echo $OUTPUT->box_start('generalbox errorboxcontent boxaligncenter');
+        foreach ($importerror->msg as $msg) {
+            echo $msg.'<br />';
+        }
+        echo $OUTPUT->box_end();
     }
-    echo $OUTPUT->box_end();
-}
 
-$mform->display();
+    $mform->display();
+}
 
 echo $OUTPUT->footer();
 
-function feedback_load_xml_data($xmlcontent) {
+function individualfeedback_load_xml_data($xmlcontent) {
     global $CFG;
     require_once($CFG->dirroot.'/lib/xmlize.php');
 
-    if (!$xmlcontent = feedback_check_xml_utf8($xmlcontent)) {
+    if (!$xmlcontent = individualfeedback_check_xml_utf8($xmlcontent)) {
         return false;
     }
 
     $data = xmlize($xmlcontent, 1, 'UTF-8');
 
-    if (intval($data['FEEDBACK']['@']['VERSION']) != 200701) {
+    if (intval($data['individualfeedback']['@']['VERSION']) != 200701) {
         return false;
     }
-    $data = $data['FEEDBACK']['#']['ITEMS'][0]['#']['ITEM'];
+    $data = $data['individualfeedback']['#']['ITEMS'][0]['#']['ITEM'];
     return $data;
 }
 
-function feedback_import_loaded_data(&$data, $feedbackid) {
+function individualfeedback_import_loaded_data(&$data, $feedbackid) {
     global $CFG, $DB;
 
-    feedback_load_feedback_items();
+    individualfeedback_load_individualfeedback_items();
 
     $deleteolditems = optional_param('deleteolditems', 0, PARAM_INT);
 
     $error = new stdClass();
     $error->stat = true;
-    $error->msg = [];
+    $error->msg = array();
 
     if (!is_array($data)) {
         $error->msg[] = get_string('data_is_not_an_array', 'feedback');
@@ -160,17 +165,17 @@ function feedback_import_loaded_data(&$data, $feedbackid) {
     }
 
     if ($deleteolditems) {
-        feedback_delete_all_items($feedbackid);
+        individualfeedback_delete_all_items($feedbackid);
         $position = 0;
     } else {
         //items will be add to the end of the existing items
-        $position = $DB->count_records('feedback_item', ['feedback' => $feedbackid]);
+        $position = $DB->count_records('individualfeedback_item', array('feedback'=>$feedbackid));
     }
 
-    // Depend items we are storing temporary in an mapping list [new id => dependitem].
-    // We also store a mapping of all items [oldid => newid].
-    $dependitemsmap = [];
-    $itembackup = [];
+    //depend items we are storing temporary in an mapping list array(new id => dependitem)
+    //we also store a mapping of all items array(oldid => newid)
+    $dependitemsmap = array();
+    $itembackup = array();
     foreach ($data as $item) {
         $position++;
         //check the typ
@@ -202,7 +207,7 @@ function feedback_import_loaded_data(&$data, $feedbackid) {
                 $oldtyp = $typ;
         }
 
-        $itemclass = 'feedback_item_'.$typ;
+        $itemclass = 'individualfeedback_item_'.$typ;
         if ($typ != 'pagebreak' AND !class_exists($itemclass)) {
             $error->stat = false;
             $error->msg[] = 'type ('.$typ.') not found';
@@ -260,7 +265,7 @@ function feedback_import_loaded_data(&$data, $feedbackid) {
         }
         $newitem->required = intval($item['@']['REQUIRED']);
         $newitem->position = $position;
-        $newid = $DB->insert_record('feedback_item', $newitem);
+        $newid = $DB->insert_record('individualfeedback_item', $newitem);
 
         $itembackup[$olditemid] = $newid;
         if ($newitem->dependitem) {
@@ -270,15 +275,15 @@ function feedback_import_loaded_data(&$data, $feedbackid) {
     }
     //remapping the dependency
     foreach ($dependitemsmap as $key => $dependitem) {
-        $newitem = $DB->get_record('feedback_item', ['id' => $key]);
+        $newitem = $DB->get_record('individualfeedback_item', array('id'=>$key));
         $newitem->dependitem = $itembackup[$newitem->dependitem];
-        $DB->update_record('feedback_item', $newitem);
+        $DB->update_record('individualfeedback_item', $newitem);
     }
 
     return $error;
 }
 
-function feedback_check_xml_utf8($text) {
+function individualfeedback_check_xml_utf8($text) {
     //find the encoding
     $searchpattern = '/^\<\?xml.+(encoding=\"([a-z0-9-]*)\").+\?\>/is';
 

@@ -15,39 +15,41 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * prints the form so the user can fill out the feedback
+ * prints the form so the user can fill out the individualfeedback
  *
- * @author Andreas Grabs
+ * @author Marcelo Augusto Rauh Schmitt
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
- * @package mod_feedback
+ * @package mod_individualfeedback
  */
+
+
+// global $OUTPUT, $PAGE, $DB;
 
 require_once("../../config.php");
 require_once("lib.php");
 
-feedback_init_feedback_session();
-
+individualfeedback_init_individualfeedback_session();
 $id = required_param('id', PARAM_INT);
 $courseid = optional_param('courseid', null, PARAM_INT);
 $gopage = optional_param('gopage', 0, PARAM_INT);
 $gopreviouspage = optional_param('gopreviouspage', null, PARAM_RAW);
 
-list($course, $cm) = get_course_and_cm_from_cmid($id, 'feedback');
-$feedback = $DB->get_record("feedback", array("id" => $cm->instance), '*', MUST_EXIST);
+list($course, $cm) = get_course_and_cm_from_cmid($id, 'individualfeedback');
+$feedback = $DB->get_record("individualfeedback", array("id" => $cm->instance), '*', MUST_EXIST);
 
 $urlparams = array('id' => $cm->id, 'gopage' => $gopage, 'courseid' => $courseid);
-$PAGE->set_url('/mod/feedback/complete.php', $urlparams);
+$PAGE->set_url('/mod/individualfeedback/complete.php', $urlparams);
 
 require_course_login($course, true, $cm);
 $PAGE->set_activity_record($feedback);
 
 $context = context_module::instance($cm->id);
-$feedbackcompletion = new mod_feedback_completion($feedback, $cm, $courseid);
+$feedbackcompletion = new mod_individualfeedback_completion($feedback, $cm, $courseid);
 
 $courseid = $feedbackcompletion->get_courseid();
 
-// Check whether the feedback is mapped to the given courseid.
-if (!has_capability('mod/feedback:edititems', $context) &&
+// Check whether the individualfeedback is mapped to the given courseid.
+if (!has_capability('mod/individualfeedback:edititems', $context) &&
         !$feedbackcompletion->check_course_is_mapped()) {
     echo $OUTPUT->header();
     echo $OUTPUT->notification(get_string('cannotaccess', 'mod_feedback'));
@@ -64,18 +66,19 @@ if (!$feedbackcompletion->can_complete()) {
     throw new \moodle_exception('error');
 }
 
-$PAGE->navbar->add(get_string('feedback:complete', 'feedback'));
+$PAGE->navbar->add(get_string('individualfeedback:complete', 'individualfeedback'));
 $PAGE->set_heading($course->fullname);
 $PAGE->set_title($feedback->name);
 $PAGE->set_pagelayout('incourse');
 $PAGE->set_secondary_active_tab('modulepage');
 $PAGE->add_body_class('limitedwidth');
 
-// Check if the feedback is open (timeopen, timeclose).
+// Check if the individualfeedback is open (timeopen, timeclose).
 if (!$feedbackcompletion->is_open()) {
     echo $OUTPUT->header();
+    // echo $OUTPUT->heading(format_string($feedback->name));
     echo $OUTPUT->box_start('generalbox boxaligncenter');
-    echo $OUTPUT->notification(get_string('feedback_is_not_open', 'feedback'));
+    echo $OUTPUT->notification(get_string('individualfeedback_is_not_open', 'individualfeedback'));
     echo $OUTPUT->continue_button(course_get_url($courseid ?: $feedback->course));
     echo $OUTPUT->box_end();
     echo $OUTPUT->footer();
@@ -90,7 +93,7 @@ if (isloggedin() && !isguestuser()) {
 // Check if user is prevented from re-submission.
 $cansubmit = $feedbackcompletion->can_submit();
 
-// Initialise the form processing feedback completion.
+// Initialise the form processing individualfeedback completion.
 if (!$feedbackcompletion->is_empty() && $cansubmit) {
     // Process the page via the form.
     $urltogo = $feedbackcompletion->process_page($gopage, $gopreviouspage);
@@ -101,10 +104,11 @@ if (!$feedbackcompletion->is_empty() && $cansubmit) {
 }
 
 // Print the page header.
-$strfeedbacks = get_string("modulenameplural", "feedback");
-$strfeedback  = get_string("modulename", "feedback");
+$strindividualfeedbacks = get_string("modulenameplural", "individualfeedback");
+$strindividualfeedback  = get_string("modulename", "individualfeedback");
 
 echo $OUTPUT->header();
+# echo $OUTPUT->heading(format_string($feedback->name));
 
 if ($feedbackcompletion->is_empty()) {
     \core\notification::error(get_string('no_items_available_yet', 'feedback'));
@@ -115,15 +119,15 @@ if ($feedbackcompletion->is_empty()) {
             echo $OUTPUT->box($feedbackcompletion->page_after_submit(),
                     'generalbox boxaligncenter');
         }
-        if (!$PAGE->has_secondary_navigation() && $feedbackcompletion->can_view_analysis()) {
+        if ($feedbackcompletion->can_view_analysis()) {   // Review.
             echo '<p class="text-center">';
-            $analysisurl = new moodle_url('/mod/feedback/analysis.php', array('id' => $cm->id, 'courseid' => $courseid));
-            echo html_writer::link($analysisurl, get_string('completed_feedbacks', 'feedback'));
+            $analysisurl = new moodle_url('/mod/individualfeedback/analysis.php', array('id' => $cm->id, 'courseid' => $courseid));
+            echo html_writer::link($analysisurl, get_string('completed_individualfeedbacks', 'individualfeedback'));
             echo '</p>';
         }
 
         if ($feedback->site_after_submit) {
-            $url = feedback_encode_target_url($feedback->site_after_submit);
+            $url = individualfeedback_encode_target_url($feedback->site_after_submit);
         } else {
             $url = course_get_url($courseid ?: $course->id);
         }
@@ -134,7 +138,7 @@ if ($feedbackcompletion->is_empty()) {
     }
 } else {
     echo $OUTPUT->box_start('generalbox boxaligncenter');
-    echo $OUTPUT->notification(get_string('this_feedback_is_already_submitted', 'feedback'));
+    echo $OUTPUT->notification(get_string('this_individualfeedback_is_already_submitted', 'individualfeedback'));
     echo $OUTPUT->continue_button(course_get_url($courseid ?: $course->id));
     echo $OUTPUT->box_end();
 }

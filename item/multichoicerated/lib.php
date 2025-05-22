@@ -15,20 +15,20 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 defined('MOODLE_INTERNAL') OR die('not allowed');
-require_once($CFG->dirroot.'/mod/feedback/item/feedback_item_class.php');
+require_once($CFG->dirroot.'/mod/individualfeedback/item/individualfeedback_item_class.php');
 
-define('FEEDBACK_RADIORATED_ADJUST_SEP', '<<<<<');
+define('INDIVIDUALFEEDBACK_RADIORATED_ADJUST_SEP', '<<<<<');
 
-define('FEEDBACK_MULTICHOICERATED_MAXCOUNT', 10); //count of possible items
-define('FEEDBACK_MULTICHOICERATED_VALUE_SEP', '####');
-define('FEEDBACK_MULTICHOICERATED_VALUE_SEP2', '/');
-define('FEEDBACK_MULTICHOICERATED_TYPE_SEP', '>>>>>');
-define('FEEDBACK_MULTICHOICERATED_LINE_SEP', '|');
-define('FEEDBACK_MULTICHOICERATED_ADJUST_SEP', '<<<<<');
-define('FEEDBACK_MULTICHOICERATED_IGNOREEMPTY', 'i');
-define('FEEDBACK_MULTICHOICERATED_HIDENOSELECT', 'h');
+define('INDIVIDUALFEEDBACK_MULTICHOICERATED_MAXCOUNT', 10); //count of possible items
+define('INDIVIDUALFEEDBACK_MULTICHOICERATED_VALUE_SEP', '####');
+define('INDIVIDUALFEEDBACK_MULTICHOICERATED_VALUE_SEP2', '/');
+define('INDIVIDUALFEEDBACK_MULTICHOICERATED_TYPE_SEP', '>>>>>');
+define('INDIVIDUALFEEDBACK_MULTICHOICERATED_LINE_SEP', '|');
+define('INDIVIDUALFEEDBACK_MULTICHOICERATED_ADJUST_SEP', '<<<<<');
+define('INDIVIDUALFEEDBACK_MULTICHOICERATED_IGNOREEMPTY', 'i');
+define('INDIVIDUALFEEDBACK_MULTICHOICERATED_HIDENOSELECT', 'h');
 
-class feedback_item_multichoicerated extends feedback_item_base {
+class individualfeedback_item_multichoicerated extends individualfeedback_item_base {
     protected $type = "multichoicerated";
 
     public function build_editform($item, $feedback, $cm) {
@@ -37,7 +37,7 @@ class feedback_item_multichoicerated extends feedback_item_base {
 
         //get the lastposition number of the feedback_items
         $position = $item->position;
-        $lastposition = $DB->count_records('feedback_item', array('feedback'=>$feedback->id));
+        $lastposition = $DB->count_records('individualfeedback_item', array('feedback'=>$feedback->id));
         if ($position == -1) {
             $i_formselect_last = $lastposition + 1;
             $i_formselect_value = $lastposition + 1;
@@ -70,7 +70,7 @@ class feedback_item_multichoicerated extends feedback_item_base {
                             'position' => $position,
                             'info' => $info);
 
-        $this->item_form = new feedback_multichoicerated_form('edit_item.php', $customdata);
+        $this->item_form = new individualfeedback_multichoicerated_form('edit_item.php', $customdata);
     }
 
     /**
@@ -96,12 +96,12 @@ class feedback_item_multichoicerated extends feedback_item_base {
 
         $item->hasvalue = $this->get_hasvalue();
         if (!$item->id) {
-            $item->id = $DB->insert_record('feedback_item', $item);
+            $item->id = $DB->insert_record('individualfeedback_item', $item);
         } else {
-            $DB->update_record('feedback_item', $item);
+            $DB->update_record('individualfeedback_item', $item);
         }
 
-        return $DB->get_record('feedback_item', array('id'=>$item->id));
+        return $DB->get_record('individualfeedback_item', array('id'=>$item->id));
     }
 
 
@@ -121,7 +121,7 @@ class feedback_item_multichoicerated extends feedback_item_base {
         //die moeglichen Antworten extrahieren
         $info = $this->get_info($item);
         $lines = null;
-        $lines = explode (FEEDBACK_MULTICHOICERATED_LINE_SEP, $info->presentation);
+        $lines = explode (INDIVIDUALFEEDBACK_MULTICHOICERATED_LINE_SEP, $info->presentation);
         if (!is_array($lines)) {
             return null;
         }
@@ -136,7 +136,7 @@ class feedback_item_multichoicerated extends feedback_item_base {
         $analysed_answer = array();
         $sizeoflines = count($lines);
         for ($i = 1; $i <= $sizeoflines; $i++) {
-            $item_values = explode(FEEDBACK_MULTICHOICERATED_VALUE_SEP, $lines[$i-1]);
+            $item_values = explode(INDIVIDUALFEEDBACK_MULTICHOICERATED_VALUE_SEP, $lines[$i-1]);
             $ans = new stdClass();
             $ans->answertext = $item_values[1];
             $avg = 0.0;
@@ -167,11 +167,11 @@ class feedback_item_multichoicerated extends feedback_item_base {
 
         $info = $this->get_info($item);
 
-        $presentation = explode (FEEDBACK_MULTICHOICERATED_LINE_SEP, $info->presentation);
+        $presentation = explode (INDIVIDUALFEEDBACK_MULTICHOICERATED_LINE_SEP, $info->presentation);
         $index = 1;
         foreach ($presentation as $pres) {
             if ($value->value == $index) {
-                $item_label = explode(FEEDBACK_MULTICHOICERATED_VALUE_SEP, $pres);
+                $item_label = explode(INDIVIDUALFEEDBACK_MULTICHOICERATED_VALUE_SEP, $pres);
                 $printval = format_string($item_label[1]);
                 break;
             }
@@ -282,10 +282,10 @@ class feedback_item_multichoicerated extends feedback_item_base {
      */
     protected function get_options($item) {
         $info = $this->get_info($item);
-        $lines = explode(FEEDBACK_MULTICHOICERATED_LINE_SEP, $info->presentation);
+        $lines = explode(INDIVIDUALFEEDBACK_MULTICHOICERATED_LINE_SEP, $info->presentation);
         $options = array();
         foreach ($lines as $idx => $line) {
-            list($weight, $optiontext) = explode(FEEDBACK_MULTICHOICERATED_VALUE_SEP, $line);
+            list($weight, $optiontext) = explode(INDIVIDUALFEEDBACK_MULTICHOICERATED_VALUE_SEP, $line);
             $a = new stdclass();
             $a->weight = $weight;
             $a->name = format_text($optiontext, FORMAT_HTML, array('noclean' => true, 'para' => false));
@@ -354,14 +354,14 @@ class feedback_item_multichoicerated extends feedback_item_base {
         if (is_array($dbvalue)) {
             $dbvalues = $dbvalue;
         } else {
-            $dbvalues = explode(FEEDBACK_MULTICHOICERATED_LINE_SEP, $dbvalue);
+            $dbvalues = explode(INDIVIDUALFEEDBACK_MULTICHOICERATED_LINE_SEP, $dbvalue);
         }
 
         $info = $this->get_info($item);
-        $presentation = explode (FEEDBACK_MULTICHOICERATED_LINE_SEP, $info->presentation);
+        $presentation = explode (INDIVIDUALFEEDBACK_MULTICHOICERATED_LINE_SEP, $info->presentation);
         $index = 1;
         foreach ($presentation as $pres) {
-            $presvalues = explode(FEEDBACK_MULTICHOICERATED_VALUE_SEP, $pres);
+            $presvalues = explode(INDIVIDUALFEEDBACK_MULTICHOICERATED_VALUE_SEP, $pres);
 
             foreach ($dbvalues as $dbval) {
                 if ($dbval == $index AND trim($presvalues[1]) == $dependvalue) {
@@ -383,7 +383,7 @@ class feedback_item_multichoicerated extends feedback_item_base {
         $info->presentation = '';
         $info->horizontal = false;
 
-        $parts = explode(FEEDBACK_MULTICHOICERATED_TYPE_SEP, $item->presentation);
+        $parts = explode(INDIVIDUALFEEDBACK_MULTICHOICERATED_TYPE_SEP, $item->presentation);
         $info->subtype = $parts[0];
         if (count($parts) > 1) {
             $info->presentation = $parts[1];
@@ -394,7 +394,7 @@ class feedback_item_multichoicerated extends feedback_item_base {
         }
 
         if ($info->subtype != 'd') {
-            $parts = explode(FEEDBACK_MULTICHOICERATED_ADJUST_SEP, $info->presentation);
+            $parts = explode(INDIVIDUALFEEDBACK_MULTICHOICERATED_ADJUST_SEP, $info->presentation);
             $info->presentation = $parts[0];
             if (count($parts) > 1) {
                 $info->horizontal = $parts[1];
@@ -408,8 +408,8 @@ class feedback_item_multichoicerated extends feedback_item_base {
         }
 
         $info->values = $this->prepare_presentation_values_print($info->presentation,
-                                                    FEEDBACK_MULTICHOICERATED_VALUE_SEP,
-                                                    FEEDBACK_MULTICHOICERATED_VALUE_SEP2);
+                                                    INDIVIDUALFEEDBACK_MULTICHOICERATED_VALUE_SEP,
+                                                    INDIVIDUALFEEDBACK_MULTICHOICERATED_VALUE_SEP2);
         return $info;
     }
 
@@ -440,7 +440,7 @@ class feedback_item_multichoicerated extends feedback_item_base {
 
     public function prepare_presentation_values_print($valuestring, $valuesep1, $valuesep2) {
         $valuestring = str_replace(array("\n","\r"), "", $valuestring);
-        return $this->prepare_presentation_values(FEEDBACK_MULTICHOICERATED_LINE_SEP,
+        return $this->prepare_presentation_values(INDIVIDUALFEEDBACK_MULTICHOICERATED_LINE_SEP,
                                                   "\n",
                                                   $valuestring,
                                                   $valuesep1,
@@ -451,35 +451,35 @@ class feedback_item_multichoicerated extends feedback_item_base {
         $valuestring = str_replace("\r", "\n", $valuestring);
         $valuestring = str_replace("\n\n", "\n", $valuestring);
         return $this->prepare_presentation_values("\n",
-                        FEEDBACK_MULTICHOICERATED_LINE_SEP,
+                        INDIVIDUALFEEDBACK_MULTICHOICERATED_LINE_SEP,
                         $valuestring,
                         $valuesep1,
                         $valuesep2);
     }
 
     public function set_ignoreempty($item, $ignoreempty=true) {
-        $item->options = str_replace(FEEDBACK_MULTICHOICERATED_IGNOREEMPTY, '', $item->options);
+        $item->options = str_replace(INDIVIDUALFEEDBACK_MULTICHOICERATED_IGNOREEMPTY, '', $item->options);
         if ($ignoreempty) {
-            $item->options .= FEEDBACK_MULTICHOICERATED_IGNOREEMPTY;
+            $item->options .= INDIVIDUALFEEDBACK_MULTICHOICERATED_IGNOREEMPTY;
         }
     }
 
     public function ignoreempty($item) {
-        if (strstr($item->options, FEEDBACK_MULTICHOICERATED_IGNOREEMPTY)) {
+        if (strstr($item->options, INDIVIDUALFEEDBACK_MULTICHOICERATED_IGNOREEMPTY)) {
             return true;
         }
         return false;
     }
 
     public function set_hidenoselect($item, $hidenoselect=true) {
-        $item->options = str_replace(FEEDBACK_MULTICHOICERATED_HIDENOSELECT, '', $item->options);
+        $item->options = str_replace(INDIVIDUALFEEDBACK_MULTICHOICERATED_HIDENOSELECT, '', $item->options);
         if ($hidenoselect) {
-            $item->options .= FEEDBACK_MULTICHOICERATED_HIDENOSELECT;
+            $item->options .= INDIVIDUALFEEDBACK_MULTICHOICERATED_HIDENOSELECT;
         }
     }
 
     public function hidenoselect($item) {
-        if (strstr($item->options, FEEDBACK_MULTICHOICERATED_HIDENOSELECT)) {
+        if (strstr($item->options, INDIVIDUALFEEDBACK_MULTICHOICERATED_HIDENOSELECT)) {
             return true;
         }
         return false;

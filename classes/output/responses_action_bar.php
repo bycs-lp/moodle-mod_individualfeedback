@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace mod_feedback\output;
+namespace mod_individualfeedback\output;
 
 use moodle_url;
 use url_select;
@@ -24,7 +24,7 @@ use url_select;
  *
  * @copyright 2021 Peter Dias
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
- * @package mod_feedback
+ * @package mod_individualfeedback
  */
 class responses_action_bar extends base_action_bar {
     /** @var moodle_url $currenturl The current page url */
@@ -49,14 +49,14 @@ class responses_action_bar extends base_action_bar {
      */
     public function get_items(): array {
         $items = [];
-        if (has_capability('mod/feedback:viewreports', $this->context)) {
-            $reporturl = new moodle_url('/mod/feedback/show_entries.php', $this->urlparams);
-            $options[$reporturl->out(false)] = get_string('show_entries', 'feedback');
+        if (has_capability('mod/individualfeedback:viewreports', $this->context)) {
+            $reporturl = new moodle_url('/mod/individualfeedback/show_entries.php', $this->urlparams);
+            $options[$reporturl->out(false)] = get_string('show_entries', 'individualfeedback');
             $selected = $this->currenturl->compare($reporturl, URL_MATCH_BASE) ? $reporturl : $this->currenturl;
 
-            if ($this->feedback->anonymous == FEEDBACK_ANONYMOUS_NO && $this->course->id != SITEID) {
-                $nonrespondenturl = new moodle_url('/mod/feedback/show_nonrespondents.php', $this->urlparams);
-                $options[$nonrespondenturl->out(false)] = get_string('show_nonrespondents', 'feedback');
+            if ($this->individualfeedback->anonymous == INDIVIDUALFEEDBACK_ANONYMOUS_NO && $this->course->id != SITEID) {
+                $nonrespondenturl = new moodle_url('/mod/individualfeedback/show_nonrespondents.php', $this->urlparams);
+                $options[$nonrespondenturl->out(false)] = get_string('show_nonrespondents', 'individualfeedback');
                 $selected = $this->currenturl->compare($nonrespondenturl, URL_MATCH_BASE) ? $nonrespondenturl : $this->currenturl;;
             }
 

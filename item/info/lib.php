@@ -15,12 +15,13 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 defined('MOODLE_INTERNAL') OR die('not allowed');
-require_once($CFG->dirroot.'/mod/feedback/item/feedback_item_class.php');
+global $CFG;
+require_once($CFG->dirroot.'/mod/individualfeedback/item/individualfeedback_item_class.php');
 
-class feedback_item_info extends feedback_item_base {
+class individualfeedback_item_info extends individualfeedback_item_base {
     protected $type = "info";
 
-    /** Mode recording response time (for non-anonymous feedbacks only) */
+    /** Mode recording response time (for non-anonymous individualfeedbacks only) */
     const MODE_RESPONSETIME = 1;
     /** Mode recording current course */
     const MODE_COURSE = 2;
@@ -34,9 +35,9 @@ class feedback_item_info extends feedback_item_base {
         global $DB, $CFG;
         require_once('info_form.php');
 
-        //get the lastposition number of the feedback_items
+        //get the lastposition number of the individualfeedback_items
         $position = $item->position;
-        $lastposition = $DB->count_records('feedback_item', array('feedback'=>$feedback->id));
+        $lastposition = $DB->count_records('individualfeedback_item', array('feedback'=>$feedback->id));
         if ($position == -1) {
             $i_formselect_last = $lastposition + 1;
             $i_formselect_value = $lastposition + 1;
@@ -52,7 +53,7 @@ class feedback_item_info extends feedback_item_base {
         $item->required = 0;
 
         //all items for dependitem
-        $feedbackitems = feedback_get_depend_candidates_for_item($feedback, $item);
+        $feedbackitems = individualfeedback_get_depend_candidates_for_item($feedback, $item);
         $commonparams = array('cmid'=>$cm->id,
                              'id'=>isset($item->id) ? $item->id : null,
                              'typ'=>$item->typ,
@@ -61,8 +62,8 @@ class feedback_item_info extends feedback_item_base {
 
         // Options for the 'presentation' select element.
         $presentationoptions = array();
-        if ($feedback->anonymous == FEEDBACK_ANONYMOUS_NO || $item->presentation == self::MODE_RESPONSETIME) {
-            // "Response time" is hidden anyway in case of anonymous feedback, no reason to offer this option.
+        if ($feedback->anonymous == INDIVIDUALFEEDBACK_ANONYMOUS_NO || $item->presentation == self::MODE_RESPONSETIME) {
+            // "Response time" is hidden anyway in case of anonymous individualfeedback, no reason to offer this option.
             // However if it was already selected leave it in the dropdown.
             $presentationoptions[self::MODE_RESPONSETIME] = get_string('responsetime', 'feedback');
         }
@@ -93,18 +94,18 @@ class feedback_item_info extends feedback_item_base {
 
         $item->hasvalue = $this->get_hasvalue();
         if (!$item->id) {
-            $item->id = $DB->insert_record('feedback_item', $item);
+            $item->id = $DB->insert_record('individualfeedback_item', $item);
         } else {
-            $DB->update_record('feedback_item', $item);
+            $DB->update_record('individualfeedback_item', $item);
         }
 
-        return $DB->get_record('feedback_item', array('id'=>$item->id));
+        return $DB->get_record('individualfeedback_item', array('id'=>$item->id));
     }
 
     /**
      * Helper function for collected data, both for analysis page and export to excel
      *
-     * @param stdClass $item the db-object from feedback_item
+     * @param stdClass $item the db-object from individualfeedback_item
      * @param int|false $groupid
      * @param int $courseid
      * @return stdClass
@@ -115,7 +116,7 @@ class feedback_item_info extends feedback_item_base {
         $analysed_val = new stdClass();
         $analysed_val->data = null;
         $analysed_val->name = $item->name;
-        $values = feedback_get_group_values($item, $groupid, $courseid);
+        $values = individualfeedback_get_group_values($item, $groupid, $courseid);
         if ($values) {
             $data = array();
             foreach ($values as $value) {
@@ -208,8 +209,8 @@ class feedback_item_info extends feedback_item_base {
         global $DB;
         switch ($item->presentation) {
             case self::MODE_RESPONSETIME:
-                if ($feedback->anonymous != FEEDBACK_ANONYMOUS_YES) {
-                    // Response time is not allowed in anonymous feedbacks.
+                if ($feedback->anonymous != INDIVIDUALFEEDBACK_ANONYMOUS_YES) {
+                    // Response time is not allowed in anonymous individualfeedbacks.
                     return time();
                 }
                 break;
@@ -234,14 +235,14 @@ class feedback_item_info extends feedback_item_base {
      * Adds an input element to the complete form
      *
      * @param stdClass $item
-     * @param mod_feedback_complete_form $form
+     * @param mod_individualfeedback_complete_form $form
      */
     public function complete_form_element($item, $form) {
-        if ($form->get_mode() == mod_feedback_complete_form::MODE_VIEW_RESPONSE) {
+        if ($form->get_mode() == mod_individualfeedback_complete_form::MODE_VIEW_RESPONSE) {
             $value = strval($form->get_item_value($item));
         } else {
             $value = $this->get_current_value($item,
-                    $form->get_feedback(), $form->get_current_course_id());
+                    $form->get_individualfeedback(), $form->get_current_course_id());
         }
         $printval = $this->get_printval($item, (object)['value' => $value]);
 
@@ -270,14 +271,14 @@ class feedback_item_info extends feedback_item_base {
                 false);
         $form->set_element_default($inputname, $value);
         $element->freeze();
-        if ($form->get_mode() == mod_feedback_complete_form::MODE_COMPLETE) {
+        if ($form->get_mode() == mod_individualfeedback_complete_form::MODE_COMPLETE) {
             $element->setPersistantFreeze(true);
         }
     }
 
     /**
      * Converts the value from complete_form data to the string value that is stored in the db.
-     * @param mixed $value element from mod_feedback_complete_form::get_data() with the name $item->typ.'_'.$item->id
+     * @param mixed $value element from mod_individualfeedback_complete_form::get_data() with the name $item->typ.'_'.$item->id
      * @return string
      */
     public function create_value($value) {
@@ -293,7 +294,7 @@ class feedback_item_info extends feedback_item_base {
 
     public function get_data_for_external($item) {
         global $DB;
-        $feedback = $DB->get_record('feedback', array('id' => $item->feedback), '*', MUST_EXIST);
+        $feedback = $DB->get_record('individualfeedback', array('id' => $item->feedback), '*', MUST_EXIST);
         // Return the default value (course name, category name or timestamp).
         return $this->get_current_value($item, $feedback, $feedback->course);
     }

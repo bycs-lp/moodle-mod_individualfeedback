@@ -12,14 +12,14 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{!
-    @template mod_feedback/use_template
+    @template mod_individualfeedback/use_template
     Trigger button for the use template confirmation modal form.
     Classes required for JS:
     * none
     Data attributes required for JS:
     * All data attributes are required
     Context variables required for this template:
-    * id - The feedback id.
+    * id - The individualfeedback id.
     * templateid - The template id.
     Example context (json):
     {
@@ -28,10 +28,10 @@
     }
 }}
 <button type="button" class="btn btn-secondary" data-action="usetemplate" data-dataid={{id}} data-templateid="{{templateid}}">
-    {{#str}}use_this_template, mod_feedback{{/str}}
+    {{#str}}use_this_template, mod_individualfeedback{{/str}}
 </button>
 {{#js}}
-    require(['mod_feedback/usetemplate'], function(usetemplate) {
+    require(['mod_individualfeedback/usetemplate'], function(usetemplate) {
     usetemplate.init();
     });
 {{/js}}

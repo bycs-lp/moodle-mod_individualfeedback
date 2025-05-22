@@ -20,7 +20,7 @@
  * @author Peter Dias
  * @copyright 2021 Peter Dias
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
- * @package mod_feedback
+ * @package mod_individualfeedback
  */
 
 require_once("../../config.php");
@@ -30,7 +30,7 @@ $id = required_param('id', PARAM_INT);
 $mode = optional_param('mode', '', PARAM_ALPHA);
 $templateid = optional_param('deletetemplate', 0, PARAM_INT);
 
-list($course, $cm) = get_course_and_cm_from_cmid($id, 'feedback');
+list($course, $cm) = get_course_and_cm_from_cmid($id, 'individualfeedback');
 $context = context_module::instance($cm->id);
 
 require_login($course, true, $cm);
@@ -43,33 +43,39 @@ $params = ['id' => $id];
 if ($mode) {
     $params += ['mode' => $mode];
 }
-$url = new moodle_url('/mod/feedback/manage_templates.php', $params);
+$url = new moodle_url('/mod/individualfeedback/manage_templates.php', $params);
 
 $PAGE->set_url($url);
-$actionbar = new \mod_feedback\output\edit_action_bar($cm->id, $url);
+$actionbar = new \mod_individualfeedback\output\edit_action_bar($cm->id, $url);
 
 $PAGE->set_heading($course->fullname);
 
-/** @var \mod_feedback\output\renderer $renderer */
-$renderer = $PAGE->get_renderer('mod_feedback');
+/** @var \mod_individualfeedback\output\renderer $renderer */
+$renderer = $PAGE->get_renderer('mod_individualfeedback');
 $renderer->set_title(
-        [format_string($feedback->name), format_string($course->fullname)],
-        get_string('templates', 'feedback')
+    [format_string($feedback->name), format_string($course->fullname)],
+    get_string('templates', 'feedback')
 );
 
 // Process template deletion.
 if ($templateid) {
     require_sesskey();
     require_capability('mod/feedback:deletetemplate', $context);
-    $template = $DB->get_record('feedback_template', ['id' => $templateid], '*', MUST_EXIST);
+    $template = $DB->get_record('individualfeedback_template', ['id' => $templateid], '*', MUST_EXIST);
 
-    if ($template->ispublic) {
+    // Test if it is a private template. Need to change how private templates are marked.
+    if($template->ispublic == 2 && $template->userid != $USER->id) {
+        echo "error";
+        exit;
+    }
+
+    if ($template->ispublic == 1) {
         require_capability('mod/feedback:createpublictemplate', $systemcontext);
         require_capability('mod/feedback:deletetemplate', $systemcontext);
     }
 
-    feedback_delete_template($template);
-    $successurl = new moodle_url('/mod/feedback/manage_templates.php', ['id' => $id]);
+    individualfeedback_delete_template($template);
+    $successurl = new moodle_url('/mod/individualfeedback/manage_templates.php', ['id' => $id]);
     redirect($url, get_string('template_deleted', 'feedback'), null, \core\output\notification::NOTIFY_SUCCESS);
 }
 $PAGE->activityheader->set_attrs([
@@ -83,19 +89,30 @@ if (!$mode) {
 echo $OUTPUT->heading(get_string('templates', 'mod_feedback'), 3);
 
 // First we get the course templates.
-$templates = feedback_get_template_list($course, 'own');
+$templates = individualfeedback_get_template_list($course, 'own');
 echo $OUTPUT->box_start('coursetemplates');
 echo $OUTPUT->heading(get_string('course'), 4);
 
-$baseurl = new moodle_url('/mod/feedback/use_templ.php', $params);
-$tablecourse = new mod_feedback_templates_table('feedback_template_course_table', $baseurl, $mode);
+$baseurl = new moodle_url('/mod/individualfeedback/use_templ.php', $params);
+$tablecourse = new mod_individualfeedback_templates_table('individualfeedback_template_course_table', $baseurl, $mode);
 $tablecourse->display($templates);
 echo $OUTPUT->box_end();
 
-$templates = feedback_get_template_list($course, 'public');
+// Second we get user templates
+$templates = individualfeedback_get_template_list($course, 'private');
+echo $OUTPUT->box_start('coursetemplates');
+echo $OUTPUT->heading(get_string('user'), 4);
+
+$baseurl = new moodle_url('/mod/individualfeedback/use_templ.php', $params);
+$tablecourse = new mod_individualfeedback_templates_table('individualfeedback_template_course_table', $baseurl, $mode);
+$tablecourse->display($templates);
+echo $OUTPUT->box_end();
+
+//Third we get public template
+$templates = individualfeedback_get_template_list($course, 'public');
 echo $OUTPUT->box_start('publictemplates');
 echo $OUTPUT->heading(get_string('public', 'feedback'), 4);
-$tablepublic = new mod_feedback_templates_table('feedback_template_public_table', $baseurl, $mode);
+$tablepublic = new mod_individualfeedback_templates_table('individualfeedback_template_public_table', $baseurl, $mode);
 $tablepublic->display($templates);
 echo $OUTPUT->box_end();
 echo $OUTPUT->footer();

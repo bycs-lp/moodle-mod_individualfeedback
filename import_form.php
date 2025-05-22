@@ -35,19 +35,19 @@ class feedback_import_form extends moodleform {
         $mform =& $this->_form;
 
         $strdeleteolditmes = get_string('delete_old_items', 'feedback').
-                             ' ('.get_string('oldvalueswillbedeleted', 'feedback').')';
+            ' ('.get_string('oldvalueswillbedeleted', 'feedback').')';
 
         $strnodeleteolditmes = get_string('append_new_items', 'feedback').
-                               ' ('.get_string('oldvaluespreserved', 'feedback').')';
+            ' ('.get_string('oldvaluespreserved', 'feedback').')';
 
         // hidden elements
         $mform->addElement('hidden', 'id');
         $mform->setType('id', PARAM_INT);
         $mform->addElement('filepicker',
-                           'choosefile',
-                           get_string('file'),
-                           null,
-                           array('maxbytes' => $CFG->maxbytes, 'filetypes' => '*'));
+            'choosefile',
+            get_string('file'),
+            null,
+            array('maxbytes' => $CFG->maxbytes, 'filetypes' => '*'));
 
         $mform->addElement('radio', 'deleteolditems', '', $strdeleteolditmes, true);
         $mform->addElement('radio', 'deleteolditems', '', $strnodeleteolditmes);

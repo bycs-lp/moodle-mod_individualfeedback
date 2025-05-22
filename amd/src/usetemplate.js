@@ -16,7 +16,7 @@
 /**
  * Javascript module for using an existing template
  *
- * @module      mod_feedback/usetemplate
+ * @module      mod_individualfeedback/usetemplate
  * @copyright   2021 Peter Dias
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -40,9 +40,9 @@ export const init = () => {
 
         const modalForm = new ModalForm({
             modalConfig: {
-                title: getString('use_this_template', 'mod_feedback'),
+                title: getString('use_this_template', 'mod_individualfeedback'),
             },
-            formClass: 'mod_feedback\\form\\use_template_form',
+            formClass: 'mod_individualfeedback\\form\\use_template_form',
             args: {
                 id: trigger.getAttribute('data-dataid'),
                 templateid: trigger.getAttribute('data-templateid')
@@ -57,7 +57,7 @@ export const init = () => {
             } else {
                 Notification.addNotification({
                     type: 'error',
-                    message:  getString('saving_failed', 'mod_feedback')
+                    message:  getString('saving_failed', 'mod_individualfeedback')
                 });
             }
         });

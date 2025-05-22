@@ -15,30 +15,30 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * The mod_feedback response submitted event.
+ * The mod_individualfeedback response submitted event.
  *
- * @package    mod_feedback
+ * @package    mod_individualfeedback
  * @copyright  2013 Ankit Agarwal
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later.
  */
 
-namespace mod_feedback\event;
+namespace mod_individualfeedback\event;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * The mod_feedback response submitted event class.
+ * The mod_individualfeedback response submitted event class.
  *
- * This event is triggered when a feedback response is submitted.
+ * This event is triggered when a individualfeedback response is submitted.
  *
  * @property-read array $other {
  *      Extra information about event.
  *
- *      - int anonymous: if feedback is anonymous.
+ *      - int anonymous: if individualfeedback is anonymous.
  *      - int cmid: course module id.
  *      - int instanceid: id of instance.
  * }
  *
- * @package    mod_feedback
+ * @package    mod_individualfeedback
  * @since      Moodle 2.6
  * @copyright  2013 Ankit Agarwal
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later.
@@ -51,32 +51,40 @@ class response_submitted extends \core\event\base {
     protected function init() {
         global $CFG;
 
-        require_once($CFG->dirroot.'/mod/feedback/lib.php');
-        $this->data['objecttable'] = 'feedback_completed';
+        require_once($CFG->dirroot.'/mod/individualfeedback/lib.php');
+        $this->data['objecttable'] = 'individualfeedback_completed';
         $this->data['crud'] = 'c';
         $this->data['edulevel'] = self::LEVEL_PARTICIPATING;
     }
 
     /**
-     * Creates an instance from the record from db table feedback_completed
+     * Creates an instance from the record from db table individualfeedback_completed
      *
      * @param stdClass $completed
      * @param stdClass|cm_info $cm
      * @return self
      */
     public static function create_from_record($completed, $cm) {
-        $event = self::create(array(
-            'relateduserid' => $completed->userid,
+        $eventdata = array(
+            'relateduserid' => 0,
             'objectid' => $completed->id,
             'context' => \context_module::instance($cm->id),
-            'anonymous' => ($completed->anonymous_response == FEEDBACK_ANONYMOUS_YES),
+            'anonymous' => ($completed->anonymous_response == INDIVIDUALFEEDBACK_ANONYMOUS_YES),
+            // Anonymize user in events.
+            'userid' => 0,
             'other' => array(
                 'cmid' => $cm->id,
                 'instanceid' => $completed->feedback,
                 'anonymous' => $completed->anonymous_response // Deprecated.
             )
-        ));
-        $event->add_record_snapshot('feedback_completed', $completed);
+        );
+
+        if (!$completed->anonymous_response) {
+            $eventdata['relateduserid'] = $completed->userid;
+        }
+
+        $event = self::create($eventdata);
+        $event->add_record_snapshot('individualfeedback_completed', $completed);
         return $event;
     }
 
@@ -86,7 +94,7 @@ class response_submitted extends \core\event\base {
      * @return string
      */
     public static function get_name() {
-        return get_string('eventresponsesubmitted', 'mod_feedback');
+        return get_string('eventresponsesubmitted', 'mod_individualfeedback');
     }
 
     /**
@@ -95,7 +103,7 @@ class response_submitted extends \core\event\base {
      * @return string
      */
     public function get_description() {
-        return "The user with id '$this->userid' submitted response for 'feedback' activity with "
+        return "The user with id '$this->userid' submitted response for 'individualfeedback' activity with "
                 . "course module id '$this->contextinstanceid'.";
     }
 
@@ -105,10 +113,10 @@ class response_submitted extends \core\event\base {
      */
     public function get_url() {
         if ($this->anonymous) {
-            return new \moodle_url('/mod/feedback/show_entries.php', array('id' => $this->other['cmid'],
+            return new \moodle_url('/mod/individualfeedback/show_entries.php', array('id' => $this->other['cmid'],
                     'showcompleted' => $this->objectid));
         } else {
-            return new \moodle_url('/mod/feedback/show_entries.php' , array('id' => $this->other['cmid'],
+            return new \moodle_url('/mod/individualfeedback/show_entries.php' , array('id' => $this->other['cmid'],
                     'userid' => $this->userid, 'showcompleted' => $this->objectid));
         }
     }
@@ -131,7 +139,7 @@ class response_submitted extends \core\event\base {
         if ($this->anonymous) {
             return is_siteadmin($userorid);
         } else {
-            return has_capability('mod/feedback:viewreports', $this->context, $userorid);
+            return has_capability('mod/individualfeedback:viewreports', $this->context, $userorid);
         }
     }
 
@@ -158,13 +166,13 @@ class response_submitted extends \core\event\base {
     }
 
     public static function get_objectid_mapping() {
-        return array('db' => 'feedback_completed', 'restore' => 'feedback_completed');
+        return array('db' => 'individualfeedback_completed', 'restore' => 'individualfeedback_completed');
     }
 
     public static function get_other_mapping() {
         $othermapped = array();
         $othermapped['cmid'] = array('db' => 'course_modules', 'restore' => 'course_module');
-        $othermapped['instanceid'] = array('db' => 'feedback', 'restore' => 'feedback');
+        $othermapped['instanceid'] = array('db' => 'individualfeedback', 'restore' => 'individualfeedback');
 
         return $othermapped;
     }

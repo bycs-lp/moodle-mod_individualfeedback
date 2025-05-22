@@ -14,9 +14,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Edit items in feedback module
+ * Edit items in individualfeedback module
  *
- * @module     mod_feedback/edit
+ * @module     mod_individualfeedback/edit
+ * @package    mod_individualfeedback
  * @copyright  2016 Marina Glancy
  */
 define(['jquery', 'core/ajax', 'core/str', 'core/notification'],
@@ -26,14 +27,19 @@ function($, ajax, str, notification) {
             e.preventDefault();
             var targetUrl = $(e.currentTarget).attr('href');
 
+            stringkey = 'confirmdeleteitem';
+            if ($(this).hasClass('questiongroup')) {
+                stringkey = 'confirmdeleteitem_questiongroup';
+            }
+
             str.get_strings([
                 {
                     key:        'confirmation',
                     component:  'admin'
                 },
                 {
-                    key:        'confirmdeleteitem',
-                    component:  'mod_feedback'
+                    key:        stringkey,
+                    component:  'mod_individualfeedback'
                 },
                 {
                     key:        'yes',

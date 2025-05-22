@@ -17,7 +17,7 @@
 /**
  * print the form to add or edit a feedback-instance
  *
- * @author Andreas Grabs
+ * @author Marcelo Augusto Rauh Schmitt
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
  * @package mod_feedback
  */
@@ -28,8 +28,11 @@ if (!defined('MOODLE_INTERNAL')) {
 }
 
 require_once($CFG->dirroot.'/course/moodleform_mod.php');
+require_once($CFG->dirroot.'/mod/feedback/mod_form.php');
+require_once($CFG->dirroot.'/mod/feedback/lib.php');
 
-class mod_feedback_mod_form extends moodleform_mod {
+
+class mod_individualfeedback_mod_form extends mod_feedback_mod_form {
 
     public function definition() {
         global $CFG, $DB;
@@ -64,14 +67,14 @@ class mod_feedback_mod_form extends moodleform_mod {
         $options[1]  = get_string('anonymous', 'feedback');
         $options[2]  = get_string('non_anonymous', 'feedback');
         $mform->addElement('select',
-                           'anonymous',
-                           get_string('anonymous_edit', 'feedback'),
-                           $options);
+            'anonymous',
+            get_string('anonymous_edit', 'feedback'),
+            $options);
 
         // check if there is existing responses to this feedback
         if (is_numeric($this->_instance) AND
-                    $this->_instance AND
-                    $feedback = $DB->get_record("feedback", array("id"=>$this->_instance))) {
+            $this->_instance AND
+            $feedback = $DB->get_record("individualfeedback", array("id"=>$this->_instance))) {
 
             $completed_feedback_count = feedback_get_completeds_group_count($feedback);
         } else {
@@ -81,11 +84,11 @@ class mod_feedback_mod_form extends moodleform_mod {
         if ($completed_feedback_count) {
             $multiple_submit_value = $feedback->multiple_submit ? get_string('yes') : get_string('no');
             $mform->addElement('text',
-                               'multiple_submit_static',
-                               get_string('multiplesubmit', 'feedback'),
-                               array('size'=>'4',
-                                    'disabled'=>'disabled',
-                                    'value'=>$multiple_submit_value));
+                'multiple_submit_static',
+                get_string('multiplesubmit', 'feedback'),
+                array('size'=>'4',
+                    'disabled'=>'disabled',
+                    'value'=>$multiple_submit_value));
             $mform->setType('multiple_submit_static', PARAM_RAW);
 
             $mform->addElement('hidden', 'multiple_submit', '');
@@ -93,8 +96,8 @@ class mod_feedback_mod_form extends moodleform_mod {
             $mform->addHelpButton('multiple_submit_static', 'multiplesubmit', 'feedback');
         } else {
             $mform->addElement('selectyesno',
-                               'multiple_submit',
-                               get_string('multiplesubmit', 'feedback'));
+                'multiple_submit',
+                get_string('multiplesubmit', 'feedback'));
 
             $mform->addHelpButton('multiple_submit', 'multiplesubmit', 'feedback');
         }
@@ -111,17 +114,17 @@ class mod_feedback_mod_form extends moodleform_mod {
         $mform->addElement('selectyesno', 'publish_stats', get_string('show_analysepage_after_submit', 'feedback'));
 
         $mform->addElement('editor',
-                           'page_after_submit_editor',
-                           get_string("page_after_submit", "feedback"),
-                           null,
-                           $editoroptions);
+            'page_after_submit_editor',
+            get_string("page_after_submit", "feedback"),
+            null,
+            $editoroptions);
 
         $mform->setType('page_after_submit_editor', PARAM_RAW);
 
         $mform->addElement('text',
-                           'site_after_submit',
-                           get_string('url_for_continue', 'feedback'),
-                           array('size'=>'64', 'maxlength'=>'255'));
+            'site_after_submit',
+            get_string('url_for_continue', 'feedback'),
+            array('size'=>'64', 'maxlength'=>'255'));
 
         $mform->setType('site_after_submit', PARAM_TEXT);
         $mform->addHelpButton('site_after_submit', 'url_for_continue', 'feedback');
@@ -130,97 +133,5 @@ class mod_feedback_mod_form extends moodleform_mod {
         //-------------------------------------------------------------------------------
         // buttons
         $this->add_action_buttons();
-    }
-
-    public function data_preprocessing(&$default_values) {
-
-        $editoroptions = feedback_get_editor_options();
-
-        if ($this->current->instance) {
-            // editing an existing feedback - let us prepare the added editor elements (intro done automatically)
-            $draftitemid = file_get_submitted_draft_itemid('page_after_submit');
-            $default_values['page_after_submit_editor']['text'] =
-                                    file_prepare_draft_area($draftitemid, $this->context->id,
-                                    'mod_feedback', 'page_after_submit', false,
-                                    $editoroptions,
-                                    $default_values['page_after_submit']);
-
-            $default_values['page_after_submit_editor']['format'] = $default_values['page_after_submitformat'];
-            $default_values['page_after_submit_editor']['itemid'] = $draftitemid;
-        } else {
-            // adding a new feedback instance
-            $draftitemid = file_get_submitted_draft_itemid('page_after_submit_editor');
-
-            // no context yet, itemid not used
-            file_prepare_draft_area($draftitemid, null, 'mod_feedback', 'page_after_submit', false);
-            $default_values['page_after_submit_editor']['text'] = '';
-            $default_values['page_after_submit_editor']['format'] = editors_get_preferred_format();
-            $default_values['page_after_submit_editor']['itemid'] = $draftitemid;
-        }
-
-    }
-
-    /**
-     * Allows module to modify the data returned by form get_data().
-     * This method is also called in the bulk activity completion form.
-     *
-     * Only available on moodleform_mod.
-     *
-     * @param stdClass $data the form data to be modified.
-     */
-    public function data_postprocessing($data) {
-        parent::data_postprocessing($data);
-        if (isset($data->page_after_submit_editor)) {
-            $data->page_after_submitformat = $data->page_after_submit_editor['format'];
-            $data->page_after_submit = $data->page_after_submit_editor['text'];
-
-            if (!empty($data->completionunlocked)) {
-                // Turn off completion settings if the checkboxes aren't ticked.
-                $suffix = $this->get_suffix();
-                $completion = $data->{'completion' . $suffix};
-                $autocompletion = !empty($completion) && $completion == COMPLETION_TRACKING_AUTOMATIC;
-                if (!$autocompletion || empty($data->{'completionsubmit' . $suffix})) {
-                    $data->{'completionsubmit' . $suffix} = 0;
-                }
-            }
-        }
-    }
-
-    /**
-     * Enforce validation rules here
-     *
-     * @param array $data array of ("fieldname"=>value) of submitted data
-     * @param array $files array of uploaded files "element_name"=>tmp_file_path
-     * @return array
-     **/
-    public function validation($data, $files) {
-        $errors = parent::validation($data, $files);
-
-        // Check open and close times are consistent.
-        if ($data['timeopen'] && $data['timeclose'] &&
-                $data['timeclose'] < $data['timeopen']) {
-            $errors['timeclose'] = get_string('closebeforeopen', 'feedback');
-        }
-        return $errors;
-    }
-
-    public function add_completion_rules() {
-        $mform =& $this->_form;
-
-        $suffix = $this->get_suffix();
-        $completionsubmitel = 'completionsubmit' . $suffix;
-        $mform->addElement('checkbox',
-            $completionsubmitel,
-            '',
-            get_string('completionsubmit', 'feedback')
-        );
-        // Enable this completion rule by default.
-        $mform->setDefault($completionsubmitel, 1);
-        return [$completionsubmitel];
-    }
-
-    public function completion_rule_enabled($data) {
-        $suffix = $this->get_suffix();
-        return !empty($data['completionsubmit' . $suffix]);
     }
 }

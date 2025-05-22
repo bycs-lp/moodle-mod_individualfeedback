@@ -19,13 +19,13 @@
  *
  * @author Andreas Grabs
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
- * @package mod_feedback
+ * @package mod_individualfeedback
  */
 
 require_once('../../config.php');
 require_once('lib.php');
 
-feedback_init_feedback_session();
+individualfeedback_init_individualfeedback_session();
 
 $id = required_param('id', PARAM_INT);
 
@@ -36,20 +36,20 @@ if (($formdata = data_submitted()) AND !confirm_sesskey()) {
 $switchitemrequired = optional_param('switchitemrequired', false, PARAM_INT);
 $deleteitem = optional_param('deleteitem', false, PARAM_INT);
 
-list($course, $cm) = get_course_and_cm_from_cmid($id, 'feedback');
+list($course, $cm) = get_course_and_cm_from_cmid($id, 'individualfeedback');
 
 $context = context_module::instance($cm->id);
 require_login($course, false, $cm);
 require_capability('mod/feedback:edititems', $context);
 $feedback = $PAGE->activityrecord;
-$feedbackstructure = new mod_feedback_structure($feedback, $cm);
-$url = new moodle_url('/mod/feedback/edit.php', ['id' => $cm->id]);
+$feedbackstructure = new mod_individualfeedback_structure($feedback, $cm);
+$url = new moodle_url('/mod/individualfeedback/edit.php', ['id' => $cm->id]);
 
 if ($switchitemrequired) {
     require_sesskey();
     $items = $feedbackstructure->get_items();
     if (isset($items[$switchitemrequired])) {
-        feedback_switch_item_required($items[$switchitemrequired]);
+        individualfeedback_switch_item_required($items[$switchitemrequired]);
     }
     redirect($url);
 }
@@ -58,18 +58,18 @@ if ($deleteitem) {
     require_sesskey();
     $items = $feedbackstructure->get_items();
     if (isset($items[$deleteitem])) {
-        feedback_delete_item($deleteitem);
+        individualfeedback_delete_item($deleteitem);
     }
     redirect($url);
 }
 
-//Get the feedbackitems
+//Get the individualfeedbackitems
 $lastposition = 0;
-$feedbackitems = $DB->get_records('feedback_item', ['feedback' => $feedback->id], 'position');
-if (is_array($feedbackitems)) {
-    $feedbackitems = array_values($feedbackitems);
-    if (count($feedbackitems) > 0) {
-        $lastitem = $feedbackitems[count($feedbackitems)-1];
+$individualfeedbackitems = $DB->get_records('individualfeedback_item', array('feedback'=>$feedback->id), 'position');
+if (is_array($individualfeedbackitems)) {
+    $individualfeedbackitems = array_values($individualfeedbackitems);
+    if (count($individualfeedbackitems) > 0) {
+        $lastitem = $individualfeedbackitems[count($individualfeedbackitems)-1];
         $lastposition = $lastitem->position;
     } else {
         $lastposition = 0;
@@ -80,14 +80,14 @@ $lastposition++;
 $PAGE->set_url($url);
 $PAGE->set_heading($course->fullname);
 
-/** @var \mod_feedback\output\renderer $renderer */
-$renderer = $PAGE->get_renderer('mod_feedback');
+/** @var \mod_individualfeedback\output\renderer $renderer */
+$renderer = $PAGE->get_renderer('mod_individualfeedback');
 $renderer->set_title(
-        [format_string($feedback->name), format_string($course->fullname)],
-        get_string('questions', 'feedback')
+    [format_string($feedback->name), format_string($course->fullname)],
+    get_string('questions', 'feedback')
 );
 
-$actionbar = new \mod_feedback\output\edit_action_bar($cm->id, $url, $lastposition);
+$actionbar = new \mod_individualfeedback\output\edit_action_bar($cm->id, $url, $lastposition);
 $PAGE->activityheader->set_attrs([
     'hidecompletion' => true,
     'description' => ''
@@ -95,25 +95,89 @@ $PAGE->activityheader->set_attrs([
 $PAGE->add_body_class('limitedwidth');
 
 //Adding the javascript module for the items dragdrop.
-if (count($feedbackitems) > 1) {
+if (count($individualfeedbackitems) > 1) {
     $PAGE->requires->strings_for_js([
         'pluginname',
         'move_item',
         'position',
-    ], 'feedback');
+    ], 'individualfeedback');
+
+    $PAGE->requires->jquery();
+    $PAGE->requires->js_call_amd('mod_individualfeedback/movequestiongroup', 'init', array('cmid' => $cm->id));
+    $PAGE->requires->strings_for_js([
+        'pluginname',
+        'move_item',
+        'position',
+        'move_questiongroup'
+    ], 'individualfeedback');
+
     $PAGE->requires->yui_module(
-        'moodle-mod_feedback-dragdrop',
-        'M.mod_feedback.init_dragdrop',
+        'moodle-mod_individualfeedback-dragdrop',
+        'M.mod_individualfeedback.init_dragdrop',
         [['cmid' => $cm->id]]
     );
 }
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('edit_items', 'mod_feedback'), 3);
+
+/// print the tabs
+//require('tabs.php');
+
+// Print the main part of the page.
+
+
+    // Print the template-section.
+/*    $use_template_form->display(); */
+
+/*    if ($cancreatetemplates) {
+        $deleteurl = new moodle_url('/mod/individualfeedback/delete_template.php', array('id' => $id));
+        $create_template_form->display();
+        echo '<p><a href="'.$deleteurl->out().'">'.
+            get_string('delete_templates', 'individualfeedback').
+            '</a></p>';
+    } else {
+        echo '&nbsp;';
+    }
+
+    if (has_capability('mod/individualfeedback:edititems', $context)) {
+        $urlparams = array('action'=>'exportfile', 'id'=>$id);
+        $exporturl = new moodle_url('/mod/individualfeedback/export.php', $urlparams);
+        $importurl = new moodle_url('/mod/individualfeedback/import.php', array('id'=>$id));
+        echo '<p>
+            <a href="'.$exporturl->out().'">'.get_string('export_questions', 'individualfeedback').'</a>/
+            <a href="'.$importurl->out().'">'.get_string('import_questions', 'individualfeedback').'</a>
+        </p>';
+    }
+*/
+
+
+    // Check if it is a linked individual feedback activity.
+    /*if ($linkedid = individualfeedback_get_linkedid($feedback->id)) {
+        echo html_writer::tag('p', get_string('individualfeedback_is_linked', 'individualfeedback'), array('class' => 'error'));
+
+        $form = new mod_individualfeedback_complete_form(mod_individualfeedback_complete_form::MODE_PRINT,
+            $feedbackstructure, 'individualfeedback_edit_form');
+        $form->display();
+    } else {
+        // Print the Item-Edit-section.
+        $select = new single_select(new moodle_url('/mod/individualfeedback/edit_item.php',
+            array('cmid' => $id, 'position' => $lastposition, 'sesskey' => sesskey())),
+            'typ', individualfeedback_load_individualfeedback_items_options());
+        $select->label = get_string('add_item', 'mod_individualfeedback');
+        echo $OUTPUT->render($select);
+
+        $form = new mod_individualfeedback_complete_form(mod_individualfeedback_complete_form::MODE_EDIT,
+            $feedbackstructure, 'individualfeedback_edit_form');
+        echo '<div id="individualfeedback_dragarea">'; // The container for the dragging area.
+        $form->display();
+        echo '</div>';
+    }*/
+
 echo $renderer->main_action_bar($actionbar);
-$form = new mod_feedback_complete_form(mod_feedback_complete_form::MODE_EDIT,
-        $feedbackstructure, 'feedback_edit_form');
-echo '<div id="feedback_dragarea">'; // The container for the dragging area.
+$form = new mod_individualfeedback_complete_form(mod_individualfeedback_complete_form::MODE_EDIT,
+    $feedbackstructure, 'individualfeedback_edit_form');
+echo '<div id="individualfeedback_dragarea">'; // The container for the dragging area.
 $form->display();
 echo '</div>';
 

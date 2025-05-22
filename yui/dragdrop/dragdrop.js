@@ -1,12 +1,32 @@
-YUI.add('moodle-mod_feedback-dragdrop', function(Y) {
-    var DRAGDROPNAME = 'mod_feedback_dragdrop';
+YUI.add('moodle-mod_individualfeedback-dragdrop', function(Y) {
+    var DRAGDROPNAME = 'mod_individualfeedback_dragdrop';
     var CSS = {
-        DRAGAREA: '#feedback_dragarea',
-        DRAGITEMCLASS: 'feedback_itemlist',
-        DRAGITEM: '.row.feedback_itemlist',
-        DRAGLIST: '#feedback_dragarea form',
+        DRAGAREA: '#individualfeedback_dragarea',
+        DRAGITEMCLASS: 'individualfeedback_itemlist',
+        DRAGITEM: '.row.individualfeedback_itemlist',
+        DRAGLIST: '#individualfeedback_dragarea form',
         DRAGHANDLE: 'itemhandle'
     };
+
+    function checkstartendgroupitem() {
+        $('div.individualfeedback_questiongroup_start').each(function() {
+
+            // var currentquestiongroup = $(this);
+            var childelements = $(this).children('.individualfeedback_itemlist');
+            var numberofelements = childelements.length;
+            if (numberofelements) {
+                firstchild = childelements[0];
+                if (!$(firstchild).hasClass('individualfeedback-item-questiongroup')) {
+                    $(firstchild).insertBefore($(this));
+                }
+
+                lastchild = childelements[numberofelements - 1];
+                if (!$(lastchild).hasClass('individualfeedback-item-questiongroupend')) {
+                    $(lastchild).insertAfter($(this));
+                }
+            }
+        });
+    }
 
     var DRAGDROP = function() {
         DRAGDROP.superclass.constructor.apply(this, arguments);
@@ -19,16 +39,19 @@ YUI.add('moodle-mod_feedback-dragdrop', function(Y) {
             this.cmid = params.cmid;
             this.goingUp = false, lastY = 0;
 
-            var groups = ['feedbackitem'];
+            var groups = ['individualfeedbackitem'];
 
-            var handletitle = M.util.get_string('move_item', 'feedback');
+            var handletitle = M.util.get_string('move_item', 'individualfeedback');
 
             //Get the list of li's in the lists and add the drag handle.
             basenode = Y.Node.one(CSS.DRAGLIST);
             listitems = basenode.all(CSS.DRAGITEM).each(function(v) {
-                var item_id = this.get_node_id(v.get('id')); //Get the id of the feedback item.
-                var mydraghandle = this.get_drag_handle(handletitle, CSS.DRAGHANDLE, 'icon');
-                v.append(mydraghandle); // Insert the new handle into the item box.
+                var classes = v.getAttribute('class');
+                if (classes.indexOf('individualfeedback-item-questiongroup') === -1) {
+                    var item_id = this.get_node_id(v.get('id')); //Get the id of the feedback item.
+                    var mydraghandle = this.get_drag_handle(handletitle, CSS.DRAGHANDLE, 'icon');
+                    v.append(mydraghandle); // Insert the new handle into the item box.
+                }
             }, this);
 
             //We use a delegate to make all items draggable
@@ -53,7 +76,6 @@ YUI.add('moodle-mod_feedback-dragdrop', function(Y) {
                 constrain: CSS.DRAGAREA
             });
             del.dd.plug(Y.Plugin.DDWinScroll);
-
             //Listen for all drop:over events
             del.on('drop:over', this.drop_over_handler, this);
             //Listen for all drag:drag events
@@ -181,7 +203,10 @@ YUI.add('moodle-mod_feedback-dragdrop', function(Y) {
                 }, this);
                 var spinner = M.util.add_spinner(Y, dragnode);
                 this.save_item_order(this.cmid, elements.toString(), spinner);
-           }
+
+                // SFSUBM-21 - Check if the item is in the question group or not.
+                checkstartendgroupitem();
+            }
         },
 
         /**
@@ -194,12 +219,12 @@ YUI.add('moodle-mod_feedback-dragdrop', function(Y) {
          */
         save_item_order : function(cmid, itemorder, spinner) {
 
-            Y.io(M.cfg.wwwroot + '/mod/feedback/ajax.php', {
+            Y.io(M.cfg.wwwroot + '/mod/individualfeedback/ajax.php', {
                 //The needed paramaters
                 data: {action: 'saveitemorder',
-                       id: cmid,
-                       itemorder: itemorder,
-                       sesskey: M.cfg.sesskey
+                    id: cmid,
+                    itemorder: itemorder,
+                    sesskey: M.cfg.sesskey
                 },
 
                 timeout: 5000, //5 seconds for timeout I think it is enough.
@@ -238,7 +263,7 @@ YUI.add('moodle-mod_feedback-dragdrop', function(Y) {
         /**
          * Returns the numeric id from the dom id of an item.
          *
-         * @param id The dom id, f.g.: feedback_item_22
+         * @param id The dom id, f.g.: individualfeedback_item_22
          * @return int
          */
         get_node_id : function(id) {
@@ -255,8 +280,8 @@ YUI.add('moodle-mod_feedback-dragdrop', function(Y) {
 
     });
 
-    M.mod_feedback = M.mod_feedback || {};
-    M.mod_feedback.init_dragdrop = function(params) {
+    M.mod_individualfeedback = M.mod_individualfeedback || {};
+    M.mod_individualfeedback.init_dragdrop = function(params) {
         return new DRAGDROP(params);
     }
 
