@@ -19,7 +19,7 @@
  *
  * @copyright Andreas Grabs
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
- * @package mod_feedback
+ * @package mod_individualfeedback
  */
 
 require_once("../../config.php");
@@ -29,16 +29,16 @@ require_once("$CFG->libdir/excellib.class.php");
 $id = required_param('id', PARAM_INT); // Course module id.
 $courseid = optional_param('courseid', '0', PARAM_INT);
 
-$url = new moodle_url('/mod/feedback/analysis_to_excel.php', array('id' => $id));
+$url = new moodle_url('/mod/individualfeedback/analysis_to_excel.php', array('id' => $id));
 if ($courseid) {
     $url->param('courseid', $courseid);
 }
 $PAGE->set_url($url);
 
-list($course, $cm) = get_course_and_cm_from_cmid($id, 'feedback');
+list($course, $cm) = get_course_and_cm_from_cmid($id, 'individualfeedback');
 require_login($course, false, $cm);
 $context = context_module::instance($cm->id);
-require_capability('mod/feedback:viewreports', $context);
+require_capability('mod/individualfeedback:viewreports', $context);
 
 $feedback = $PAGE->activityrecord;
 
@@ -47,7 +47,7 @@ ob_start();
 ob_end_clean();
 
 // Get the questions (item-names).
-$feedbackstructure = new mod_feedback_structure($feedback, $cm, $course->id);
+$feedbackstructure = new mod_individualfeedback_structure($feedback, $cm, $course->id);
 if (!$items = $feedbackstructure->get_items(true)) {
     throw new \moodle_exception('no_items_available_yet', 'feedback', $cm->url);
 }
@@ -55,7 +55,7 @@ if (!$items = $feedbackstructure->get_items(true)) {
 $mygroupid = groups_get_activity_group($cm);
 
 // Creating a workbook.
-$filename = "feedback_" . clean_filename($cm->get_formatted_name()) . ".xls";
+$filename = "individualfeedback_" . clean_filename($cm->get_formatted_name()) . ".xls";
 $workbook = new MoodleExcelWorkbook($filename);
 
 // Creating the worksheet.
@@ -86,24 +86,24 @@ $completedscount = $feedbackstructure->count_completed_responses($mygroupid);
 $rowoffset1++;
 $worksheet1->write_string($rowoffset1,
     0,
-    get_string('completed_feedbacks', 'feedback').': '.strval($completedscount),
+    get_string('completed_feedbacks', 'mod_individualfeedback').': '.strval($completedscount),
     $xlsformats->head1);
 
 $rowoffset1++;
 $worksheet1->write_string($rowoffset1,
     0,
-    get_string('questions', 'feedback').': '. strval(count($items)),
+    get_string('questions', 'mod_individualfeedback').': '. strval(count($items)),
     $xlsformats->head1);
 
 $rowoffset1 += 2;
-$worksheet1->write_string($rowoffset1, 0, get_string('item_label', 'feedback'), $xlsformats->head1);
-$worksheet1->write_string($rowoffset1, 1, get_string('question', 'feedback'), $xlsformats->head1);
-$worksheet1->write_string($rowoffset1, 2, get_string('responses', 'feedback'), $xlsformats->head1);
+$worksheet1->write_string($rowoffset1, 0, get_string('item_label', 'mod_individualfeedback'), $xlsformats->head1);
+$worksheet1->write_string($rowoffset1, 1, get_string('question', 'mod_individualfeedback'), $xlsformats->head1);
+$worksheet1->write_string($rowoffset1, 2, get_string('responses', 'mod_individualfeedback'), $xlsformats->head1);
 $rowoffset1++;
 
 foreach ($items as $item) {
     // Get the class of item-typ.
-    $itemobj = feedback_get_item_class($item->typ);
+    $itemobj = individualfeedback_get_item_class($item->typ);
     $rowoffset1 = $itemobj->excelprint_item($worksheet1,
         $rowoffset1,
         $xlsformats,

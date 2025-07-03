@@ -18,7 +18,7 @@ require_once('../../../../config.php');
 
 $id = required_param('id', PARAM_INT);
 
-$PAGE->set_url('/mod/feedback/item/captcha/print_captcha.php', array('id'=>$id));
+$PAGE->set_url('/mod/individualfeedback/item/captcha/print_captcha.php', array('id'=>$id));
 
 if ($id) {
     if (! $cm = get_coursemodule_from_id('feedback', $id)) {

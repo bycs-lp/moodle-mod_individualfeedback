@@ -1,4 +1,4 @@
-@mod @mod_feedback
+@mod @mod_individualfeedback
 Feature: Feedbacks in courses with groups
   In order to collect feedbacks per group
   As an teacher
@@ -57,7 +57,7 @@ Feature: Feedbacks in courses with groups
 
   @javascript
   Scenario: Non anonymous feedback with groups in a course
-    Given the following "mod_feedback > question" exists:
+    Given the following "mod_individualfeedback > question" exists:
       | activity        | feedback1                               |
       | name            | Do you like this course?                |
       | questiontype    | multichoice                             |
@@ -65,7 +65,7 @@ Feature: Feedbacks in courses with groups
       | subtype         | r                                       |
       | hidenoselect    | 1                                       |
       | values          | Yes of course\nNot at all\nI don't know |
-    And the following "mod_feedback > responses" exist:
+    And the following "mod_individualfeedback > responses" exist:
       | activity  | user  | Do you like this course? |
       | feedback1 | user1 | Not at all               |
       | feedback1 | user2 | I don't know             |
@@ -154,7 +154,7 @@ Feature: Feedbacks in courses with groups
 
   @javascript
   Scenario: Anonymous feedback with groups in a course - insufficient responses
-    Given the following "mod_feedback > question" exists:
+    Given the following "mod_individualfeedback > question" exists:
       | activity        | feedback2                               |
       | name            | Do you like this course?                |
       | questiontype    | multichoice                             |
@@ -162,7 +162,7 @@ Feature: Feedbacks in courses with groups
       | subtype         | r                                       |
       | hidenoselect    | 1                                       |
       | values          | Yes of course\nNot at all\nI don't know |
-    And the following "mod_feedback > responses" exist:
+    And the following "mod_individualfeedback > responses" exist:
       | activity  | user  | Do you like this course? |
       | feedback2 | user1 | Not at all               |
     When I am on the "Course anon feedback" "feedback activity" page logged in as user1
@@ -172,7 +172,7 @@ Feature: Feedbacks in courses with groups
 
   @javascript
   Scenario: Anonymous feedback with groups in a course
-    Given the following "mod_feedback > question" exists:
+    Given the following "mod_individualfeedback > question" exists:
       | activity        | feedback2                               |
       | name            | Do you like this course?                |
       | questiontype    | multichoice                             |
@@ -180,7 +180,7 @@ Feature: Feedbacks in courses with groups
       | subtype         | r                                       |
       | hidenoselect    | 1                                       |
       | values          | Yes of course\nNot at all\nI don't know |
-    And the following "mod_feedback > responses" exist:
+    And the following "mod_individualfeedback > responses" exist:
       | activity  | user  | Do you like this course? |
       | feedback2 | user1 | Not at all               |
       | feedback2 | user2 | I don't know             |

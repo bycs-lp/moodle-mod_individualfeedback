@@ -1,4 +1,4 @@
-@mod @mod_feedback
+@mod @mod_individualfeedback
 Feature: Feedback with no calendar capabilites
   In order to allow work effectively
   As a teacher

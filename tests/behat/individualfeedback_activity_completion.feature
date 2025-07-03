@@ -1,4 +1,4 @@
-@mod @mod_feedback @core_completion
+@mod @mod_individualfeedback @core_completion
 Feature: View activity completion in the feedback activity
   In order to have visibility of feedback completion requirements
   As a student

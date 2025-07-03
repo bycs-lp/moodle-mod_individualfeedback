@@ -14,14 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace mod_feedback\form;
+namespace mod_individualfeedback\form;
 
 /**
  * Tests the confirm use template form
  *
  * @author Peter Dias
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
- * @package mod_feedback
+ * @package mod_individualfeedback
  */
 final class create_template_form_test extends \advanced_testcase {
     /**
@@ -34,7 +34,7 @@ final class create_template_form_test extends \advanced_testcase {
 
         $course = $this->getDataGenerator()->create_course();
         $feedback = $this->getDataGenerator()->create_module('feedback', ['course' => $course->id]);
-        $cm = get_coursemodule_from_instance('feedback', $feedback->id, $course->id);
+        $cm = get_coursemodule_from_instance('individualfeedback', $feedback->id, $course->id);
         $user = $this->getDataGenerator()->create_user();
         $teacher = $this->getDataGenerator()->create_user();
         $manager = $this->getDataGenerator()->create_user();
@@ -47,7 +47,7 @@ final class create_template_form_test extends \advanced_testcase {
         $managerrole = $DB->get_record('role', ['shortname' => 'manager']);
         role_assign($managerrole->id, $manager->id, SYSCONTEXTID);
 
-        $feedbackgenerator = $this->getDataGenerator()->get_plugin_generator('mod_feedback');
+        $feedbackgenerator = $this->getDataGenerator()->get_plugin_generator('mod_individualfeedback');
 
         // Create at least one page.
         $feedbackgenerator->create_item_multichoice($feedback, ['values' => "y\nn"]);
@@ -93,7 +93,7 @@ final class create_template_form_test extends \advanced_testcase {
         $form->set_data_for_dynamic_submission();
         $this->assertTrue($form->is_validated());
         $form->process_dynamic_submission();
-        $records = array_values($DB->get_records('feedback_template', null, 'id ASC'));
+        $records = array_values($DB->get_records('individualfeedback_template', null, 'id ASC'));
         $this->assertEquals($expectedispublicvalue, (bool) $records[0]->ispublic);
     }
 
@@ -105,22 +105,22 @@ final class create_template_form_test extends \advanced_testcase {
     public static function createtemplate_form_with_modified_capabilities_provider(): array {
         return [
             "Manager without edititems permission cannot create any templates" => [
-                ['mod/feedback:edititems'], false
+                ['mod/individualfeedback:edititems'], false
             ],
             "Manager without createprivatetemplate permission creating public template" => [
-                ['mod/feedback:createprivatetemplate'], true, true, true
+                ['mod/individualfeedback:createprivatetemplate'], true, true, true
             ],
             "Manager without createprivatetemplate permission creating private template" => [
-                ['mod/feedback:createprivatetemplate'], true
+                ['mod/individualfeedback:createprivatetemplate'], true
             ],
             "Manager without createpublictemplate permission creating private template" => [
-                ['mod/feedback:createpublictemplate'], true
+                ['mod/individualfeedback:createpublictemplate'], true
             ],
             "Manager without createpublictemplate permission creating public template" => [
-                ['mod/feedback:createpublictemplate'], true, true
+                ['mod/individualfeedback:createpublictemplate'], true, true
             ],
             "Manager without createprivatetemplate,createpublictemplate permission cannot create templates" => [
-                ['mod/feedback:createpublictemplate', 'mod/feedback:createprivatetemplate'], false
+                ['mod/individualfeedback:createpublictemplate', 'mod/individualfeedback:createprivatetemplate'], false
             ]
         ];
     }
@@ -170,7 +170,7 @@ final class create_template_form_test extends \advanced_testcase {
 
         // A teacher can access the form but cannot create public templates.
         if ($loginas == 'teacher' && $public) {
-            $records = array_values($DB->get_records('feedback_template', null, 'id ASC'));
+            $records = array_values($DB->get_records('individualfeedback_template', null, 'id ASC'));
             $this->assertFalse((bool) $records[0]->ispublic);
         }
     }

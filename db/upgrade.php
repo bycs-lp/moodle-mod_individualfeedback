@@ -34,12 +34,28 @@
  * Please do not forget to use upgrade_set_timeout()
  * before any action that may take longer time to finish.
  *
- * @package   mod_feedback
+ * @package   mod_individualfeedback
  * @copyright Andreas Grabs
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-function xmldb_feedback_upgrade($oldversion) {
+function xmldb_individualfeedback_upgrade($oldversion) {
+    global $DB;
+
+    $dbman = $DB->get_manager();
+
+    // Handle case where tables might already exist from previous installation attempts.
+    if ($oldversion < 2024100703) {
+        // If tables exist but version wasn't properly registered, just mark as upgraded.
+        // This handles the case where installation was attempted but not completed properly.
+        if ($dbman->table_exists('individualfeedback')) {
+            // Tables exist, so we can proceed with normal upgrade logic.
+            // No schema changes needed at this point.
+        }
+        
+        upgrade_mod_savepoint(true, 2024100703, 'individualfeedback');
+    }
+
     // Automatically generated Moodle v4.1.0 release upgrade line.
     // Put any upgrade step following this.
 
@@ -54,6 +70,39 @@ function xmldb_feedback_upgrade($oldversion) {
 
     // Automatically generated Moodle v4.5.0 release upgrade line.
     // Put any upgrade step following this.
+
+    // Rename column from 'feedback' to 'individualfeedback' in all tables.
+    if ($oldversion < 2024100708) {
+        // Rename columns in individualfeedback_item table
+        $table = new xmldb_table('individualfeedback_item');
+        $field = new xmldb_field('feedback', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'id');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->rename_field($table, $field, 'individualfeedback');
+        }
+
+        // Rename columns in individualfeedback_completed table
+        $table = new xmldb_table('individualfeedback_completed');
+        $field = new xmldb_field('feedback', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'id');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->rename_field($table, $field, 'individualfeedback');
+        }
+
+        // Rename columns in individualfeedback_completedtmp table
+        $table = new xmldb_table('individualfeedback_completedtmp');
+        $field = new xmldb_field('feedback', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'id');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->rename_field($table, $field, 'individualfeedback');
+        }
+
+        // Rename columns in individualfeedback_sitecourse_map table
+        $table = new xmldb_table('individualfeedback_sitecourse_map');
+        $field = new xmldb_field('feedbackid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'id');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->rename_field($table, $field, 'individualfeedbackid');
+        }
+
+        upgrade_mod_savepoint(true, 2024100708, 'individualfeedback');
+    }
 
     return true;
 }

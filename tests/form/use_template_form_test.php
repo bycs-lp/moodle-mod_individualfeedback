@@ -14,14 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace mod_feedback\form;
+namespace mod_individualfeedback\form;
 
 /**
  * Tests the confirm use template form
  *
  * @author Peter Dias
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
- * @package mod_feedback
+ * @package mod_individualfeedback
  */
 final class use_template_form_test extends \advanced_testcase {
     /**
@@ -34,19 +34,19 @@ final class use_template_form_test extends \advanced_testcase {
 
         $course = $this->getDataGenerator()->create_course();
         $feedback = $this->getDataGenerator()->create_module('feedback', ['course' => $course->id]);
-        $cm = get_coursemodule_from_instance('feedback', $feedback->id, $course->id);
+        $cm = get_coursemodule_from_instance('individualfeedback', $feedback->id, $course->id);
         $user = $this->getDataGenerator()->create_user();
         $this->getDataGenerator()->enrol_user($user->id, $course->id, 'student');
 
-        $feedbackgenerator = $this->getDataGenerator()->get_plugin_generator('mod_feedback');
+        $feedbackgenerator = $this->getDataGenerator()->get_plugin_generator('mod_individualfeedback');
 
         // Create at least one page.
         $feedbackgenerator->create_item_multichoice($feedback, ['values' => "y\nn"]);
 
-        feedback_save_as_template($feedback, 'my template', 0);
+        individualfeedback_save_as_template($feedback, 'my template', 0);
         $feedbackgenerator->create_item_multichoice($feedback, ['values' => "0\n1"]);
-        feedback_save_as_template($feedback, 'mytemplate2', 1);
-        $records = array_keys($DB->get_records('feedback_template', null, 'id ASC'));
+        individualfeedback_save_as_template($feedback, 'mytemplate2', 1);
+        $records = array_keys($DB->get_records('individualfeedback_template', null, 'id ASC'));
         $feedbackparams = [
             'id' => $cm->id,
             'privatetemplate' => $records[0],

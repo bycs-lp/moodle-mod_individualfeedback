@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Contains class mod_feedback_templates_table
+ * Contains class mod_individualfeedback_templates_table
  *
- * @package   mod_feedback
+ * @package   mod_individualfeedback
  * @copyright 2016 Marina Glancy
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -28,13 +28,13 @@ global $CFG;
 require_once($CFG->libdir . '/tablelib.php');
 
 /**
- * Class mod_feedback_templates_table
+ * Class mod_individualfeedback_templates_table
  *
- * @package   mod_feedback
+ * @package   mod_individualfeedback
  * @copyright 2016 Marina Glancy
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_feedback_templates_table extends flexible_table {
+class mod_individualfeedback_templates_table extends flexible_table {
     /** @var string|null Indicate whether we are managing template or not. */
     private $mode;
 
@@ -54,7 +54,7 @@ class mod_feedback_templates_table extends flexible_table {
         }
 
         $tableheaders = [
-            get_string('template', 'feedback'),
+            get_string('template', 'mod_individualfeedback'),
             html_writer::span(get_string('actions'), 'sr-only'),
         ];
 
@@ -75,13 +75,13 @@ class mod_feedback_templates_table extends flexible_table {
     public function display($templates) {
         global $OUTPUT;
         if (empty($templates)) {
-            echo $OUTPUT->box(get_string('no_templates_available_yet', 'feedback'),
+            echo $OUTPUT->box(get_string('no_templates_available_yet', 'mod_individualfeedback'),
                              'generalbox boxaligncenter');
             return;
         }
 
         $this->setup();
-        $strdeletefeedback = get_string('delete_template', 'feedback');
+        $strdeletefeedback = get_string('delete_template', 'mod_individualfeedback');
 
         foreach ($templates as $template) {
             $data = [];
@@ -89,15 +89,15 @@ class mod_feedback_templates_table extends flexible_table {
             $data[] = $OUTPUT->action_link($url, format_string($template->name));
 
             // Only show the actions if we are managing templates.
-            if ($this->mode && has_capability('mod/feedback:deletetemplate', $this->get_context())) {
-                $deleteurl = new moodle_url('/mod/feedback/manage_templates.php',
+            if ($this->mode && has_capability('mod/individualfeedback:deletetemplate', $this->get_context())) {
+                $deleteurl = new moodle_url('/mod/individualfeedback/manage_templates.php',
                     $url->params() + ['deletetemplate' => $template->id]);
-                $deleteaction = new confirm_action(get_string('confirmdeletetemplate', 'feedback'));
+                $deleteaction = new confirm_action(get_string('confirmdeletetemplate', 'mod_individualfeedback'));
                 $deleteicon = $OUTPUT->action_icon($deleteurl, new pix_icon('t/delete', $strdeletefeedback), $deleteaction);
                 if ($template->ispublic) {
                     $systemcontext = context_system::instance();
-                    if (!(has_capability('mod/feedback:createpublictemplate', $systemcontext) &&
-                        has_capability('mod/feedback:deletetemplate', $systemcontext))) {
+                    if (!(has_capability('mod/individualfeedback:createpublictemplate', $systemcontext) &&
+                        has_capability('mod/individualfeedback:deletetemplate', $systemcontext))) {
                         $deleteicon = false;
                     }
                 }

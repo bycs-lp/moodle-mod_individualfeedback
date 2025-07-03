@@ -17,11 +17,11 @@
 /**
  * Class for exporting a feedback completion record.
  *
- * @package    mod_feedback
+ * @package    mod_individualfeedback
  * @copyright  2017 Juan Leyva <juan@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-namespace mod_feedback\external;
+namespace mod_individualfeedback\external;
 defined('MOODLE_INTERNAL') || die();
 
 use core\external\exporter;
@@ -32,7 +32,7 @@ use core\external\exporter;
  * @copyright  2017 Juan Leyva <juan@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class feedback_completed_exporter extends exporter {
+class individualfeedback_completed_exporter extends exporter {
 
     /**
      * Return the list of properties.
@@ -45,7 +45,7 @@ class feedback_completed_exporter extends exporter {
                 'type' => PARAM_INT,
                 'description' => 'The record id.',
             ),
-            'feedback' => array(
+            'individualfeedback' => array(
                 'type' => PARAM_INT,
                 'description' => 'The feedback instance id this records belongs to.',
             ),

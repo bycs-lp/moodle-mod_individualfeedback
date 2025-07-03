@@ -17,13 +17,13 @@
 /**
  * Data provider tests.
  *
- * @package    mod_feedback
+ * @package    mod_individualfeedback
  * @category   test
  * @copyright  2018 Frédéric Massart
  * @author     Frédéric Massart <fred@branchup.tech>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-namespace mod_feedback\privacy;
+namespace mod_individualfeedback\privacy;
 
 defined('MOODLE_INTERNAL') || die();
 global $CFG;
@@ -33,14 +33,14 @@ use core_privacy\local\request\approved_contextlist;
 use core_privacy\local\request\approved_userlist;
 use core_privacy\local\request\transform;
 use core_privacy\local\request\writer;
-use mod_feedback\privacy\provider;
+use mod_individualfeedback\privacy\provider;
 
-require_once($CFG->dirroot . '/mod/feedback/lib.php');
+require_once($CFG->dirroot . '/mod/individualfeedback/lib.php');
 
 /**
  * Data provider testcase class.
  *
- * @package    mod_feedback
+ * @package    mod_individualfeedback
  * @category   test
  * @copyright  2018 Frédéric Massart
  * @author     Frédéric Massart <fred@branchup.tech>
@@ -59,12 +59,12 @@ final class provider_test extends provider_testcase {
     public function test_get_contexts_for_userid(): void {
         global $DB;
         $dg = $this->getDataGenerator();
-        $fg = $dg->get_plugin_generator('mod_feedback');
+        $fg = $dg->get_plugin_generator('mod_individualfeedback');
 
         $c1 = $dg->create_course();
         $c2 = $dg->create_course();
         $cm0a = $dg->create_module('feedback', ['course' => SITEID]);
-        $cm1a = $dg->create_module('feedback', ['course' => $c1, 'anonymous' => FEEDBACK_ANONYMOUS_NO]);
+        $cm1a = $dg->create_module('feedback', ['course' => $c1, 'anonymous' => INDIVIDUALFEEDBACK_ANONYMOUS_NO]);
         $cm1b = $dg->create_module('feedback', ['course' => $c1]);
         $cm2a = $dg->create_module('feedback', ['course' => $c2]);
         $cm2b = $dg->create_module('feedback', ['course' => $c2]);
@@ -124,13 +124,13 @@ final class provider_test extends provider_testcase {
     public function test_get_users_in_context(): void {
         global $DB;
         $dg = $this->getDataGenerator();
-        $fg = $dg->get_plugin_generator('mod_feedback');
-        $component = 'mod_feedback';
+        $fg = $dg->get_plugin_generator('mod_individualfeedback');
+        $component = 'mod_individualfeedback';
 
         $c1 = $dg->create_course();
         $c2 = $dg->create_course();
         $cm0 = $dg->create_module('feedback', ['course' => SITEID]);
-        $cm1a = $dg->create_module('feedback', ['course' => $c1, 'anonymous' => FEEDBACK_ANONYMOUS_NO]);
+        $cm1a = $dg->create_module('feedback', ['course' => $c1, 'anonymous' => INDIVIDUALFEEDBACK_ANONYMOUS_NO]);
         $cm1b = $dg->create_module('feedback', ['course' => $c1]);
         $cm2 = $dg->create_module('feedback', ['course' => $c2]);
 
@@ -201,12 +201,12 @@ final class provider_test extends provider_testcase {
     public function test_delete_data_for_user(): void {
         global $DB;
         $dg = $this->getDataGenerator();
-        $fg = $dg->get_plugin_generator('mod_feedback');
+        $fg = $dg->get_plugin_generator('mod_individualfeedback');
 
         $c1 = $dg->create_course();
         $c2 = $dg->create_course();
         $cm0a = $dg->create_module('feedback', ['course' => SITEID]);
-        $cm1a = $dg->create_module('feedback', ['course' => $c1, 'anonymous' => FEEDBACK_ANONYMOUS_NO]);
+        $cm1a = $dg->create_module('feedback', ['course' => $c1, 'anonymous' => INDIVIDUALFEEDBACK_ANONYMOUS_NO]);
         $cm2a = $dg->create_module('feedback', ['course' => $c2]);
 
         $u1 = $dg->create_user();
@@ -228,7 +228,7 @@ final class provider_test extends provider_testcase {
             $this->create_tmp_submission_with_answers($feedback, $u1, $answers);
         }
 
-        $appctx = new approved_contextlist($u1, 'mod_feedback', [
+        $appctx = new approved_contextlist($u1, 'mod_individualfeedback', [
             \context_module::instance($cm0a->cmid)->id,
             \context_module::instance($cm1a->cmid)->id
         ]);
@@ -236,16 +236,16 @@ final class provider_test extends provider_testcase {
 
         // Confirm all data is gone in those, except for u2.
         foreach ([$cm0a, $cm1a] as $feedback) {
-            $this->assert_no_feedback_data_for_user($feedback, $u1);
+            $this->assert_no_individualfeedback_data_for_user($feedback, $u1);
             if ($feedback == $cm1a) {
-                $this->assert_feedback_data_for_user($feedback, $u2);
-                $this->assert_feedback_tmp_data_for_user($feedback, $u2);
+                $this->assert_individualfeedback_data_for_user($feedback, $u2);
+                $this->assert_individualfeedback_tmp_data_for_user($feedback, $u2);
             }
         }
 
         // Confirm cm2a wasn't affected.
-        $this->assert_feedback_data_for_user($cm2a, $u1);
-        $this->assert_feedback_tmp_data_for_user($cm2a, $u1);
+        $this->assert_individualfeedback_data_for_user($cm2a, $u1);
+        $this->assert_individualfeedback_tmp_data_for_user($cm2a, $u1);
 
     }
 
@@ -255,12 +255,12 @@ final class provider_test extends provider_testcase {
     public function test_delete_data_for_users(): void {
         global $DB;
         $dg = $this->getDataGenerator();
-        $fg = $dg->get_plugin_generator('mod_feedback');
+        $fg = $dg->get_plugin_generator('mod_individualfeedback');
 
         $c1 = $dg->create_course();
         $c2 = $dg->create_course();
         $cm0 = $dg->create_module('feedback', ['course' => SITEID]);
-        $cm1 = $dg->create_module('feedback', ['course' => $c1, 'anonymous' => FEEDBACK_ANONYMOUS_NO]);
+        $cm1 = $dg->create_module('feedback', ['course' => $c1, 'anonymous' => INDIVIDUALFEEDBACK_ANONYMOUS_NO]);
         $cm2 = $dg->create_module('feedback', ['course' => $c2]);
         $context0 = \context_module::instance($cm0->cmid);
         $context1 = \context_module::instance($cm1->cmid);
@@ -282,31 +282,31 @@ final class provider_test extends provider_testcase {
         }
 
         // Delete u1 from cm0, ensure u2 data is retained.
-        $approveduserlist = new approved_userlist($context0, 'mod_feedback', [$u1->id]);
+        $approveduserlist = new approved_userlist($context0, 'mod_individualfeedback', [$u1->id]);
         provider::delete_data_for_users($approveduserlist);
 
-        $this->assert_no_feedback_data_for_user($cm0, $u1);
-        $this->assert_feedback_data_for_user($cm0, $u2);
-        $this->assert_feedback_tmp_data_for_user($cm0, $u2);
+        $this->assert_no_individualfeedback_data_for_user($cm0, $u1);
+        $this->assert_individualfeedback_data_for_user($cm0, $u2);
+        $this->assert_individualfeedback_tmp_data_for_user($cm0, $u2);
 
         // Ensure cm1 unaffected by cm1 deletes.
-        $this->assert_feedback_data_for_user($cm1, $u1);
-        $this->assert_feedback_tmp_data_for_user($cm1, $u1);
-        $this->assert_feedback_data_for_user($cm1, $u2);
-        $this->assert_feedback_tmp_data_for_user($cm1, $u2);
+        $this->assert_individualfeedback_data_for_user($cm1, $u1);
+        $this->assert_individualfeedback_tmp_data_for_user($cm1, $u1);
+        $this->assert_individualfeedback_data_for_user($cm1, $u2);
+        $this->assert_individualfeedback_tmp_data_for_user($cm1, $u2);
 
         // Delete u1 and u2 from cm1, ensure no data is retained.
-        $approveduserlist = new approved_userlist($context1, 'mod_feedback', [$u1->id, $u2->id]);
+        $approveduserlist = new approved_userlist($context1, 'mod_individualfeedback', [$u1->id, $u2->id]);
         provider::delete_data_for_users($approveduserlist);
 
-        $this->assert_no_feedback_data_for_user($cm1, $u1);
-        $this->assert_no_feedback_data_for_user($cm1, $u2);
+        $this->assert_no_individualfeedback_data_for_user($cm1, $u1);
+        $this->assert_no_individualfeedback_data_for_user($cm1, $u2);
 
         // Ensure cm2 is unaffected by any of the deletes.
-        $this->assert_feedback_data_for_user($cm2, $u1);
-        $this->assert_feedback_tmp_data_for_user($cm2, $u1);
-        $this->assert_feedback_data_for_user($cm2, $u2);
-        $this->assert_feedback_tmp_data_for_user($cm2, $u2);
+        $this->assert_individualfeedback_data_for_user($cm2, $u1);
+        $this->assert_individualfeedback_tmp_data_for_user($cm2, $u1);
+        $this->assert_individualfeedback_data_for_user($cm2, $u2);
+        $this->assert_individualfeedback_tmp_data_for_user($cm2, $u2);
     }
 
     /**
@@ -315,12 +315,12 @@ final class provider_test extends provider_testcase {
     public function test_delete_data_for_all_users_in_context(): void {
         global $DB;
         $dg = $this->getDataGenerator();
-        $fg = $dg->get_plugin_generator('mod_feedback');
+        $fg = $dg->get_plugin_generator('mod_individualfeedback');
 
         $c1 = $dg->create_course();
         $c2 = $dg->create_course();
         $cm0a = $dg->create_module('feedback', ['course' => SITEID]);
-        $cm1a = $dg->create_module('feedback', ['course' => $c1, 'anonymous' => FEEDBACK_ANONYMOUS_NO]);
+        $cm1a = $dg->create_module('feedback', ['course' => $c1, 'anonymous' => INDIVIDUALFEEDBACK_ANONYMOUS_NO]);
 
         $u1 = $dg->create_user();
         $u2 = $dg->create_user();
@@ -340,12 +340,12 @@ final class provider_test extends provider_testcase {
 
         provider::delete_data_for_all_users_in_context(\context_module::instance($cm1a->cmid));
 
-        $this->assert_no_feedback_data_for_user($cm1a, $u1);
-        $this->assert_no_feedback_data_for_user($cm1a, $u2);
-        $this->assert_feedback_data_for_user($cm0a, $u1);
-        $this->assert_feedback_data_for_user($cm0a, $u2);
-        $this->assert_feedback_tmp_data_for_user($cm0a, $u1);
-        $this->assert_feedback_tmp_data_for_user($cm0a, $u2);
+        $this->assert_no_individualfeedback_data_for_user($cm1a, $u1);
+        $this->assert_no_individualfeedback_data_for_user($cm1a, $u2);
+        $this->assert_individualfeedback_data_for_user($cm0a, $u1);
+        $this->assert_individualfeedback_data_for_user($cm0a, $u2);
+        $this->assert_individualfeedback_tmp_data_for_user($cm0a, $u1);
+        $this->assert_individualfeedback_tmp_data_for_user($cm0a, $u2);
     }
 
     /**
@@ -354,13 +354,13 @@ final class provider_test extends provider_testcase {
     public function test_export_user_data(): void {
         global $DB;
         $dg = $this->getDataGenerator();
-        $fg = $dg->get_plugin_generator('mod_feedback');
+        $fg = $dg->get_plugin_generator('mod_individualfeedback');
 
         $c1 = $dg->create_course();
         $c2 = $dg->create_course();
         $cm0a = $dg->create_module('feedback', ['course' => SITEID]);
-        $cm1a = $dg->create_module('feedback', ['course' => $c1, 'anonymous' => FEEDBACK_ANONYMOUS_NO]);
-        $cm2a = $dg->create_module('feedback', ['course' => $c2, 'anonymous' => FEEDBACK_ANONYMOUS_YES, 'multiple_submit' => 1]);
+        $cm1a = $dg->create_module('feedback', ['course' => $c1, 'anonymous' => INDIVIDUALFEEDBACK_ANONYMOUS_NO]);
+        $cm2a = $dg->create_module('feedback', ['course' => $c2, 'anonymous' => INDIVIDUALFEEDBACK_ANONYMOUS_YES, 'multiple_submit' => 1]);
         $cm2b = $dg->create_module('feedback', ['course' => $c2]);
         $cm2c = $dg->create_module('feedback', ['course' => $c2]);
 
@@ -391,7 +391,7 @@ final class provider_test extends provider_testcase {
             $this->create_tmp_submission_with_answers($feedback, $u2, $answersu2);
         }
 
-        $appctx = new approved_contextlist($u1, 'mod_feedback', [
+        $appctx = new approved_contextlist($u1, 'mod_individualfeedback', [
             \context_module::instance($cm0a->cmid)->id,
             \context_module::instance($cm1a->cmid)->id,
             \context_module::instance($cm2a->cmid)->id,
@@ -465,10 +465,10 @@ final class provider_test extends provider_testcase {
      * @param object $user The user.
      * @return void
      */
-    protected function assert_no_feedback_data_for_user($feedback, $user) {
+    protected function assert_no_individualfeedback_data_for_user($feedback, $user) {
         global $DB;
-        $this->assertFalse($DB->record_exists('feedback_completed', ['feedback' => $feedback->id, 'userid' => $user->id]));
-        $this->assertFalse($DB->record_exists('feedback_completedtmp', ['feedback' => $feedback->id, 'userid' => $user->id]));
+        $this->assertFalse($DB->record_exists('individualfeedback_completed', ['individualfeedback' => $feedback->id, 'userid' => $user->id]));
+        $this->assertFalse($DB->record_exists('individualfeedback_completedtmp', ['individualfeedback' => $feedback->id, 'userid' => $user->id]));
 
         // Check that there aren't orphan values because we can't check by userid.
         $sql = "
@@ -477,8 +477,8 @@ final class provider_test extends provider_testcase {
          LEFT JOIN {%s} fc
                 ON fc.id = fv.completed
              WHERE fc.id IS NULL";
-        $this->assertFalse($DB->record_exists_sql(sprintf($sql, 'feedback_value', 'feedback_completed'), []));
-        $this->assertFalse($DB->record_exists_sql(sprintf($sql, 'feedback_valuetmp', 'feedback_completedtmp'), []));
+        $this->assertFalse($DB->record_exists_sql(sprintf($sql, 'individualfeedback_value', 'individualfeedback_completed'), []));
+        $this->assertFalse($DB->record_exists_sql(sprintf($sql, 'individualfeedback_valuetmp', 'individualfeedback_completedtmp'), []));
     }
 
     /**
@@ -490,12 +490,12 @@ final class provider_test extends provider_testcase {
      * @param int $valuecount The number of values per submission.
      * @return void
      */
-    protected function assert_feedback_data_for_user($feedback, $user, $submissioncount = 1, $valuecount = 2) {
+    protected function assert_individualfeedback_data_for_user($feedback, $user, $submissioncount = 1, $valuecount = 2) {
         global $DB;
-        $completeds = $DB->get_records('feedback_completed', ['feedback' => $feedback->id, 'userid' => $user->id]);
+        $completeds = $DB->get_records('individualfeedback_completed', ['individualfeedback' => $feedback->id, 'userid' => $user->id]);
         $this->assertCount($submissioncount, $completeds);
         foreach ($completeds as $record) {
-            $this->assertEquals($valuecount, $DB->count_records('feedback_value', ['completed' => $record->id]));
+            $this->assertEquals($valuecount, $DB->count_records('individualfeedback_value', ['completed' => $record->id]));
         }
     }
 
@@ -508,12 +508,12 @@ final class provider_test extends provider_testcase {
      * @param int $valuecount The number of values per submission.
      * @return void
      */
-    protected function assert_feedback_tmp_data_for_user($feedback, $user, $submissioncount = 1, $valuecount = 2) {
+    protected function assert_individualfeedback_tmp_data_for_user($feedback, $user, $submissioncount = 1, $valuecount = 2) {
         global $DB;
-        $completedtmps = $DB->get_records('feedback_completedtmp', ['feedback' => $feedback->id, 'userid' => $user->id]);
+        $completedtmps = $DB->get_records('individualfeedback_completedtmp', ['individualfeedback' => $feedback->id, 'userid' => $user->id]);
         $this->assertCount($submissioncount, $completedtmps);
         foreach ($completedtmps as $record) {
-            $this->assertEquals($valuecount, $DB->count_records('feedback_valuetmp', ['completed' => $record->id]));
+            $this->assertEquals($valuecount, $DB->count_records('individualfeedback_valuetmp', ['completed' => $record->id]));
         }
     }
 
@@ -532,12 +532,12 @@ final class provider_test extends provider_testcase {
         $modinfo = get_fast_modinfo($feedback->course);
         $cm = $modinfo->get_cm($feedback->cmid);
 
-        $feedbackcompletion = new \mod_feedback_completion($feedback, $cm, $feedback->course, false, null, null, $user->id);
+        $feedbackcompletion = new \mod_individualfeedback_completion($feedback, $cm, $feedback->course, false, null, null, $user->id);
         $feedbackcompletion->save_response_tmp((object) $answers);
         $feedbackcompletion->save_response();
-        $this->assertEquals($submissioncount, $DB->count_records('feedback_completed', ['feedback' => $feedback->id,
+        $this->assertEquals($submissioncount, $DB->count_records('individualfeedback_completed', ['individualfeedback' => $feedback->id,
             'userid' => $user->id]));
-        $this->assertEquals(count($answers), $DB->count_records('feedback_value', [
+        $this->assertEquals(count($answers), $DB->count_records('individualfeedback_value', [
             'completed' => $feedbackcompletion->get_completed()->id]));
     }
 
@@ -555,10 +555,10 @@ final class provider_test extends provider_testcase {
         $modinfo = get_fast_modinfo($feedback->course);
         $cm = $modinfo->get_cm($feedback->cmid);
 
-        $feedbackcompletion = new \mod_feedback_completion($feedback, $cm, $feedback->course, false, null, null, $user->id);
+        $feedbackcompletion = new \mod_individualfeedback_completion($feedback, $cm, $feedback->course, false, null, null, $user->id);
         $feedbackcompletion->save_response_tmp((object) $answers);
-        $this->assertEquals(1, $DB->count_records('feedback_completedtmp', ['feedback' => $feedback->id, 'userid' => $user->id]));
-        $this->assertEquals(2, $DB->count_records('feedback_valuetmp', [
+        $this->assertEquals(1, $DB->count_records('individualfeedback_completedtmp', ['individualfeedback' => $feedback->id, 'userid' => $user->id]));
+        $this->assertEquals(2, $DB->count_records('individualfeedback_valuetmp', [
             'completed' => $feedbackcompletion->get_current_completed_tmp()->id]));
     }
 }

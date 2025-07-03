@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace mod_feedback\output;
+namespace mod_individualfeedback\output;
 
 use context_module;
 use renderable;
@@ -26,7 +26,7 @@ use templatable;
  *
  * Base class to be inherited by any other feedback action bar
  *
- * @package     mod_feedback
+ * @package     mod_individualfeedback
  * @copyright   2021 onwards Peter Dias
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

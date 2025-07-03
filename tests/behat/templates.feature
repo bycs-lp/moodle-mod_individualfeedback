@@ -1,4 +1,4 @@
-@mod @mod_feedback
+@mod @mod_individualfeedback
 Feature: Saving, using and deleting feedback templates
   In order to quickly create feedbacks
   As a manager

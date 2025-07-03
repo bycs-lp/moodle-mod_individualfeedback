@@ -16,7 +16,7 @@
 
 declare(strict_types=1);
 
-namespace mod_feedback\external\questions;
+namespace mod_individualfeedback\external\questions;
 
 use core_external\external_api;
 use core_external\external_value;
@@ -26,7 +26,7 @@ use context_module;
 /**
  * External method for reordering feedback questions.
  *
- * @package     mod_feedback
+ * @package     mod_individualfeedback
  * @copyright   2024 Mikel Martín <mikel@moodle.com>
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -68,11 +68,11 @@ class reorder extends external_api {
         $context = context_module::instance($cm->id);
 
         self::validate_context($context);
-        require_capability('mod/feedback:edititems', $context);
+        require_capability('mod/individualfeedback:edititems', $context);
 
         $itemlist = explode(',', trim($itemorder, ',')) ?: [];
         if (count($itemlist) > 0) {
-            return feedback_ajax_saveitemorder($itemlist, $feedback);
+            return individualfeedback_ajax_saveitemorder($itemlist, $feedback);
         }
 
         return false;

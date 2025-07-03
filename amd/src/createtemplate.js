@@ -16,7 +16,7 @@
 /**
  * Javascript module for saving a new template.
  *
- * @module      mod_feedback/createtemplate
+ * @module      mod_individualfeedback/createtemplate
  * @copyright   2021 Peter Dias
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -42,9 +42,9 @@ export const init = () => {
 
         const modalForm = new ModalForm({
             modalConfig: {
-                title: getString('save_as_new_template', 'mod_feedback'),
+                title: getString('save_as_new_template', 'mod_individualfeedback'),
             },
-            formClass: 'mod_feedback\\form\\create_template_form',
+            formClass: 'mod_individualfeedback\\form\\create_template_form',
             args: {
                 id: ele.dataset.dataid
             },

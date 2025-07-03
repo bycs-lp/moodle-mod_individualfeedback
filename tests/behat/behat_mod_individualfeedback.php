@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Steps definitions related to mod_feedback.
+ * Steps definitions related to mod_individualfeedback.
  *
- * @package   mod_feedback
+ * @package   mod_individualfeedback
  * @category  test
  * @copyright 2016 Marina Glancy
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -31,12 +31,12 @@ use Behat\Gherkin\Node\TableNode as TableNode,
     Behat\Mink\Exception\ExpectationException as ExpectationException;
 
 /**
- * Steps definitions related to mod_feedback.
+ * Steps definitions related to mod_individualfeedback.
  *
  * @copyright 2016 Marina Glancy
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class behat_mod_feedback extends behat_base {
+class behat_mod_individualfeedback extends behat_base {
 
     /**
      * Adds a question to the existing feedback with filling the form.
@@ -47,10 +47,10 @@ class behat_mod_feedback extends behat_base {
      * @param string $questiontype
      * @param TableNode $questiondata with data for filling the add question form
      */
-    public function i_add_question_to_the_feedback_with($questiontype, TableNode $questiondata) {
+    public function i_add_question_to_the_individualfeedback_with($questiontype, TableNode $questiondata) {
 
         $questiontype = $this->escape($questiontype);
-        $this->execute('behat_general::i_click_on', [get_string('add_item', 'mod_feedback'), 'link']);
+        $this->execute('behat_general::i_click_on', [get_string('add_item', 'mod_individualfeedback'), 'link']);
         $this->execute('behat_general::i_click_on', [$questiontype, 'link']);
 
         // Wait again, for page to reloaded.
@@ -81,8 +81,8 @@ class behat_mod_feedback extends behat_base {
      */
     public function i_add_a_page_break_to_the_feedback() {
 
-        $questiontype = $this->escape(get_string('add_pagebreak', 'feedback'));
-        $this->execute('behat_general::i_click_on', [get_string('add_item', 'mod_feedback'), 'link']);
+        $questiontype = $this->escape(get_string('add_pagebreak', 'mod_individualfeedback'));
+        $this->execute('behat_general::i_click_on', [get_string('add_item', 'mod_individualfeedback'), 'link']);
         $this->execute('behat_general::i_click_on', [$questiontype, 'link']);
 
         // Wait again, for page to reloaded.
@@ -92,15 +92,15 @@ class behat_mod_feedback extends behat_base {
     /**
      * Quick way to generate answers to a one-page feedback.
      *
-     * @When /^I log in as "(?P<user_name_string>(?:[^"]|\\")*)" and complete feedback "(?P<feedback_name_string>(?:[^"]|\\")*)" in course "(?P<course_name_string>(?:[^"]|\\")*)" with:$/
+     * @When /^I log in as "(?P<user_name_string>(?:[^"]|\\")*)" and complete feedback "(?P<individualfeedback_name_string>(?:[^"]|\\")*)" in course "(?P<course_name_string>(?:[^"]|\\")*)" with:$/
      * @param string $questiontype
      * @param TableNode $questiondata with data for filling the add question form
      */
-    public function i_log_in_as_and_complete_feedback_in_course($username, $feedbackname, $coursename, TableNode $answers) {
+    public function i_log_in_as_and_complete_individualfeedback_in_course($username, $feedbackname, $coursename, TableNode $answers) {
         $username = $this->escape($username);
         $coursename = $this->escape($coursename);
         $feedbackname = $this->escape($feedbackname);
-        $completeform = $this->escape(get_string('complete_the_form', 'feedback'));
+        $completeform = $this->escape(get_string('complete_the_form', 'mod_individualfeedback'));
 
         // Log in as user.
         $this->execute('behat_auth::i_log_in_as', $username);
@@ -124,7 +124,7 @@ class behat_mod_feedback extends behat_base {
      * @param string $link
      * @param string $filename
      */
-    public function following_should_export_feedback_identical_to($link, $filename) {
+    public function following_should_export_individualfeedback_identical_to($link, $filename) {
         global $CFG;
         $exception = new ExpectationException('Error while downloading data from ' . $link, $this->getSession());
 
@@ -146,7 +146,7 @@ class behat_mod_feedback extends behat_base {
     /**
      * Clicks on Show chart data to display chart data if not visible.
      *
-     * @Then /^I show chart data for the "(?P<feedback_name_string>(?:[^"]|\\")*)" feedback$/
+     * @Then /^I show chart data for the "(?P<individualfeedback_name_string>(?:[^"]|\\")*)" feedback$/
      * @param string $feedbackname name of the feedback for which chart data needs to be shown.
      */
     public function i_show_chart_data_for_the_feedback($feedbackname) {
@@ -237,7 +237,7 @@ class behat_mod_feedback extends behat_base {
     public static function get_partial_named_selectors(): array {
         return [
             new behat_component_named_selector('Question', [
-                ".//*[starts-with(@id, 'fitem_feedback_item_') or starts-with(@id, 'fgroup_feedback_item_')]" .
+                ".//*[starts-with(@id, 'fitem_individualfeedback_item_') or starts-with(@id, 'fgroup_individualfeedback_item_')]" .
                 "[.//*[contains(text(), %locator%)]]",
             ]),
         ];

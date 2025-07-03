@@ -14,12 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-use mod_feedback\external\feedback_summary_exporter;
-use mod_feedback\external\feedback_completedtmp_exporter;
-use mod_feedback\external\feedback_item_exporter;
-use mod_feedback\external\feedback_valuetmp_exporter;
-use mod_feedback\external\feedback_value_exporter;
-use mod_feedback\external\feedback_completed_exporter;
+use mod_individualfeedback\external\individualfeedback_summary_exporter;
+use mod_individualfeedback\external\individualfeedback_completedtmp_exporter;
+use mod_individualfeedback\external\individualfeedback_item_exporter;
+use mod_individualfeedback\external\individualfeedback_valuetmp_exporter;
+use mod_individualfeedback\external\individualfeedback_value_exporter;
+use mod_individualfeedback\external\individualfeedback_completed_exporter;
 use core_external\external_api;
 use core_external\external_function_parameters;
 use core_external\external_multiple_structure;
@@ -31,13 +31,13 @@ use core_external\util;
 /**
  * Feedback external functions
  *
- * @package    mod_feedback
+ * @package    mod_individualfeedback
  * @category   external
  * @copyright  2017 Juan Leyva <juan@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @since      Moodle 3.3
  */
-class mod_feedback_external extends external_api {
+class mod_individualfeedback_external extends external_api {
 
     /**
      * Describes the parameters for get_feedbacks_by_courses.
@@ -98,16 +98,16 @@ class mod_feedback_external extends external_api {
                         $feedback->groupingid);
 
                 // Check permissions.
-                if (!has_capability('mod/feedback:edititems', $context)) {
+                if (!has_capability('mod/individualfeedback:edititems', $context)) {
                     // Don't return the optional properties.
-                    $properties = feedback_summary_exporter::properties_definition();
+                    $properties = individualfeedback_summary_exporter::properties_definition();
                     foreach ($properties as $property => $config) {
                         if (!empty($config['optional'])) {
                             unset($feedback->{$property});
                         }
                     }
                 }
-                $exporter = new feedback_summary_exporter($feedback, array('context' => $context));
+                $exporter = new individualfeedback_summary_exporter($feedback, array('context' => $context));
                 $returnedfeedbacks[] = $exporter->export($output);
             }
         }
@@ -129,7 +129,7 @@ class mod_feedback_external extends external_api {
         return new external_single_structure(
             array(
                 'feedbacks' => new external_multiple_structure(
-                    feedback_summary_exporter::get_read_structure()
+                    individualfeedback_summary_exporter::get_read_structure()
                 ),
                 'warnings' => new external_warnings(),
             )
@@ -161,9 +161,9 @@ class mod_feedback_external extends external_api {
             $completioncourse = get_course($courseid);
             self::validate_context(context_course::instance($courseid));
 
-            $feedbackcompletion = new mod_feedback_completion($feedback, $cm, $courseid);
+            $feedbackcompletion = new mod_individualfeedback_completion($feedback, $cm, $courseid);
             if (!$feedbackcompletion->check_course_is_mapped()) {
-                throw new moodle_exception('cannotaccess', 'mod_feedback');
+                throw new moodle_exception('cannotaccess', 'mod_individualfeedback');
             }
         }
 
@@ -178,18 +178,18 @@ class mod_feedback_external extends external_api {
      * @param  stdClass   $cm       course module
      * @param  stdClass   $context  context object
      * @throws moodle_exception
-     * @return mod_feedback_completion feedback completion instance
+     * @return mod_individualfeedback_completion feedback completion instance
      * @since  Moodle 3.3
      */
-    protected static function validate_feedback_access($feedback, $course, $cm, $context, $checksubmit = false) {
-        $feedbackcompletion = new mod_feedback_completion($feedback, $cm, $course->id);
+    protected static function validate_individualfeedback_access($feedback, $course, $cm, $context, $checksubmit = false) {
+        $feedbackcompletion = new mod_individualfeedback_completion($feedback, $cm, $course->id);
 
         if (!$feedbackcompletion->can_complete()) {
-            throw new required_capability_exception($context, 'mod/feedback:complete', 'nopermission', '');
+            throw new required_capability_exception($context, 'mod/individualfeedback:complete', 'nopermission', '');
         }
 
         if (!$feedbackcompletion->is_open()) {
-            throw new moodle_exception('feedback_is_not_open', 'feedback');
+            throw new moodle_exception('individualfeedback_is_not_open', 'feedback');
         }
 
         if ($feedbackcompletion->is_empty()) {
@@ -197,18 +197,18 @@ class mod_feedback_external extends external_api {
         }
 
         if ($checksubmit && !$feedbackcompletion->can_submit()) {
-            throw new moodle_exception('this_feedback_is_already_submitted', 'feedback');
+            throw new moodle_exception('this_individualfeedback_is_already_submitted', 'feedback');
         }
         return $feedbackcompletion;
     }
 
     /**
-     * Describes the parameters for get_feedback_access_information.
+     * Describes the parameters for get_individualfeedback_access_information.
      *
      * @return external_external_function_parameters
      * @since Moodle 3.3
      */
-    public static function get_feedback_access_information_parameters() {
+    public static function get_individualfeedback_access_information_parameters() {
         return new external_function_parameters (
             array(
                 'feedbackid' => new external_value(PARAM_INT, 'Feedback instance id.'),
@@ -227,27 +227,27 @@ class mod_feedback_external extends external_api {
      * @since Moodle 3.3
      * @throws  moodle_exception
      */
-    public static function get_feedback_access_information($feedbackid, $courseid = 0) {
+    public static function get_individualfeedback_access_information($feedbackid, $courseid = 0) {
         global $PAGE;
 
         $params = array(
             'feedbackid' => $feedbackid,
             'courseid' => $courseid,
         );
-        $params = self::validate_parameters(self::get_feedback_access_information_parameters(), $params);
+        $params = self::validate_parameters(self::get_individualfeedback_access_information_parameters(), $params);
 
         list($feedback, $course, $cm, $context, $completioncourse) = self::validate_feedback($params['feedbackid'],
             $params['courseid']);
-        $feedbackcompletion = new mod_feedback_completion($feedback, $cm, $completioncourse->id);
+        $feedbackcompletion = new mod_individualfeedback_completion($feedback, $cm, $completioncourse->id);
 
         $result = array();
         // Capabilities first.
         $result['canviewanalysis'] = $feedbackcompletion->can_view_analysis();
         $result['cancomplete'] = $feedbackcompletion->can_complete();
         $result['cansubmit'] = $feedbackcompletion->can_submit();
-        $result['candeletesubmissions'] = has_capability('mod/feedback:deletesubmissions', $context);
-        $result['canviewreports'] = has_capability('mod/feedback:viewreports', $context);
-        $result['canedititems'] = has_capability('mod/feedback:edititems', $context);
+        $result['candeletesubmissions'] = has_capability('mod/individualfeedback:deletesubmissions', $context);
+        $result['canviewreports'] = has_capability('mod/individualfeedback:viewreports', $context);
+        $result['canedititems'] = has_capability('mod/individualfeedback:edititems', $context);
 
         // Status information.
         $result['isempty'] = $feedbackcompletion->is_empty();
@@ -261,12 +261,12 @@ class mod_feedback_external extends external_api {
     }
 
     /**
-     * Describes the get_feedback_access_information return value.
+     * Describes the get_individualfeedback_access_information return value.
      *
      * @return external_single_structure
      * @since Moodle 3.3
      */
-    public static function get_feedback_access_information_returns() {
+    public static function get_individualfeedback_access_information_returns() {
         return new external_single_structure(
             array(
                 'canviewanalysis' => new external_value(PARAM_BOOL, 'Whether the user can view the analysis or not.'),
@@ -290,7 +290,7 @@ class mod_feedback_external extends external_api {
      * @return external_function_parameters
      * @since Moodle 3.3
      */
-    public static function view_feedback_parameters() {
+    public static function view_individualfeedback_parameters() {
         return new external_function_parameters (
             array(
                 'feedbackid' => new external_value(PARAM_INT, 'Feedback instance id'),
@@ -315,18 +315,18 @@ class mod_feedback_external extends external_api {
     public static function view_feedback($feedbackid, $moduleviewed = false, $courseid = 0) {
 
         $params = array('feedbackid' => $feedbackid, 'moduleviewed' => $moduleviewed, 'courseid' => $courseid);
-        $params = self::validate_parameters(self::view_feedback_parameters(), $params);
+        $params = self::validate_parameters(self::view_individualfeedback_parameters(), $params);
         $warnings = array();
 
         list($feedback, $course, $cm, $context, $completioncourse) = self::validate_feedback($params['feedbackid'],
             $params['courseid']);
-        $feedbackcompletion = new mod_feedback_completion($feedback, $cm, $completioncourse->id);
+        $feedbackcompletion = new mod_individualfeedback_completion($feedback, $cm, $completioncourse->id);
 
         // Trigger module viewed event.
         $feedbackcompletion->trigger_module_viewed();
         if ($params['moduleviewed']) {
             if (!$feedbackcompletion->is_open()) {
-                throw new moodle_exception('feedback_is_not_open', 'feedback');
+                throw new moodle_exception('individualfeedback_is_not_open', 'feedback');
             }
             // Mark activity viewed for completion-tracking.
             $feedbackcompletion->set_module_viewed();
@@ -345,7 +345,7 @@ class mod_feedback_external extends external_api {
      * @return external_single_structure
      * @since Moodle 3.3
      */
-    public static function view_feedback_returns() {
+    public static function view_individualfeedback_returns() {
         return new external_single_structure(
             array(
                 'status' => new external_value(PARAM_BOOL, 'status: true if success'),
@@ -388,12 +388,12 @@ class mod_feedback_external extends external_api {
 
         list($feedback, $course, $cm, $context, $completioncourse) = self::validate_feedback($params['feedbackid'],
             $params['courseid']);
-        $feedbackcompletion = new mod_feedback_completion($feedback, $cm, $completioncourse->id);
+        $feedbackcompletion = new mod_individualfeedback_completion($feedback, $cm, $completioncourse->id);
 
         if ($completed = $feedbackcompletion->get_current_completed_tmp()) {
-            $exporter = new feedback_completedtmp_exporter($completed);
+            $exporter = new individualfeedback_completedtmp_exporter($completed);
             return array(
-                'feedback' => $exporter->export($PAGE->get_renderer('core')),
+                'individualfeedback' => $exporter->export($PAGE->get_renderer('core')),
                 'warnings' => $warnings,
             );
         }
@@ -409,7 +409,7 @@ class mod_feedback_external extends external_api {
     public static function get_current_completed_tmp_returns() {
         return new external_single_structure(
             array(
-                'feedback' => feedback_completedtmp_exporter::get_read_structure(),
+                'individualfeedback' => individualfeedback_completedtmp_exporter::get_read_structure(),
                 'warnings' => new external_warnings(),
             )
         );
@@ -453,7 +453,7 @@ class mod_feedback_external extends external_api {
         $userhasaccess = true;
         try {
             // Check the user has access to the feedback.
-            self::validate_feedback_access($feedback, $completioncourse, $cm, $context, true);
+            self::validate_individualfeedback_access($feedback, $completioncourse, $cm, $context, true);
         } catch (moodle_exception $e) {
             $userhasaccess = false;
             $warnings[] = [
@@ -466,18 +466,18 @@ class mod_feedback_external extends external_api {
         // For consistency with the web behaviour, the items should be returned only when the user can edit or view reports (to
         // include non-editing teachers too).
         $capabilities = [
-            'mod/feedback:edititems',
-            'mod/feedback:viewreports',
+            'mod/individualfeedback:edititems',
+            'mod/individualfeedback:viewreports',
         ];
         if ($userhasaccess || has_any_capability($capabilities, $context)) {
             // Remove previous warnings because, although the user might not have access, they have the proper capability.
             $warnings = [];
-            $feedbackstructure = new mod_feedback_structure($feedback, $cm, $completioncourse->id);
+            $feedbackstructure = new mod_individualfeedback_structure($feedback, $cm, $completioncourse->id);
             if ($items = $feedbackstructure->get_items()) {
                 foreach ($items as $item) {
                     $itemnumber = empty($item->itemnr) ? null : $item->itemnr;
                     unset($item->itemnr);   // Added by the function, not part of the record.
-                    $exporter = new feedback_item_exporter($item, array('context' => $context, 'itemnumber' => $itemnumber));
+                    $exporter = new individualfeedback_item_exporter($item, array('context' => $context, 'itemnumber' => $itemnumber));
                     $returneditems[] = $exporter->export($PAGE->get_renderer('core'));
                 }
             }
@@ -506,7 +506,7 @@ class mod_feedback_external extends external_api {
         return new external_single_structure(
             array(
                 'items' => new external_multiple_structure(
-                    feedback_item_exporter::get_read_structure()
+                    individualfeedback_item_exporter::get_read_structure()
                 ),
                 'warnings' => new external_warnings(),
             )
@@ -519,7 +519,7 @@ class mod_feedback_external extends external_api {
      * @return external_function_parameters
      * @since Moodle 3.3
      */
-    public static function launch_feedback_parameters() {
+    public static function launch_individualfeedback_parameters() {
         return new external_function_parameters (
             array(
                 'feedbackid' => new external_value(PARAM_INT, 'Feedback instance id'),
@@ -541,13 +541,13 @@ class mod_feedback_external extends external_api {
         global $PAGE;
 
         $params = array('feedbackid' => $feedbackid, 'courseid' => $courseid);
-        $params = self::validate_parameters(self::launch_feedback_parameters(), $params);
+        $params = self::validate_parameters(self::launch_individualfeedback_parameters(), $params);
         $warnings = array();
 
         list($feedback, $course, $cm, $context, $completioncourse) = self::validate_feedback($params['feedbackid'],
             $params['courseid']);
         // Check we can do a new submission (or continue an existing).
-        $feedbackcompletion = self::validate_feedback_access($feedback, $completioncourse, $cm, $context, true);
+        $feedbackcompletion = self::validate_individualfeedback_access($feedback, $completioncourse, $cm, $context, true);
 
         $gopage = $feedbackcompletion->get_resume_page();
         if ($gopage === null) {
@@ -567,7 +567,7 @@ class mod_feedback_external extends external_api {
      * @return external_single_structure
      * @since Moodle 3.3
      */
-    public static function launch_feedback_returns() {
+    public static function launch_individualfeedback_returns() {
         return new external_single_structure(
             array(
                 'gopage' => new external_value(PARAM_INT, 'The next page to go (-1 if we were already in the last page). 0 for first page.'),
@@ -619,7 +619,7 @@ class mod_feedback_external extends external_api {
         $feedbackcompletion = null;
         try {
             // Check the user has access to the feedback.
-            $feedbackcompletion = self::validate_feedback_access($feedback, $completioncourse, $cm, $context, true);
+            $feedbackcompletion = self::validate_individualfeedback_access($feedback, $completioncourse, $cm, $context, true);
         } catch (moodle_exception $e) {
             $userhasaccess = false;
             $warnings[] = [
@@ -632,15 +632,15 @@ class mod_feedback_external extends external_api {
         // For consistency with the web behaviour, the items should be returned only when the user can edit or view reports (to
         // include non-editing teachers too).
         $capabilities = [
-            'mod/feedback:edititems',
-            'mod/feedback:viewreports',
+            'mod/individualfeedback:edititems',
+            'mod/individualfeedback:viewreports',
         ];
         if ($userhasaccess || has_any_capability($capabilities, $context)) {
             // Remove previous warnings because, although the user might not have access, they have the proper capability.
             $warnings = [];
 
             if ($feedbackcompletion == null) {
-                $feedbackcompletion = new mod_feedback_completion($feedback, $cm, $completioncourse->id);
+                $feedbackcompletion = new mod_individualfeedback_completion($feedback, $cm, $completioncourse->id);
             }
 
             $page = $params['page'];
@@ -652,14 +652,14 @@ class mod_feedback_external extends external_api {
             foreach ($pageitems as $item) {
                 $itemnumber = empty($item->itemnr) ? null : $item->itemnr;
                 unset($item->itemnr);   // Added by the function, not part of the record.
-                $exporter = new feedback_item_exporter($item, array('context' => $context, 'itemnumber' => $itemnumber));
+                $exporter = new individualfeedback_item_exporter($item, array('context' => $context, 'itemnumber' => $itemnumber));
                 $returneditems[] = $exporter->export($PAGE->get_renderer('core'));
             }
         } else if ($userhasaccess) {
             $warnings[] = [
                 'item' => $feedback->id,
                 'warningcode' => 'nopermission',
-                'message' => get_string('nopermission', 'mod_feedback'),
+                'message' => get_string('nopermission', 'mod_individualfeedback'),
             ];
         }
 
@@ -682,7 +682,7 @@ class mod_feedback_external extends external_api {
         return new external_single_structure(
             array(
                 'items' => new external_multiple_structure(
-                    feedback_item_exporter::get_read_structure()
+                    individualfeedback_item_exporter::get_read_structure()
                 ),
                 'hasprevpage' => new external_value(PARAM_BOOL, 'Whether is a previous page.'),
                 'hasnextpage' => new external_value(PARAM_BOOL, 'Whether there are more pages.'),
@@ -740,7 +740,7 @@ class mod_feedback_external extends external_api {
         list($feedback, $course, $cm, $context, $completioncourse) = self::validate_feedback($params['feedbackid'],
             $params['courseid']);
         // Check we can do a new submission (or continue an existing).
-        $feedbackcompletion = self::validate_feedback_access($feedback, $completioncourse, $cm, $context, true);
+        $feedbackcompletion = self::validate_individualfeedback_access($feedback, $completioncourse, $cm, $context, true);
 
         // Create the $_POST object required by the feedback question engine.
         $_POST = array();
@@ -756,7 +756,7 @@ class mod_feedback_external extends external_api {
         $_POST['id'] = $cm->id;
         $_POST['courseid'] = $courseid;
         $_POST['gopage'] = $params['page'];
-        $_POST['_qf__mod_feedback_complete_form'] = 1;
+        $_POST['_qf__mod_individualfeedback_complete_form'] = 1;
 
         // Determine where to go, backwards or forward.
         if (!$params['goprevious']) {
@@ -768,7 +768,7 @@ class mod_feedback_external extends external_api {
 
         // Ignore sesskey (deep in some APIs), the request is already validated.
         $USER->ignoresesskey = true;
-        feedback_init_feedback_session();
+        individualfeedback_init_individualfeedback_session();
         $SESSION->feedback->is_started = true;
 
         $feedbackcompletion->process_page($params['page'], $params['goprevious']);
@@ -780,7 +780,7 @@ class mod_feedback_external extends external_api {
             }
 
             if ($feedback->site_after_submit) {
-                $siteaftersubmit = feedback_encode_target_url($feedback->site_after_submit);
+                $siteaftersubmit = individualfeedback_encode_target_url($feedback->site_after_submit);
             }
         } else {
             $jumpto = $feedbackcompletion->get_jumpto();
@@ -852,9 +852,9 @@ class mod_feedback_external extends external_api {
             $params['courseid']);
 
         // Check permissions.
-        $feedbackstructure = new mod_feedback_structure($feedback, $cm, $completioncourse->id);
+        $feedbackstructure = new mod_individualfeedback_structure($feedback, $cm, $completioncourse->id);
         if (!$feedbackstructure->can_view_analysis()) {
-            throw new required_capability_exception($context, 'mod/feedback:viewanalysepage', 'nopermission', '');
+            throw new required_capability_exception($context, 'mod/individualfeedback:viewanalysepage', 'nopermission', '');
         }
 
         if (!empty($params['groupid'])) {
@@ -877,13 +877,13 @@ class mod_feedback_external extends external_api {
         }
 
         // Summary data.
-        $summary = new mod_feedback\output\summary($feedbackstructure, $groupid);
+        $summary = new mod_individualfeedback\output\summary($feedbackstructure, $groupid);
         $summarydata = $summary->export_for_template($PAGE->get_renderer('core'));
 
         $checkanonymously = true;
-        if ($groupid > 0 AND $feedback->anonymous == FEEDBACK_ANONYMOUS_YES) {
+        if ($groupid > 0 AND $feedback->anonymous == INDIVIDUALFEEDBACK_ANONYMOUS_YES) {
             $completedcount = $feedbackstructure->count_completed_responses($groupid);
-            if ($completedcount < FEEDBACK_MIN_ANONYMOUS_COUNT_IN_GROUP) {
+            if ($completedcount < INDIVIDUALFEEDBACK_MIN_ANONYMOUS_COUNT_IN_GROUP) {
                 $checkanonymously = false;
             }
         }
@@ -892,10 +892,10 @@ class mod_feedback_external extends external_api {
             // Get the items of the feedback.
             $items = $feedbackstructure->get_items(true);
             foreach ($items as $item) {
-                $itemobj = feedback_get_item_class($item->typ);
+                $itemobj = individualfeedback_get_item_class($item->typ);
                 $itemnumber = empty($item->itemnr) ? null : $item->itemnr;
                 unset($item->itemnr);   // Added by the function, not part of the record.
-                $exporter = new feedback_item_exporter($item, array('context' => $context, 'itemnumber' => $itemnumber));
+                $exporter = new individualfeedback_item_exporter($item, array('context' => $context, 'itemnumber' => $itemnumber));
 
                 $itemsdata[] = array(
                     'item' => $exporter->export($PAGE->get_renderer('core')),
@@ -907,7 +907,7 @@ class mod_feedback_external extends external_api {
                 'item' => 'feedback',
                 'itemid' => $feedback->id,
                 'warningcode' => 'insufficientresponsesforthisgroup',
-                'message' => s(get_string('insufficient_responses_for_this_group', 'feedback'))
+                'message' => s(get_string('insufficient_responses_for_this_group', 'mod_individualfeedback'))
             );
         }
 
@@ -934,7 +934,7 @@ class mod_feedback_external extends external_api {
             'itemsdata' => new external_multiple_structure(
                 new external_single_structure(
                     array(
-                        'item' => feedback_item_exporter::get_read_structure(),
+                        'item' => individualfeedback_item_exporter::get_read_structure(),
                         'data' => new external_multiple_structure(
                             new external_value(PARAM_RAW, 'The analysis data (can be json encoded)')
                         ),
@@ -979,12 +979,12 @@ class mod_feedback_external extends external_api {
 
         list($feedback, $course, $cm, $context, $completioncourse) = self::validate_feedback($params['feedbackid'],
             $params['courseid']);
-        $feedbackcompletion = new mod_feedback_completion($feedback, $cm, $completioncourse->id);
+        $feedbackcompletion = new mod_individualfeedback_completion($feedback, $cm, $completioncourse->id);
 
         $responses = array();
         $unfinished = $feedbackcompletion->get_unfinished_responses();
         foreach ($unfinished as $u) {
-            $exporter = new feedback_valuetmp_exporter($u);
+            $exporter = new individualfeedback_valuetmp_exporter($u);
             $responses[] = $exporter->export($PAGE->get_renderer('core'));
         }
 
@@ -1005,7 +1005,7 @@ class mod_feedback_external extends external_api {
         return new external_single_structure(
             array(
             'responses' => new external_multiple_structure(
-                feedback_valuetmp_exporter::get_read_structure()
+                individualfeedback_valuetmp_exporter::get_read_structure()
             ),
             'warnings' => new external_warnings(),
             )
@@ -1045,14 +1045,14 @@ class mod_feedback_external extends external_api {
 
         list($feedback, $course, $cm, $context, $completioncourse) = self::validate_feedback($params['feedbackid'],
             $params['courseid']);
-        $feedbackcompletion = new mod_feedback_completion($feedback, $cm, $completioncourse->id);
+        $feedbackcompletion = new mod_individualfeedback_completion($feedback, $cm, $completioncourse->id);
 
         $responses = array();
         // Load and get the responses from the last completed feedback.
         $feedbackcompletion->find_last_completed();
         $unfinished = $feedbackcompletion->get_finished_responses();
         foreach ($unfinished as $u) {
-            $exporter = new feedback_value_exporter($u);
+            $exporter = new individualfeedback_value_exporter($u);
             $responses[] = $exporter->export($PAGE->get_renderer('core'));
         }
 
@@ -1073,7 +1073,7 @@ class mod_feedback_external extends external_api {
         return new external_single_structure(
             array(
             'responses' => new external_multiple_structure(
-                feedback_value_exporter::get_read_structure()
+                individualfeedback_value_exporter::get_read_structure()
             ),
             'warnings' => new external_warnings(),
             )
@@ -1118,7 +1118,7 @@ class mod_feedback_external extends external_api {
             $courseid = 0) {
 
         global $CFG;
-        require_once($CFG->dirroot . '/mod/feedback/lib.php');
+        require_once($CFG->dirroot . '/mod/individualfeedback/lib.php');
 
         $params = array('feedbackid' => $feedbackid, 'groupid' => $groupid, 'sort' => $sort, 'page' => $page,
             'perpage' => $perpage, 'courseid' => $courseid);
@@ -1127,15 +1127,15 @@ class mod_feedback_external extends external_api {
 
         list($feedback, $course, $cm, $context, $completioncourse) = self::validate_feedback($params['feedbackid'],
             $params['courseid']);
-        $feedbackcompletion = new mod_feedback_completion($feedback, $cm, $completioncourse->id);
+        $feedbackcompletion = new mod_individualfeedback_completion($feedback, $cm, $completioncourse->id);
         $completioncourseid = $feedbackcompletion->get_courseid();
 
-        if ($feedback->anonymous != FEEDBACK_ANONYMOUS_NO || $feedback->course == SITEID) {
+        if ($feedback->anonymous != INDIVIDUALFEEDBACK_ANONYMOUS_NO || $feedback->course == SITEID) {
             throw new moodle_exception('anonymous', 'feedback');
         }
 
         // Check permissions.
-        require_capability('mod/feedback:viewreports', $context);
+        require_capability('mod/individualfeedback:viewreports', $context);
 
         if (!empty($params['groupid'])) {
             $groupid = $params['groupid'];
@@ -1163,12 +1163,12 @@ class mod_feedback_external extends external_api {
         // Check if we are page filtering.
         if ($params['perpage'] == 0) {
             $page = $params['page'];
-            $perpage = FEEDBACK_DEFAULT_PAGE_COUNT;
+            $perpage = INDIVIDUALFEEDBACK_DEFAULT_PAGE_COUNT;
         } else {
             $perpage = $params['perpage'];
             $page = $perpage * $params['page'];
         }
-        $users = feedback_get_incomplete_users($cm, $groupid, $params['sort'], $page, $perpage, true);
+        $users = individualfeedback_get_incomplete_users($cm, $groupid, $params['sort'], $page, $perpage, true);
         foreach ($users as $user) {
             $nonrespondents[] = [
                 'courseid' => $completioncourseid,
@@ -1180,7 +1180,7 @@ class mod_feedback_external extends external_api {
 
         $result = array(
             'users' => $nonrespondents,
-            'total' => feedback_count_incomplete_users($cm, $groupid),
+            'total' => individualfeedback_count_incomplete_users($cm, $groupid),
             'warnings' => $warnings
         );
         return $result;
@@ -1254,7 +1254,7 @@ class mod_feedback_external extends external_api {
             $params['courseid']);
 
         // Check permissions.
-        require_capability('mod/feedback:viewreports', $context);
+        require_capability('mod/individualfeedback:viewreports', $context);
 
         if (!empty($params['groupid'])) {
             $groupid = $params['groupid'];
@@ -1275,11 +1275,11 @@ class mod_feedback_external extends external_api {
             }
         }
 
-        $feedbackstructure = new mod_feedback_structure($feedback, $cm, $completioncourse->id);
-        $responsestable = new mod_feedback_responses_table($feedbackstructure, $groupid);
+        $feedbackstructure = new mod_individualfeedback_structure($feedback, $cm, $completioncourse->id);
+        $responsestable = new mod_individualfeedback_responses_table($feedbackstructure, $groupid);
         // Ensure responses number is correct prior returning them.
         $feedbackstructure->shuffle_anonym_responses();
-        $anonresponsestable = new mod_feedback_responses_anon_table($feedbackstructure, $groupid);
+        $anonresponsestable = new mod_individualfeedback_responses_anon_table($feedbackstructure, $groupid);
 
         $result = array(
             'attempts'          => $responsestable->export_external_structure($params['page'], $params['perpage']),
@@ -1373,13 +1373,13 @@ class mod_feedback_external extends external_api {
 
         list($feedback, $course, $cm, $context, $completioncourse) = self::validate_feedback($params['feedbackid'],
             $params['courseid']);
-        $feedbackcompletion = new mod_feedback_completion($feedback, $cm, $completioncourse->id);
+        $feedbackcompletion = new mod_individualfeedback_completion($feedback, $cm, $completioncourse->id);
 
         if ($feedbackcompletion->is_anonymous()) {
              throw new moodle_exception('anonymous', 'feedback');
         }
         if ($completed = $feedbackcompletion->find_last_completed()) {
-            $exporter = new feedback_completed_exporter($completed);
+            $exporter = new individualfeedback_completed_exporter($completed);
             return array(
                 'completed' => $exporter->export($PAGE->get_renderer('core')),
                 'warnings' => $warnings,
@@ -1397,7 +1397,7 @@ class mod_feedback_external extends external_api {
     public static function get_last_completed_returns() {
         return new external_single_structure(
             array(
-                'completed' => feedback_completed_exporter::get_read_structure(),
+                'completed' => individualfeedback_completed_exporter::get_read_structure(),
                 'warnings' => new external_warnings(),
             )
         );

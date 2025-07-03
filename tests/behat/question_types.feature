@@ -1,4 +1,4 @@
-@mod @mod_feedback
+@mod @mod_individualfeedback
 Feature: Test creating different types of feedback questions for anonymous feedback
   In order to create feedbacks
   As a teacher

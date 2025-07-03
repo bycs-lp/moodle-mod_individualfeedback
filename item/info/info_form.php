@@ -14,9 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-require_once($CFG->dirroot.'/mod/feedback/item/feedback_item_form_class.php');
+require_once($CFG->dirroot.'/mod/individualfeedback/item/individualfeedback_item_form_class.php');
 
-class feedback_info_form extends feedback_item_form {
+class individualfeedback_info_form extends individualfeedback_item_form {
     protected $type = "info";
 
     /** @var object Form element. */
@@ -38,16 +38,16 @@ class feedback_info_form extends feedback_item_form {
 
         $mform->addElement('text',
                             'name',
-                            get_string('item_name', 'feedback'),
-                            array('size'=>FEEDBACK_ITEM_NAME_TEXTBOX_SIZE, 'maxlength'=>255));
+                            get_string('item_name', 'mod_individualfeedback'),
+                            array('size'=>INDIVIDUALFEEDBACK_ITEM_NAME_TEXTBOX_SIZE, 'maxlength'=>255));
         $mform->addElement('text',
                             'label',
-                            get_string('item_label', 'feedback'),
-                            array('size'=>FEEDBACK_ITEM_LABEL_TEXTBOX_SIZE, 'maxlength'=>255));
+                            get_string('item_label', 'mod_individualfeedback'),
+                            array('size'=>INDIVIDUALFEEDBACK_ITEM_LABEL_TEXTBOX_SIZE, 'maxlength'=>255));
 
         $this->infotype = &$mform->addElement('select',
                                               'presentation',
-                                              get_string('infotype', 'feedback'),
+                                              get_string('infotype', 'mod_individualfeedback'),
                                               $presentationoptions);
 
         parent::definition();
