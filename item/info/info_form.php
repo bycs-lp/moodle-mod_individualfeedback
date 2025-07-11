@@ -32,23 +32,23 @@ class individualfeedback_info_form extends individualfeedback_item_form {
 
         $mform =& $this->_form;
 
-        $mform->addElement('header', 'general', get_string($this->type, 'feedback'));
+        $mform->addElement('header', 'general', get_string($this->type, 'individualfeedback'));
         $mform->addElement('hidden', 'required', 0);
         $mform->setType('required', PARAM_INT);
 
         $mform->addElement('text',
-                            'name',
-                            get_string('item_name', 'mod_individualfeedback'),
-                            array('size'=>INDIVIDUALFEEDBACK_ITEM_NAME_TEXTBOX_SIZE, 'maxlength'=>255));
+            'name',
+            get_string('item_name', 'individualfeedback'),
+            array('size'=>INDIVIDUALFEEDBACK_ITEM_NAME_TEXTBOX_SIZE, 'maxlength'=>255));
         $mform->addElement('text',
-                            'label',
-                            get_string('item_label', 'mod_individualfeedback'),
-                            array('size'=>INDIVIDUALFEEDBACK_ITEM_LABEL_TEXTBOX_SIZE, 'maxlength'=>255));
+            'label',
+            get_string('item_label', 'individualfeedback'),
+            array('size'=>INDIVIDUALFEEDBACK_ITEM_LABEL_TEXTBOX_SIZE, 'maxlength'=>255));
 
         $this->infotype = &$mform->addElement('select',
-                                              'presentation',
-                                              get_string('infotype', 'mod_individualfeedback'),
-                                              $presentationoptions);
+            'presentation',
+            get_string('infotype', 'individualfeedback'),
+            $presentationoptions);
 
         parent::definition();
         $this->set_data($item);

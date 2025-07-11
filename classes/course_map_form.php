@@ -24,7 +24,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Form for mapping courses to the feedback
+ * Form for mapping courses to the individualfeedback
  *
  * @package   mod_individualfeedback
  * @copyright 2016 Marina Glancy

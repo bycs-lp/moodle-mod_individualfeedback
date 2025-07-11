@@ -41,15 +41,18 @@ class create_template_form extends dynamic_form {
 
         $mform->addElement('text',
             'templatename',
-            get_string('name', 'mod_individualfeedback'),
+            get_string('name', 'individualfeedback'),
             ['maxlength' => '200', 'size' => '50']);
         $mform->setType('templatename', PARAM_TEXT);
 
-        if (has_capability('mod/individualfeedback:createpublictemplate', context_system::instance())) {
-            $mform->addElement('checkbox',
-                'ispublic', '',
-                get_string('public', 'mod_individualfeedback'));
-        }
+        // +++ NEW CODE
+        // Add private template checkbox.
+         $mform->addElement('radio', 'ispublic', '', get_string('course'),0);
+         $mform->addElement('radio', 'ispublic', '', get_string('user'),2);
+         if (has_capability('mod/individualfeedback:createpublictemplate', context_system::instance())) {
+             $mform->addElement('radio', 'ispublic', '', get_string('public', 'individualfeedback'),1);
+         }
+         // --- NEW CODE
     }
 
     /**
@@ -83,9 +86,9 @@ class create_template_form extends dynamic_form {
      * @return array Returns whether a new template was created.
      */
     public function process_dynamic_submission(): array {
-        global $PAGE;
+        global $PAGE, $USER;
         $formdata = $this->get_data();
-        $ispublic = !empty($formdata->ispublic) ? 1 : 0;
+        $ispublic = !empty($formdata->ispublic) ? $formdata->ispublic : 0;
         $result = individualfeedback_save_as_template($PAGE->activityrecord, $formdata->templatename, $ispublic);
         return [
             'result' => $result,

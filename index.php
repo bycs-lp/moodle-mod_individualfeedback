@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * prints the overview of all feedbacks included into the current course
+ * prints the overview of all individualfeedbacks included into the current course
  *
  * @author Andreas Grabs
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
@@ -47,12 +47,12 @@ $event->add_record_snapshot('course', $course);
 $event->trigger();
 
 /// Print the page header
-$strfeedbacks = get_string("modulenameplural", "feedback");
-$strfeedback  = get_string("modulename", "feedback");
+$strfeedbacks = get_string("modulenameplural", "individualfeedback");
+$strfeedback  = get_string("modulename", "individualfeedback");
 
 $PAGE->navbar->add($strfeedbacks);
 $PAGE->set_heading($course->fullname);
-$PAGE->set_title(get_string('modulename', 'mod_individualfeedback').' '.get_string('activities'));
+$PAGE->set_title(get_string('modulename', 'individualfeedback').' '.get_string('activities'));
 echo $OUTPUT->header();
 if (!$PAGE->has_secondary_navigation()) {
     echo $OUTPUT->heading($strfeedbacks);
@@ -60,7 +60,7 @@ if (!$PAGE->has_secondary_navigation()) {
 
 /// Get all the appropriate data
 
-if (! $feedbacks = get_all_instances_in_course("feedback", $course)) {
+if (! $feedbacks = get_all_instances_in_course("individualfeedback", $course)) {
     $url = new moodle_url('/course/view.php', array('id'=>$course->id));
     notice(get_string('thereareno', 'moodle', $strfeedbacks), $url);
     die;
@@ -72,7 +72,7 @@ $usesections = course_format_uses_sections($course->format);
 
 $timenow = time();
 $strname  = get_string("name");
-$strresponses = get_string('responses', 'mod_individualfeedback');
+$strresponses = get_string('responses', 'individualfeedback');
 
 $table = new html_table();
 
@@ -97,7 +97,7 @@ if ($usesections) {
 
 
 foreach ($feedbacks as $feedback) {
-    //get the responses of each feedback
+    //get the responses of each individualfeedback
     $viewurl = new moodle_url('/mod/individualfeedback/view.php', array('id'=>$feedback->coursemodule));
 
     if (has_capability('mod/individualfeedback:viewreports', $context)) {

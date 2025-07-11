@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * print a printview of feedback-items
+ * print a printview of individualfeedback-items
  *
  * @author Andreas Grabs
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
@@ -26,7 +26,7 @@ require_once("../../config.php");
 require_once("lib.php");
 
 $id = required_param('id', PARAM_INT);
-$courseid = optional_param('courseid', false, PARAM_INT); // Course where this feedback is mapped to - used for return link.
+$courseid = optional_param('courseid', false, PARAM_INT); // Course where this individualfeedback is mapped to - used for return link.
 
 $PAGE->set_url('/mod/individualfeedback/print.php', array('id'=>$id));
 
@@ -53,17 +53,17 @@ $feedbackstructure = new mod_individualfeedback_structure($feedback, $cm, $cours
 $PAGE->set_pagelayout('popup');
 
 // Print the page header.
-$strfeedbacks = get_string("modulenameplural", "feedback");
-$strfeedback  = get_string("modulename", "feedback");
+$strfeedbacks = get_string("modulenameplural", "individualfeedback");
+$strfeedback  = get_string("modulename", "individualfeedback");
 
-$individualfeedback_url = new moodle_url('/mod/individualfeedback/index.php', array('id'=>$course->id));
-$PAGE->navbar->add($strfeedbacks, $individualfeedback_url);
+$feedback_url = new moodle_url('/mod/individualfeedback/index.php', array('id'=>$course->id));
+$PAGE->navbar->add($strfeedbacks, $feedback_url);
 $PAGE->navbar->add(format_string($feedback->name));
 
 $renderer = $PAGE->get_renderer('mod_individualfeedback');
 $renderer->set_title(
-        [format_string($feedback->name), format_string($course->fullname)],
-        get_string('previewquestions', 'mod_individualfeedback')
+    [format_string($feedback->name), format_string($course->fullname)],
+    get_string('previewquestions', 'individualfeedback')
 );
 
 $PAGE->set_heading($course->fullname);

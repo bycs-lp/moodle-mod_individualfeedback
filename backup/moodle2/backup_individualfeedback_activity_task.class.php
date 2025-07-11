@@ -1,12 +1,5 @@
 <?php
-
-// This file is part of Moodle - ht    /**
-     * Defines a backup step to store the instance data in the individualfeedback.xml file
-     */
-    protected function define_my_steps() {
-        // individualfeedback only has one structure step
-        $this->add_step(new backup_individualfeedback_activity_structure_step('individualfeedback structure', 'individualfeedback.xml'));
-    }odle.org/
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -36,7 +29,7 @@ require_once($CFG->dirroot . '/mod/individualfeedback/backup/moodle2/backup_indi
 require_once($CFG->dirroot . '/mod/individualfeedback/backup/moodle2/backup_individualfeedback_settingslib.php');
 
 /**
- * Provides the steps to perform one complete backup of the Feedback instance
+ * Provides the steps to perform one complete backup of the individualfeedback instance
  */
 class backup_individualfeedback_activity_task extends backup_activity_task {
 

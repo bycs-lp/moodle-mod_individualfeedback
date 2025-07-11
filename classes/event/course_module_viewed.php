@@ -31,7 +31,7 @@ defined('MOODLE_INTERNAL') || die();
  * @property-read array $other {
  *      Extra information about event.
  *
- *      - int anonymous if feedback is anonymous.
+ *      - int anonymous if individualfeedback is anonymous.
  * }
  *
  * @package    mod_individualfeedback
@@ -47,29 +47,29 @@ class course_module_viewed extends \core\event\course_module_viewed {
     protected function init() {
         $this->data['crud'] = 'r';
         $this->data['edulevel'] = self::LEVEL_PARTICIPATING;
-        $this->data['objecttable'] = 'feedback';
+        $this->data['objecttable'] = 'individualfeedback';
     }
 
     /**
-     * Creates an instance from feedback record
+     * Creates an instance from individualfeedback record
      *
-     * @param stdClass $feedback
+     * @param stdClass $individualfeedback
      * @param cm_info|stdClass $cm
      * @param stdClass $course
      * @return course_module_viewed
      */
-    public static function create_from_record($feedback, $cm, $course) {
+    public static function create_from_record($individualfeedback, $cm, $course) {
         $event = self::create(array(
-            'objectid' => $feedback->id,
+            'objectid' => $individualfeedback->id,
             'context' => \context_module::instance($cm->id),
-            'anonymous' => ($feedback->anonymous == INDIVIDUALFEEDBACK_ANONYMOUS_YES),
+            'anonymous' => ($individualfeedback->anonymous == INDIVIDUALFEEDBACK_ANONYMOUS_YES),
             'other' => array(
-                'anonymous' => $feedback->anonymous // Deprecated.
+                'anonymous' => $individualfeedback->anonymous // Deprecated.
             )
         ));
         $event->add_record_snapshot('course_modules', $cm);
         $event->add_record_snapshot('course', $course);
-        $event->add_record_snapshot('feedback', $feedback);
+        $event->add_record_snapshot('individualfeedback', $individualfeedback);
         return $event;
     }
 
@@ -109,7 +109,7 @@ class course_module_viewed extends \core\event\course_module_viewed {
     }
 
     public static function get_objectid_mapping() {
-        return array('db' => 'feedback', 'restore' => 'feedback');
+        return array('db' => 'individualfeedback', 'restore' => 'individualfeedback');
     }
 
     public static function get_other_mapping() {

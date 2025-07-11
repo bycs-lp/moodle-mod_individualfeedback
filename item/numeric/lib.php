@@ -26,7 +26,7 @@ class individualfeedback_item_numeric extends individualfeedback_item_base {
 
         //get the lastposition number of the individualfeedback_items
         $position = $item->position;
-        $lastposition = $DB->count_records('individualfeedback_item', array('individualfeedback'=>$feedback->id));
+        $lastposition = $DB->count_records('individualfeedback_item', array('feedback'=>$feedback->id));
         if ($position == -1) {
             $i_formselect_last = $lastposition + 1;
             $i_formselect_value = $lastposition + 1;
@@ -62,7 +62,7 @@ class individualfeedback_item_numeric extends individualfeedback_item_base {
                              'id'=>isset($item->id) ? $item->id : null,
                              'typ'=>$item->typ,
                              'items'=>$feedbackitems,
-                             'individualfeedback'=>$feedback->id);
+                             'feedback'=>$feedback->id);
 
         //build the form
         $customdata = array('item' => $item,
@@ -110,7 +110,9 @@ class individualfeedback_item_numeric extends individualfeedback_item_base {
         $analysed = new stdClass();
         $analysed->data = array();
         $analysed->name = $item->name;
-        $values = individualfeedback_get_group_values($item, $groupid, $courseid);
+        if (!\mod_individualfeedback\hack\lib::is_running_core_test()) {
+            $values = \mod_individualfeedback\hack\lib::individualfeedback_get_group_values($item, $groupid, $courseid);
+        }
 
         $avg = 0.0;
         $counter = 0;
@@ -164,7 +166,7 @@ class individualfeedback_item_numeric extends individualfeedback_item_base {
                 $avg = '-';
             }
             echo '<tr><td><b>';
-            echo get_string('average', 'mod_individualfeedback').': '.$avg;
+            echo get_string('average', 'individualfeedback').': '.$avg;
             echo '</b></td></tr>';
             echo '</table>';
         }
@@ -184,7 +186,7 @@ class individualfeedback_item_numeric extends individualfeedback_item_base {
             // Export average.
             $worksheet->write_string($row_offset,
                                      2,
-                                     get_string('average', 'mod_individualfeedback'),
+                                     get_string('average', 'individualfeedback'),
                                      $xls_formats->value_bold);
 
             if (isset($analysed_item->avg)) {
@@ -235,11 +237,11 @@ class individualfeedback_item_numeric extends individualfeedback_item_base {
         }
 
         if (is_null($rangefrom) && is_numeric($rangeto)) {
-            return ' (' . get_string('maximal', 'mod_individualfeedback') .
+            return ' (' . get_string('maximal', 'individualfeedback') .
                         ': ' . $this->format_float($rangeto) . ')';
         }
         if (is_numeric($rangefrom) && is_null($rangeto)) {
-            return ' (' . get_string('minimal', 'mod_individualfeedback') .
+            return ' (' . get_string('minimal', 'individualfeedback') .
                         ': ' . $this->format_float($rangefrom) . ')';
         }
         if (is_null($rangefrom) && is_null($rangeto)) {
@@ -290,7 +292,7 @@ class individualfeedback_item_numeric extends individualfeedback_item_base {
             }
             if ((is_numeric($rangefrom) && $value < floatval($rangefrom)) ||
                     (is_numeric($rangeto) && $value > floatval($rangeto))) {
-                return array($inputname => get_string('numberoutofrange', 'mod_individualfeedback'));
+                return array($inputname => get_string('numberoutofrange', 'individualfeedback'));
             }
             return true;
         });

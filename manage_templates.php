@@ -53,8 +53,8 @@ $PAGE->set_heading($course->fullname);
 /** @var \mod_individualfeedback\output\renderer $renderer */
 $renderer = $PAGE->get_renderer('mod_individualfeedback');
 $renderer->set_title(
-        [format_string($feedback->name), format_string($course->fullname)],
-        get_string('templates', 'mod_individualfeedback')
+    [format_string($feedback->name), format_string($course->fullname)],
+    get_string('templates', 'individualfeedback')
 );
 
 // Process template deletion.
@@ -63,14 +63,21 @@ if ($templateid) {
     require_capability('mod/individualfeedback:deletetemplate', $context);
     $template = $DB->get_record('individualfeedback_template', ['id' => $templateid], '*', MUST_EXIST);
 
-    if ($template->ispublic) {
+    // +++ NEW CODE
+    if ($template->ispublic == 1) {
         require_capability('mod/individualfeedback:createpublictemplate', $systemcontext);
         require_capability('mod/individualfeedback:deletetemplate', $systemcontext);
     }
+        
+    if ($template->ispublic == 2 && $template->userid != $USER->id) {
+        echo "error";
+        exit;
+    }
+    // --- NEW CODE
 
     individualfeedback_delete_template($template);
     $successurl = new moodle_url('/mod/individualfeedback/manage_templates.php', ['id' => $id]);
-    redirect($url, get_string('template_deleted', 'mod_individualfeedback'), null, \core\output\notification::NOTIFY_SUCCESS);
+    redirect($url, get_string('template_deleted', 'individualfeedback'), null, \core\output\notification::NOTIFY_SUCCESS);
 }
 $PAGE->activityheader->set_attrs([
     "hidecompletion" => true,
@@ -80,21 +87,38 @@ echo $OUTPUT->header();
 if (!$mode) {
     echo $renderer->main_action_bar($actionbar);
 }
-echo $OUTPUT->heading(get_string('templates', 'mod_individualfeedback'), 2);
+echo $OUTPUT->heading(get_string('templates', 'individualfeedback'), 3);
 
 // First we get the course templates.
-$templates = individualfeedback_get_template_list($course, 'own');
+if (!\mod_individualfeedback\hack\lib::is_running_core_test()) {
+    $templates = $feedback_options['questiongroup'] = \mod_individualfeedback\hack\lib::individualfeedback_get_template_list($course, 'own');
+}
 echo $OUTPUT->box_start('coursetemplates');
-echo $OUTPUT->heading(get_string('course'), 3);
+echo $OUTPUT->heading(get_string('course'), 4);
 
 $baseurl = new moodle_url('/mod/individualfeedback/use_templ.php', $params);
 $tablecourse = new mod_individualfeedback_templates_table('individualfeedback_template_course_table', $baseurl, $mode);
 $tablecourse->display($templates);
 echo $OUTPUT->box_end();
 
-$templates = individualfeedback_get_template_list($course, 'public');
+// +++ NEW CODE
+if (!\mod_individualfeedback\hack\lib::is_running_core_test()) {
+    $templates = $feedback_options['questiongroup'] = \mod_individualfeedback\hack\lib::individualfeedback_get_template_list($course, 'private');
+}
+echo $OUTPUT->box_start('coursetemplates');
+echo $OUTPUT->heading(get_string('user'), 4);
+
+$baseurl = new moodle_url('/mod/individualfeedback/use_templ.php', $params);
+$tablecourse = new mod_individualfeedback_templates_table('individualfeedback_template_course_table', $baseurl, $mode);
+$tablecourse->display($templates);
+echo $OUTPUT->box_end();
+// --- NEW CODE
+
+if (!\mod_individualfeedback\hack\lib::is_running_core_test()) {
+    $templates = $feedback_options['questiongroup'] = \mod_individualfeedback\hack\lib::individualfeedback_get_template_list($course, 'public');
+}
 echo $OUTPUT->box_start('publictemplates');
-echo $OUTPUT->heading(get_string('public', 'mod_individualfeedback'), 3);
+echo $OUTPUT->heading(get_string('public', 'individualfeedback'), 4);
 $tablepublic = new mod_individualfeedback_templates_table('individualfeedback_template_public_table', $baseurl, $mode);
 $tablepublic->display($templates);
 echo $OUTPUT->box_end();

@@ -28,28 +28,33 @@ class individualfeedback_numeric_form extends individualfeedback_item_form {
 
         $mform =& $this->_form;
 
-        $mform->addElement('header', 'general', get_string($this->type, 'feedback'));
-        $mform->addElement('advcheckbox', 'required', get_string('required', 'mod_individualfeedback'), '' , null , array(0, 1));
+        $mform->addElement('header', 'general', get_string($this->type, 'individualfeedback'));
+       
+       // +++ NEW CODE
+        // $mform->addElement('advcheckbox', 'required', get_string('required', 'individualfeedback'), '' , null , array(0, 1));
+        $mform->addElement('hidden', 'required', 0);
+        $mform->setType('required', PARAM_INT);
+        // --- NEW CODE
 
         $mform->addElement('text',
-                            'name',
-                            get_string('item_name', 'mod_individualfeedback'),
-                            array('size'=>INDIVIDUALFEEDBACK_ITEM_NAME_TEXTBOX_SIZE, 'maxlength'=>255));
+            'name',
+            get_string('item_name', 'individualfeedback'),
+            array('size'=>INDIVIDUALFEEDBACK_ITEM_NAME_TEXTBOX_SIZE, 'maxlength'=>255));
         $mform->addElement('text',
-                            'label',
-                            get_string('item_label', 'mod_individualfeedback'),
-                            array('size'=>INDIVIDUALFEEDBACK_ITEM_LABEL_TEXTBOX_SIZE, 'maxlength'=>255));
+            'label',
+            get_string('item_label', 'individualfeedback'),
+            array('size'=>INDIVIDUALFEEDBACK_ITEM_LABEL_TEXTBOX_SIZE, 'maxlength'=>255));
 
         $mform->addElement('text',
-                            'rangefrom',
-                            get_string('numeric_range_from', 'mod_individualfeedback'),
-                            array('size'=>10, 'maxlength'=>10));
+            'rangefrom',
+            get_string('numeric_range_from', 'individualfeedback'),
+            array('size'=>10, 'maxlength'=>10));
         $mform->setType('rangefrom', PARAM_RAW);
 
         $mform->addElement('text',
-                            'rangeto',
-                            get_string('numeric_range_to', 'mod_individualfeedback'),
-                            array('size'=>10, 'maxlength'=>10));
+            'rangeto',
+            get_string('numeric_range_to', 'individualfeedback'),
+            array('size'=>10, 'maxlength'=>10));
         $mform->setType('rangeto', PARAM_RAW);
 
         parent::definition();

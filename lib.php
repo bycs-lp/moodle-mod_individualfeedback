@@ -15,8 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Library of functions and constants for module feedback
- * includes the main-part of feedback-functions
+ * Library of functions and constants for module individualfeedback
+ * includes the main-part of individualfeedback-functions
  *
  * @package mod_individualfeedback
  * @copyright Andreas Grabs
@@ -52,7 +52,7 @@ require_once(__DIR__ . '/deprecatedlib.php');
  * @uses FEATURE_GRADE_HAS_GRADE
  * @uses FEATURE_GRADE_OUTCOMES
  * @param string $feature FEATURE_xx constant for requested feature
- * @return mixed True if module supports feature, false if not, null if doesn't know or string for the module purpose.
+ * @return mixed True if module supports feature, null if doesn't know
  */
 function individualfeedback_supports($feature) {
     switch($feature) {
@@ -89,7 +89,7 @@ function individualfeedback_add_instance($feedback) {
         $feedback->site_after_submit = '';
     }
 
-    //saving the feedback in db
+    //saving the individualfeedback in db
     $feedbackid = $DB->insert_record("individualfeedback", $feedback);
 
     $feedback->id = $feedbackid;
@@ -140,7 +140,7 @@ function individualfeedback_update_instance($feedback) {
         $feedback->site_after_submit = '';
     }
 
-    //save the feedback into the db
+    //save the individualfeedback into the db
     $DB->update_record("individualfeedback", $feedback);
 
     //create or update the new events
@@ -167,7 +167,7 @@ function individualfeedback_update_instance($feedback) {
 }
 
 /**
- * Serves the files included in feedback items like label. Implements needed access control ;-)
+ * Serves the files included in individualfeedback items like label. Implements needed access control ;-)
  *
  * There are two situations in general where the files will be sent.
  * 1) filearea = item, 2) filearea = template
@@ -192,7 +192,7 @@ function individualfeedback_pluginfile($course, $cm, $context, $filearea, $args,
         if (!$item = $DB->get_record('individualfeedback_item', array('id'=>$itemid))) {
             return false;
         }
-        $feedbackid = $item->individualfeedback;
+        $feedbackid = $item->feedback;
         $templateid = $item->template;
     }
 
@@ -203,7 +203,7 @@ function individualfeedback_pluginfile($course, $cm, $context, $filearea, $args,
 
         $feedbackid = $feedback->id;
 
-        //if the filearea is "item" so we check the permissions like view/complete the feedback
+        //if the filearea is "item" so we check the permissions like view/complete the individualfeedback
         $canload = false;
         //first check whether the user has the complete capability
         if (has_capability('mod/individualfeedback:complete', $context)) {
@@ -215,7 +215,7 @@ function individualfeedback_pluginfile($course, $cm, $context, $filearea, $args,
             $canload = true;
         }
 
-        //if the feedback is on frontpage and anonymous and the fullanonymous is allowed
+        //if the individualfeedback is on frontpage and anonymous and the fullanonymous is allowed
         //so the file can be loaded too.
         if (isset($CFG->individualfeedback_allowfullanonymous)
                     AND $CFG->individualfeedback_allowfullanonymous
@@ -282,14 +282,14 @@ function individualfeedback_pluginfile($course, $cm, $context, $filearea, $args,
  * all referenced data also will be deleted
  *
  * @global object
- * @param int $id the instanceid of feedback
+ * @param int $id the instanceid of individualfeedback
  * @return boolean
  */
 function individualfeedback_delete_instance($id) {
     global $DB;
 
     //get all referenced items
-    $feedbackitems = $DB->get_records('individualfeedback_item', array('individualfeedback'=>$id));
+    $feedbackitems = $DB->get_records('individualfeedback_item', array('feedback'=>$id));
 
     //deleting all referenced items and values
     if (is_array($feedbackitems)) {
@@ -299,7 +299,9 @@ function individualfeedback_delete_instance($id) {
         }
         if ($delitems = $DB->get_records("individualfeedback_item", array("individualfeedback"=>$id))) {
             foreach ($delitems as $delitem) {
-                individualfeedback_delete_item($delitem->id, false);
+                if (!\mod_individualfeedback\hack\lib::is_running_core_test()) {
+                    \mod_individualfeedback\hack\lib::individualfeedback_delete_item($delitem->id, false);
+                }
             }
         }
     }
@@ -310,6 +312,17 @@ function individualfeedback_delete_instance($id) {
     //deleting the unfinished completeds
     $DB->delete_records("individualfeedback_completedtmp", array("individualfeedback"=>$id));
 
+    // +++ NEW CODE
+    // Delete the activity from the linked table.
+    if ($linkedid = individualfeedback_get_linkedid($id)) {
+        $DB->delete_records('individualfeedback_linked', array('individualfeedbackid' => $id));
+        // If there is only 1 record left, delete that record as well.
+        if ($DB->count_records('individualfeedback_linked', array('linkedid' => $linkedid)) < 2) {
+            $DB->delete_records('individualfeedback_linked',  array('linkedid' => $linkedid));
+        }
+    }
+    // --- NEW CODE
+    
     //deleting old events
     $DB->delete_records('event', array('modulename'=>'individualfeedback', 'instance'=>$id));
     return $DB->delete_records("individualfeedback", array("id"=>$id));
@@ -332,31 +345,31 @@ function individualfeedback_user_outline($course, $user, $mod, $feedback) {
     global $DB;
     $outline = (object)['info' => '', 'time' => 0];
     if ($feedback->anonymous != INDIVIDUALFEEDBACK_ANONYMOUS_NO) {
-        // Do not disclose any user info if feedback is anonymous.
+        // Do not disclose any user info if individualfeedback is anonymous.
         return $outline;
     }
-    $params = array('userid' => $user->id, 'individualfeedback' => $feedback->id,
+    $params = array('userid' => individualfeedback_hash_userid($user->id), 'individualfeedback' => $feedback->id,
         'anonymous_response' => INDIVIDUALFEEDBACK_ANONYMOUS_NO);
     $status = null;
     $context = context_module::instance($mod->id);
     if ($completed = $DB->get_record('individualfeedback_completed', $params)) {
-        // User has completed feedback.
-        $outline->info = get_string('completed', 'mod_individualfeedback');
+        // User has completed individualfeedback.
+        $outline->info = get_string('completed', 'individualfeedback');
         $outline->time = $completed->timemodified;
     } else if ($completedtmp = $DB->get_record('individualfeedback_completedtmp', $params)) {
-        // User has started but not completed feedback.
-        $outline->info = get_string('started', 'mod_individualfeedback');
+        // User has started but not completed individualfeedback.
+        $outline->info = get_string('started', 'individualfeedback');
         $outline->time = $completedtmp->timemodified;
     } else if (has_capability('mod/individualfeedback:complete', $context, $user)) {
-        // User has not started feedback but has capability to do so.
-        $outline->info = get_string('not_started', 'mod_individualfeedback');
+        // User has not started individualfeedback but has capability to do so.
+        $outline->info = get_string('not_started', 'individualfeedback');
     }
 
     return $outline;
 }
 
 /**
- * Returns all users who has completed a specified feedback since a given time
+ * Returns all users who has completed a specified individualfeedback since a given time
  * many thanks to Manolescu Dorel, who contributed these two functions
  *
  * @global object
@@ -395,7 +408,7 @@ function individualfeedback_get_recent_mod_activity(&$activities, &$index,
     $userfields = $userfieldsapi->get_sql('u', false, '', 'useridagain', false)->selects;
     $sql = " SELECT fk . * , fc . * , $userfields
                 FROM {individualfeedback_completed} fc
-                    JOIN {feedback} fk ON fk.id = fc.feedback
+                    JOIN {individualfeedback} fk ON fk.id = fc.individualfeedback
                     JOIN {user} u ON u.id = fc.userid ";
 
     if ($groupid) {
@@ -474,7 +487,7 @@ function individualfeedback_get_recent_mod_activity(&$activities, &$index,
 }
 
 /**
- * Prints all users who has completed a specified feedback since a given time
+ * Prints all users who has completed a specified individualfeedback since a given time
  * many thanks to Manolescu Dorel, who contributed these two functions
  *
  * @global object
@@ -496,7 +509,7 @@ function individualfeedback_print_recent_mod_activity($activity, $courseid, $det
     if ($detail) {
         $modname = $modnames[$activity->type];
         echo '<div class="title">';
-        echo $OUTPUT->image_icon('monologo', $modname, $activity->type);
+        echo $OUTPUT->image_icon('logo', $modname, $activity->type);
         echo "<a href=\"$CFG->wwwroot/mod/individualfeedback/view.php?id={$activity->cmid}\">{$activity->name}</a>";
         echo '</div>';
     }
@@ -526,15 +539,15 @@ function individualfeedback_print_recent_mod_activity($activity, $courseid, $det
 function individualfeedback_user_complete($course, $user, $mod, $feedback) {
     global $DB;
     if ($feedback->anonymous != INDIVIDUALFEEDBACK_ANONYMOUS_NO) {
-        // Do not disclose any user info if feedback is anonymous.
+        // Do not disclose any user info if individualfeedback is anonymous.
         return;
     }
-    $params = array('userid' => $user->id, 'individualfeedback' => $feedback->id,
+    $params = array('userid' => individualfeedback_hash_userid($user->id), 'individualfeedback' => $feedback->id,
         'anonymous_response' => INDIVIDUALFEEDBACK_ANONYMOUS_NO);
     $url = $status = null;
     $context = context_module::instance($mod->id);
     if ($completed = $DB->get_record('individualfeedback_completed', $params)) {
-        // User has completed feedback.
+        // User has completed individualfeedback.
         if (has_capability('mod/individualfeedback:viewreports', $context)) {
             $url = new moodle_url('/mod/individualfeedback/show_entries.php',
                 ['id' => $mod->id, 'userid' => $user->id,
@@ -542,11 +555,11 @@ function individualfeedback_user_complete($course, $user, $mod, $feedback) {
         }
         $status = get_string('completedon', 'individualfeedback', userdate($completed->timemodified));
     } else if ($completedtmp = $DB->get_record('individualfeedback_completedtmp', $params)) {
-        // User has started but not completed feedback.
+        // User has started but not completed individualfeedback.
         $status = get_string('startedon', 'individualfeedback', userdate($completedtmp->timemodified));
     } else if (has_capability('mod/individualfeedback:complete', $context, $user)) {
-        // User has not started feedback but has capability to do so.
-        $status = get_string('not_started', 'mod_individualfeedback');
+        // User has not started individualfeedback but has capability to do so.
+        $status = get_string('not_started', 'individualfeedback');
     }
 
     if ($url && $status) {
@@ -572,7 +585,7 @@ function individualfeedback_scale_used() {
 }
 
 /**
- * Checks if scale is being used by any instance of feedback
+ * Checks if scale is being used by any instance of individualfeedback
  *
  * This is used to find out if scale used anywhere
  * @param $scaleid int
@@ -612,7 +625,7 @@ function individualfeedback_get_post_actions() {
 
 /**
  * This function is used by the reset_course_userdata function in moodlelib.
- * This function will remove all responses from the specified feedback
+ * This function will remove all responses from the specified individualfeedback
  * and clean up any related data.
  *
  * @global object
@@ -625,19 +638,19 @@ function individualfeedback_get_post_actions() {
 function individualfeedback_reset_userdata($data) {
     global $CFG, $DB;
 
-    $resetfeedbacks = [];
-    $dropfeedbacks = [];
-    $status = [];
-    $componentstr = get_string('modulenameplural', 'mod_individualfeedback');
+    $resetindividualfeedbacks = array();
+    $dropindividualfeedbacks = array();
+    $status = array();
+    $componentstr = get_string('modulenameplural', 'individualfeedback');
 
-    // Get the relevant entries from $data.
+    //get the relevant entries from $data
     foreach ($data as $key => $value) {
         switch(true) {
             case substr($key, 0, strlen(INDIVIDUALFEEDBACK_RESETFORM_RESET)) == INDIVIDUALFEEDBACK_RESETFORM_RESET:
                 if ($value == 1) {
                     $templist = explode('_', $key);
                     if (isset($templist[3])) {
-                        $resetfeedbacks[] = intval($templist[3]);
+                        $resetindividualfeedbacks[] = intval($templist[3]);
                     }
                 }
             break;
@@ -645,20 +658,20 @@ function individualfeedback_reset_userdata($data) {
                 if ($value == 1) {
                     $templist = explode('_', $key);
                     if (isset($templist[3])) {
-                        $dropfeedbacks[] = intval($templist[3]);
+                        $dropindividualfeedbacks[] = intval($templist[3]);
                     }
                 }
             break;
         }
     }
 
-    // Reset the selected feedbacks.
-    foreach ($resetfeedbacks as $id) {
-        $feedback = $DB->get_record('individualfeedback', ['id' => $id]);
+    //reset the selected individualfeedbacks
+    foreach ($resetindividualfeedbacks as $id) {
+        $feedback = $DB->get_record('individualfeedback', array('id'=>$id));
         individualfeedback_delete_all_completeds($feedback);
         $status[] = [
             'component' => $componentstr.':'.$feedback->name,
-            'item' => get_string('resetting_data', 'mod_individualfeedback'),
+            'item' => get_string('resetting_data', 'individualfeedback'),
             'error' => false,
         ];
     }
@@ -667,10 +680,10 @@ function individualfeedback_reset_userdata($data) {
     if ($data->timeshift) {
         // Any changes to the list of dates that needs to be rolled should be same during course restore and course reset.
         // See MDL-9367.
-        $shifterror = !shift_course_mod_dates('individualfeedback', ['timeopen', 'timeclose'], $data->timeshift, $data->courseid);
+        $shifterror = !shift_course_mod_dates('individualfeedback', array('timeopen', 'timeclose'), $data->timeshift, $data->courseid);
         $status[] = [
             'component' => $componentstr,
-            'item' => get_string('date'),
+            'item' => get_string('datechanged'),
             'error' => $shifterror,
         ];
     }
@@ -683,18 +696,18 @@ function individualfeedback_reset_userdata($data) {
  *
  * @global object
  * @uses INDIVIDUALFEEDBACK_RESETFORM_RESET
- * @param MoodleQuickForm $mform form passed by reference
+ * @param object $mform form passed by reference
  */
 function individualfeedback_reset_course_form_definition(&$mform) {
     global $COURSE, $DB;
 
-    $mform->addElement('header', 'feedbackheader', get_string('modulenameplural', 'mod_individualfeedback'));
+    $mform->addElement('header', 'individualfeedbackheader', get_string('modulenameplural', 'individualfeedback'));
 
     if (!$feedbacks = $DB->get_records('individualfeedback', array('course'=>$COURSE->id), 'name')) {
         return;
     }
 
-    $mform->addElement('static', 'hint', get_string('resetting_delete', 'mod_individualfeedback'));
+    $mform->addElement('static', 'hint', get_string('resetting_data', 'individualfeedback'));
     foreach ($feedbacks as $feedback) {
         $mform->addElement('checkbox', INDIVIDUALFEEDBACK_RESETFORM_RESET.$feedback->id, $feedback->name);
     }
@@ -722,10 +735,10 @@ function individualfeedback_reset_course_form_defaults($course) {
 
 /**
  * Called by course/reset.php and shows the formdata by coursereset.
- * it prints checkboxes for each feedback available at the given course
+ * it prints checkboxes for each individualfeedback available at the given course
  * there are two checkboxes:
- * 1) delete userdata and keep the feedback
- * 2) delete userdata and drop the feedback
+ * 1) delete userdata and keep the individualfeedback
+ * 2) delete userdata and drop the individualfeedback
  *
  * @global object
  * @uses INDIVIDUALFEEDBACK_RESETFORM_RESET
@@ -736,21 +749,21 @@ function individualfeedback_reset_course_form_defaults($course) {
 function individualfeedback_reset_course_form($course) {
     global $DB, $OUTPUT;
 
-    echo get_string('resetting_feedbacks', 'mod_individualfeedback'); echo ':<br />';
-    if (!$feedbacks = $DB->get_records('individualfeedback', ['course' => $course->id], 'name')) {
+    echo get_string('resetting_individualfeedbacks', 'individualfeedback'); echo ':<br />';
+    if (!$feedbacks = $DB->get_records('individualfeedback', array('course'=>$course->id), 'name')) {
         return;
     }
 
     foreach ($feedbacks as $feedback) {
         echo '<p>';
-        echo get_string('name', 'mod_individualfeedback').': '.$feedback->name.'<br />';
+        echo get_string('name', 'individualfeedback').': '.$feedback->name.'<br />';
         echo html_writer::checkbox(INDIVIDUALFEEDBACK_RESETFORM_RESET.$feedback->id,
                                 1, true,
-                                get_string('resetting_data', 'mod_individualfeedback'));
+                                get_string('resetting_data', 'individualfeedback'));
         echo '<br />';
         echo html_writer::checkbox(INDIVIDUALFEEDBACK_RESETFORM_DROP.$feedback->id,
                                 1, false,
-                                get_string('drop_feedback', 'mod_individualfeedback'));
+                                get_string('drop_individualfeedback', 'individualfeedback'));
         echo '</p>';
     }
 }
@@ -784,7 +797,7 @@ function individualfeedback_set_events($feedback) {
         $feedback->coursemodule = $cm->id;
     }
 
-    // Feedback start calendar events.
+    // individualfeedback start calendar events.
     $eventid = $DB->get_field('event', 'id',
             array('modulename' => 'individualfeedback', 'instance' => $feedback->id, 'eventtype' => INDIVIDUALFEEDBACK_EVENT_TYPE_OPEN));
 
@@ -792,7 +805,7 @@ function individualfeedback_set_events($feedback) {
         $event = new stdClass();
         $event->eventtype    = INDIVIDUALFEEDBACK_EVENT_TYPE_OPEN;
         $event->type         = empty($feedback->timeclose) ? CALENDAR_EVENT_TYPE_ACTION : CALENDAR_EVENT_TYPE_STANDARD;
-        $event->name         = get_string('calendarstart', 'mod_individualfeedback', $feedback->name);
+        $event->name         = get_string('calendarstart', 'individualfeedback', $feedback->name);
         $event->description  = format_module_intro('individualfeedback', $feedback, $feedback->coursemodule, false);
         $event->format       = FORMAT_HTML;
         $event->timestart    = $feedback->timeopen;
@@ -820,7 +833,7 @@ function individualfeedback_set_events($feedback) {
         $calendarevent->delete();
     }
 
-    // Feedback close calendar events.
+    // individualfeedback close calendar events.
     $eventid = $DB->get_field('event', 'id',
             array('modulename' => 'individualfeedback', 'instance' => $feedback->id, 'eventtype' => INDIVIDUALFEEDBACK_EVENT_TYPE_CLOSE));
 
@@ -828,7 +841,7 @@ function individualfeedback_set_events($feedback) {
         $event = new stdClass();
         $event->type         = CALENDAR_EVENT_TYPE_ACTION;
         $event->eventtype    = INDIVIDUALFEEDBACK_EVENT_TYPE_CLOSE;
-        $event->name         = get_string('calendarend', 'mod_individualfeedback', $feedback->name);
+        $event->name         = get_string('calendarend', 'individualfeedback', $feedback->name);
         $event->description  = format_module_intro('individualfeedback', $feedback, $feedback->coursemodule, false);
         $event->format       = FORMAT_HTML;
         $event->timestart    = $feedback->timeclose;
@@ -859,12 +872,12 @@ function individualfeedback_set_events($feedback) {
 /**
  * This standard function will check all instances of this module
  * and make sure there are up-to-date events created for each of them.
- * If courseid = 0, then every feedback event in the site is checked, else
- * only feedback events belonging to the course specified are checked.
+ * If courseid = 0, then every individualfeedback event in the site is checked, else
+ * only individualfeedback events belonging to the course specified are checked.
  * This function is used, in its new format, by restore_refresh_events()
  *
  * @param int $courseid
- * @param int|stdClass $instance Feedback module instance or ID.
+ * @param int|stdClass $instance individualfeedback module instance or ID.
  * @param int|stdClass $cm Course module object or ID (not used in this module).
  * @return bool
  */
@@ -898,7 +911,7 @@ function individualfeedback_refresh_events($courseid = 0, $instance = null, $cm 
 
 /**
  * this function is called by {@link individualfeedback_delete_userdata()}
- * it drops the feedback-instance from the course_module table
+ * it drops the individualfeedback-instance from the course_module table
  *
  * @global object
  * @param int $id the id from the coursemodule
@@ -927,7 +940,7 @@ function individualfeedback_get_context() {
 }
 
 /**
- * count users which have not completed the feedback
+ * count users which have not completed the individualfeedback
  *
  * @global object
  * @uses CONTEXT_MODULE
@@ -936,7 +949,7 @@ function individualfeedback_get_context() {
  * @param string $sort
  * @param int $startpage
  * @param int $pagecount
- * @param bool $includestatus to return if the user started or not the feedback among the complete user record
+ * @param bool $includestatus to return if the user started or not the individualfeedback among the complete user record
  * @return array array of user ids or user objects when $includestatus set to true
  */
 function individualfeedback_get_incomplete_users(cm_info $cm,
@@ -950,7 +963,7 @@ function individualfeedback_get_incomplete_users(cm_info $cm,
 
     $context = context_module::instance($cm->id);
 
-    //first get all user who can complete this feedback
+    //first get all user who can complete this individualfeedback
     $cap = 'mod/individualfeedback:complete';
     $userfieldsapi = \core_user\fields::for_name();
     $allnames = $userfieldsapi->get_sql('u', false, '', '', false)->selects;
@@ -973,7 +986,7 @@ function individualfeedback_get_incomplete_users(cm_info $cm,
     $allusers = array_keys($allusersrecords);
 
     //now get all completeds
-    $params = array('individualfeedback'=>$cm->instance);
+    $params = array('feedback'=>$cm->instance);
     if ($completedusers = $DB->get_records_menu('individualfeedback_completed', $params, '', 'id, userid')) {
         // Now strike all completedusers from allusers.
         $allusers = array_diff($allusers, $completedusers);
@@ -987,7 +1000,7 @@ function individualfeedback_get_incomplete_users(cm_info $cm,
     // Check if we should return the full users objects.
     if ($includestatus) {
         $userrecords = [];
-        $startedusers = $DB->get_records_menu('individualfeedback_completedtmp', ['individualfeedback' => $cm->instance], '', 'id, userid');
+        $startedusers = $DB->get_records_menu('individualfeedback_completedtmp', ['feedback' => $cm->instance], '', 'id, userid');
         $startedusers = array_flip($startedusers);
         foreach ($allusers as $userid) {
             $allusersrecords[$userid]->feedbackstarted = isset($startedusers[$userid]);
@@ -1000,7 +1013,7 @@ function individualfeedback_get_incomplete_users(cm_info $cm,
 }
 
 /**
- * count users which have not completed the feedback
+ * count users which have not completed the individualfeedback
  *
  * @global object
  * @param object $cm
@@ -1015,7 +1028,7 @@ function individualfeedback_count_incomplete_users($cm, $group = false) {
 }
 
 /**
- * count users which have completed a feedback
+ * count users which have completed a individualfeedback
  *
  * @global object
  * @uses INDIVIDUALFEEDBACK_ANONYMOUS_NO
@@ -1045,7 +1058,7 @@ function individualfeedback_count_complete_users($cm, $group = false) {
 }
 
 /**
- * get users which have completed a feedback
+ * get users which have completed a individualfeedback
  *
  * @global object
  * @uses CONTEXT_MODULE
@@ -1166,13 +1179,13 @@ function individualfeedback_get_receivemail_users($cmid, $groups = false) {
 /**
  * creates a new template-record.
  *
- * @global object
  * @param int $courseid
  * @param string $name the name of template shown in the templatelist
  * @param int $ispublic 0:privat 1:public
  * @return stdClass the new template
+ * @global object
  */
-function individualfeedback_create_template($courseid, $name, $ispublic = 0) {
+/*function feedback_create_template($courseid, $name, $ispublic = 0) {
     global $DB;
 
     $templ = new stdClass();
@@ -1180,13 +1193,13 @@ function individualfeedback_create_template($courseid, $name, $ispublic = 0) {
     $templ->name     = $name;
     $templ->ispublic = $ispublic;
 
-    $templid = $DB->insert_record('individualfeedback_template', $templ);
-    return $DB->get_record('individualfeedback_template', array('id'=>$templid));
-}
+    $templid = $DB->insert_record('feedback_template', $templ);
+    return $DB->get_record('feedback_template', array('id'=>$templid));
+}*/
 
 /**
  * creates new template items.
- * all items will be copied and the attribute feedback will be set to 0
+ * all items will be copied and the attribute individualfeedback will be set to 0
  * and the attribute template will be set to the new templateid
  *
  * @global object
@@ -1201,17 +1214,20 @@ function individualfeedback_save_as_template($feedback, $name, $ispublic = 0) {
     global $DB;
     $fs = get_file_storage();
 
-    if (!$feedbackitems = $DB->get_records('individualfeedback_item', array('individualfeedback'=>$feedback->id))) {
+    if (!$feedbackitems = $DB->get_records('individualfeedback_item', array('feedback'=>$feedback->id))) {
         return false;
     }
 
-    if (!$newtempl = individualfeedback_create_template($feedback->course, $name, $ispublic)) {
+    if (!\mod_individualfeedback\hack\lib::is_running_core_test()) {
+        $newtempl = \mod_individualfeedback\hack\lib::individualfeedback_create_template($feedback->course, $name, $ispublic);
+    }
+    if (!$newtempl) {
         return false;
     }
 
     //files in the template_item are in the context of the current course or
     //if the template is public the files are in the system context
-    //files in the individualfeedback_item are in the individualfeedback_context of the feedback
+    //files in the individualfeedback_item are in the individualfeedback_context of the individualfeedback
     if ($ispublic) {
         $s_context = context_system::instance();
     } else {
@@ -1230,7 +1246,7 @@ function individualfeedback_save_as_template($feedback, $name, $ispublic = 0) {
         $t_item = clone($item);
 
         unset($t_item->id);
-        $t_item->individualfeedback = 0;
+        $t_item->feedback = 0;
         $t_item->template     = $newtempl->id;
         $t_item->id = $DB->insert_record('individualfeedback_item', $t_item);
         //copy all included files to the individualfeedback_template filearea
@@ -1282,7 +1298,9 @@ function individualfeedback_delete_template($template) {
     //deleting the files from the item is done by individualfeedback_delete_item
     if ($t_items = $DB->get_records("individualfeedback_item", array("template"=>$template->id))) {
         foreach ($t_items as $t_item) {
-            individualfeedback_delete_item($t_item->id, false, $template);
+            if (!\mod_individualfeedback\hack\lib::is_running_core_test()) {
+                \mod_individualfeedback\hack\lib::individualfeedback_delete_item($t_item->id, false, $template);
+            }
         }
     }
     $DB->delete_records("individualfeedback_template", array("id"=>$template->id));
@@ -1290,7 +1308,7 @@ function individualfeedback_delete_template($template) {
 
 /**
  * creates new individualfeedback_item-records from template.
- * if $deleteold is set true so the existing items of the given feedback will be deleted
+ * if $deleteold is set true so the existing items of the given individualfeedback will be deleted
  * if $deleteold is set false so the new items will be appanded to the old items
  *
  * @global object
@@ -1316,7 +1334,7 @@ function individualfeedback_items_from_template($feedback, $templateid, $deleteo
     }
 
     //files in the template_item are in the context of the current course
-    //files in the individualfeedback_item are in the individualfeedback_context of the feedback
+    //files in the individualfeedback_item are in the individualfeedback_context of the individualfeedback
     if ($template->ispublic) {
         $s_context = context_system::instance();
     } else {
@@ -1329,13 +1347,15 @@ function individualfeedback_items_from_template($feedback, $templateid, $deleteo
     //if deleteold then delete all old items before
     //get all items
     if ($deleteold) {
-        if ($feedbackitems = $DB->get_records('individualfeedback_item', array('individualfeedback'=>$feedback->id))) {
-            //delete all items of this feedback
+        if ($feedbackitems = $DB->get_records('individualfeedback_item', array('feedback'=>$feedback->id))) {
+            //delete all items of this individualfeedback
             foreach ($feedbackitems as $item) {
-                individualfeedback_delete_item($item->id, false);
+                if (!\mod_individualfeedback\hack\lib::is_running_core_test()) {
+                    \mod_individualfeedback\hack\lib::individualfeedback_delete_item($item->id, false);
+                }
             }
 
-            $params = array('individualfeedback'=>$feedback->id);
+            $params = array('feedback'=>$feedback->id);
             if ($completeds = $DB->get_records('individualfeedback_completed', $params)) {
                 $completion = new completion_info($course);
                 foreach ($completeds as $completed) {
@@ -1347,13 +1367,13 @@ function individualfeedback_items_from_template($feedback, $templateid, $deleteo
                     }
                 }
             }
-            $DB->delete_records('individualfeedback_completedtmp', array('individualfeedback'=>$feedback->id));
+            $DB->delete_records('individualfeedback_completedtmp', array('feedback'=>$feedback->id));
         }
         $positionoffset = 0;
     } else {
         //if the old items are kept the new items will be appended
         //therefor the new position has an offset
-        $positionoffset = $DB->count_records('individualfeedback_item', array('individualfeedback'=>$feedback->id));
+        $positionoffset = $DB->count_records('individualfeedback_item', array('feedback'=>$feedback->id));
     }
 
     //create items of this new template
@@ -1364,7 +1384,7 @@ function individualfeedback_items_from_template($feedback, $templateid, $deleteo
     foreach ($templitems as $t_item) {
         $item = clone($t_item);
         unset($item->id);
-        $item->individualfeedback = $feedback->id;
+        $item->feedback = $feedback->id;
         $item->template = 0;
         $item->position = $item->position + $positionoffset;
 
@@ -1412,27 +1432,30 @@ function individualfeedback_items_from_template($feedback, $templateid, $deleteo
  * @param string $onlyownorpublic
  * @return array the template recordsets
  */
-function individualfeedback_get_template_list($course, $onlyownorpublic = '') {
+/*function feedback_get_template_list($course, $onlyownorpublic = '') {
     global $DB, $CFG;
 
     switch($onlyownorpublic) {
         case '':
-            $templates = $DB->get_records_select('individualfeedback_template',
+            $templates = $DB->get_records_select('feedback_template',
                                                  'course = ? OR ispublic = 1',
                                                  array($course->id),
                                                  'name');
             break;
         case 'own':
-            $templates = $DB->get_records('individualfeedback_template',
+            $templates = $DB->get_records('feedback_template',
                                           array('course'=>$course->id),
                                           'name');
             break;
         case 'public':
-            $templates = $DB->get_records('individualfeedback_template', array('ispublic'=>1), 'name');
+            $templates = $DB->get_records('feedback_template', array('ispublic'=>1), 'name');
             break;
     }
     return $templates;
-}
+}*/
+
+
+
 
 ////////////////////////////////////////////////
 //Handling der Items
@@ -1497,21 +1520,22 @@ function individualfeedback_load_individualfeedback_items($dir = 'mod/individual
  * @global object
  * @return array pluginnames as string
  */
-function individualfeedback_load_individualfeedback_items_options() {
+/*function individualfeedback_load_individualfeedback_items_options() {
     global $CFG;
 
-    $individualfeedback_options = array("pagebreak" => get_string('add_pagebreak', 'mod_individualfeedback'));
+    $feedback_options = array("pagebreak" => get_string('add_pagebreak', 'individualfeedback'));
+    $feedback_options['questiongroup'] = get_string('questiongroup', 'individualfeedback');
 
-    if (!$individualfeedback_names = individualfeedback_load_individualfeedback_items('mod/individualfeedback/item')) {
+    if (!$feedback_names = individualfeedback_load_individualfeedback_items('mod/individualfeedback/item')) {
         return array();
     }
 
-    foreach ($individualfeedback_names as $fn) {
-        $individualfeedback_options[$fn] = get_string($fn, 'individualfeedback');
+    foreach ($feedback_names as $fn) {
+        $feedback_options[$fn] = get_string($fn, 'individualfeedback');
     }
-    asort($individualfeedback_options);
-    return $individualfeedback_options;
-}
+    asort($feedback_options);
+    return $feedback_options;
+}*/
 
 /**
  * load the available items for the depend item dropdown list shown in the edit_item form
@@ -1524,7 +1548,7 @@ function individualfeedback_load_individualfeedback_items_options() {
 function individualfeedback_get_depend_candidates_for_item($feedback, $item) {
     global $DB;
     //all items for dependitem
-    $where = "individualfeedback = ? AND typ != 'pagebreak' AND hasvalue = 1";
+    $where = "feedback = ? AND typ != 'pagebreak' AND hasvalue = 1";
     $params = array($feedback->id);
     if (isset($item->id) AND $item->id) {
         $where .= ' AND id != ?';
@@ -1578,10 +1602,10 @@ function individualfeedback_update_item($item) {
  * @param object $template if the template is given so the items are bound to it
  * @return void
  */
-function individualfeedback_delete_item($itemid, $renumber = true, $template = false) {
+/*function feedback_delete_item($itemid, $renumber = true, $template = false) {
     global $DB;
 
-    $item = $DB->get_record('individualfeedback_item', array('id'=>$itemid));
+    $item = $DB->get_record('feedback_item', array('id'=>$itemid));
 
     //deleting the files from the item
     $fs = get_file_storage();
@@ -1593,47 +1617,47 @@ function individualfeedback_delete_item($itemid, $renumber = true, $template = f
             $context = context_course::instance($template->course);
         }
         $templatefiles = $fs->get_area_files($context->id,
-                                    'mod_individualfeedback',
+                                    'mod_feedback',
                                     'template',
                                     $item->id,
                                     "id",
                                     false);
 
         if ($templatefiles) {
-            $fs->delete_area_files($context->id, 'mod_individualfeedback', 'template', $item->id);
+            $fs->delete_area_files($context->id, 'mod_feedback', 'template', $item->id);
         }
     } else {
-        if (!$cm = get_coursemodule_from_instance('individualfeedback', $item->individualfeedback)) {
+        if (!$cm = get_coursemodule_from_instance('feedback', $item->feedback)) {
             return false;
         }
         $context = context_module::instance($cm->id);
 
         $itemfiles = $fs->get_area_files($context->id,
-                                    'mod_individualfeedback',
+                                    'mod_feedback',
                                     'item',
                                     $item->id,
                                     "id", false);
 
         if ($itemfiles) {
-            $fs->delete_area_files($context->id, 'mod_individualfeedback', 'item', $item->id);
+            $fs->delete_area_files($context->id, 'mod_feedback', 'item', $item->id);
         }
     }
 
-    $DB->delete_records("individualfeedback_value", array("item"=>$itemid));
-    $DB->delete_records("individualfeedback_valuetmp", array("item"=>$itemid));
+    $DB->delete_records("feedback_value", array("item"=>$itemid));
+    $DB->delete_records("feedback_valuetmp", array("item"=>$itemid));
 
     //remove all depends
-    $DB->set_field('individualfeedback_item', 'dependvalue', '', array('dependitem'=>$itemid));
-    $DB->set_field('individualfeedback_item', 'dependitem', 0, array('dependitem'=>$itemid));
+    $DB->set_field('feedback_item', 'dependvalue', '', array('dependitem'=>$itemid));
+    $DB->set_field('feedback_item', 'dependitem', 0, array('dependitem'=>$itemid));
 
-    $DB->delete_records("individualfeedback_item", array("id"=>$itemid));
+    $DB->delete_records("feedback_item", array("id"=>$itemid));
     if ($renumber) {
-        individualfeedback_renumber_items($item->individualfeedback);
+        feedback_renumber_items($item->feedback);
     }
-}
+}*/
 
 /**
- * deletes all items of the given feedbackid
+ * deletes all items of the given individualfeedbackid
  *
  * @global object
  * @param int $feedbackid
@@ -1655,13 +1679,15 @@ function individualfeedback_delete_all_items($feedbackid) {
         return false;
     }
 
-    if (!$items = $DB->get_records('individualfeedback_item', array('individualfeedback'=>$feedbackid))) {
+    if (!$items = $DB->get_records('individualfeedback_item', array('feedback'=>$feedbackid))) {
         return;
     }
     foreach ($items as $item) {
-        individualfeedback_delete_item($item->id, false);
+        if (!\mod_individualfeedback\hack\lib::is_running_core_test()) {
+            \mod_individualfeedback\hack\lib::individualfeedback_delete_item($item->id, false);
+        }
     }
-    if ($completeds = $DB->get_records('individualfeedback_completed', array('individualfeedback'=>$feedback->id))) {
+    if ($completeds = $DB->get_records('individualfeedback_completed', array('feedback'=>$feedback->id))) {
         $completion = new completion_info($course);
         foreach ($completeds as $completed) {
             $DB->delete_records('individualfeedback_completed', array('id' => $completed->id));
@@ -1673,7 +1699,7 @@ function individualfeedback_delete_all_items($feedbackid) {
         }
     }
 
-    $DB->delete_records('individualfeedback_completedtmp', array('individualfeedback'=>$feedbackid));
+    $DB->delete_records('individualfeedback_completedtmp', array('feedback'=>$feedbackid));
 
 }
 
@@ -1698,7 +1724,7 @@ function individualfeedback_switch_item_required($item) {
 }
 
 /**
- * renumbers all items of the given feedbackid
+ * renumbers all items of the given individualfeedbackid
  *
  * @global object
  * @param int $feedbackid
@@ -1707,7 +1733,7 @@ function individualfeedback_switch_item_required($item) {
 function individualfeedback_renumber_items($feedbackid) {
     global $DB;
 
-    $items = $DB->get_records('individualfeedback_item', array('individualfeedback'=>$feedbackid), 'position');
+    $items = $DB->get_records('individualfeedback_item', array('feedback'=>$feedbackid), 'position');
     $pos = 1;
     if ($items) {
         foreach ($items as $item) {
@@ -1731,7 +1757,7 @@ function individualfeedback_moveup_item($item) {
         return true;
     }
 
-    $params = array('individualfeedback'=>$item->individualfeedback);
+    $params = array('feedback'=>$item->feedback);
     if (!$items = $DB->get_records('individualfeedback_item', $params, 'position')) {
         return false;
     }
@@ -1746,7 +1772,7 @@ function individualfeedback_moveup_item($item) {
             $item->position--;
             individualfeedback_update_item($itembefore);
             individualfeedback_update_item($item);
-            individualfeedback_renumber_items($item->individualfeedback);
+            individualfeedback_renumber_items($item->feedback);
             return true;
         }
         $itembefore = $i;
@@ -1764,7 +1790,7 @@ function individualfeedback_moveup_item($item) {
 function individualfeedback_movedown_item($item) {
     global $DB;
 
-    $params = array('individualfeedback'=>$item->individualfeedback);
+    $params = array('feedback'=>$item->feedback);
     if (!$items = $DB->get_records('individualfeedback_item', $params, 'position')) {
         return false;
     }
@@ -1776,7 +1802,7 @@ function individualfeedback_movedown_item($item) {
             $i->position--;
             individualfeedback_update_item($movedownitem);
             individualfeedback_update_item($i);
-            individualfeedback_renumber_items($item->individualfeedback);
+            individualfeedback_renumber_items($item->feedback);
             return true;
         }
         $movedownitem = $i;
@@ -1795,7 +1821,7 @@ function individualfeedback_movedown_item($item) {
 function individualfeedback_move_item($moveitem, $pos) {
     global $DB;
 
-    $params = array('individualfeedback'=>$moveitem->individualfeedback);
+    $params = array('feedback'=>$moveitem->feedback);
     if (!$allitems = $DB->get_records('individualfeedback_item', $params, 'position')) {
         return false;
     }
@@ -1844,7 +1870,7 @@ function individualfeedback_print_item_show_value() {
 }
 
 /**
- * if the user completes a feedback and there is a pagebreak so the values are saved temporary.
+ * if the user completes a individualfeedback and there is a pagebreak so the values are saved temporary.
  * the values are not saved permanently until the user click on save button
  *
  * @global object
@@ -1877,12 +1903,12 @@ function individualfeedback_set_tmp_values($feedbackcompleted) {
 /**
  * this saves the temporary saved values permanently
  *
- * @global object
  * @param object $feedbackcompletedtmp the temporary completed
  * @param stdClass|null $feedbackcompleted the target completed
  * @return int the id of the completed
+ * @global object
  */
-function individualfeedback_save_tmp_values($feedbackcompletedtmp, ?stdClass $feedbackcompleted = null) {
+function individualfeedback_save_tmp_values($feedbackcompletedtmp, ?stdClass $feedbackcompleted = null)  {
     global $DB;
 
     $tmpcplid = $feedbackcompletedtmp->id;
@@ -1899,7 +1925,7 @@ function individualfeedback_save_tmp_values($feedbackcompletedtmp, ?stdClass $fe
         $feedbackcompleted->id = $DB->insert_record('individualfeedback_completed', $feedbackcompleted);
     }
 
-    $allitems = $DB->get_records('individualfeedback_item', array('individualfeedback' => $feedbackcompleted->individualfeedback));
+    $allitems = $DB->get_records('individualfeedback_item', array('feedback' => $feedbackcompleted->feedback));
 
     //save all the new values from individualfeedback_valuetmp
     //get all values of tmp-completed
@@ -1912,9 +1938,9 @@ function individualfeedback_save_tmp_values($feedbackcompletedtmp, ?stdClass $fe
             $ditem = $allitems[$item->dependitem];
             while ($ditem !== null) {
                 $check = individualfeedback_compare_item_value($tmpcplid,
-                                            $ditem,
-                                            $item->dependvalue,
-                                            true);
+                    $ditem,
+                    $item->dependvalue,
+                    true);
                 if (!$check) {
                     break;
                 }
@@ -1940,7 +1966,7 @@ function individualfeedback_save_tmp_values($feedbackcompletedtmp, ?stdClass $fe
     $DB->delete_records('individualfeedback_completedtmp', array('id'=>$tmpcplid));
 
     // Trigger event for the delete action we performed.
-    $cm = get_coursemodule_from_instance('individualfeedback', $feedbackcompleted->individualfeedback);
+    $cm = get_coursemodule_from_instance('individualfeedback', $feedbackcompleted->feedback);
     $event = \mod_individualfeedback\event\response_submitted::create_from_record($feedbackcompleted, $cm);
     $event->trigger();
     return $feedbackcompleted->id;
@@ -1967,19 +1993,19 @@ function individualfeedback_delete_completedtmp() {
  *
  * @global object
  * @param int $feedbackid
- * @return int|false false if there already is a pagebreak on last position or the id of the pagebreak-item
+ * @return mixed false if there already is a pagebreak on last position or the id of the pagebreak-item
  */
 function individualfeedback_create_pagebreak($feedbackid) {
     global $DB;
 
-    // Disallow pagebreak if there's already one present in last position, or the feedback has no items.
-    $lastposition = $DB->count_records('individualfeedback_item', array('individualfeedback'=>$feedbackid));
+    //check if there already is a pagebreak on the last position
+    $lastposition = $DB->count_records('individualfeedback_item', array('feedback'=>$feedbackid));
     if ($lastposition == individualfeedback_get_last_break_position($feedbackid)) {
         return false;
     }
 
     $item = new stdClass();
-    $item->individualfeedback = $feedbackid;
+    $item->feedback = $feedbackid;
 
     $item->template=0;
 
@@ -1997,7 +2023,7 @@ function individualfeedback_create_pagebreak($feedbackid) {
 }
 
 /**
- * get all positions of pagebreaks in the given feedback
+ * get all positions of pagebreaks in the given individualfeedback
  *
  * @global object
  * @param int $feedbackid
@@ -2006,7 +2032,7 @@ function individualfeedback_create_pagebreak($feedbackid) {
 function individualfeedback_get_all_break_positions($feedbackid) {
     global $DB;
 
-    $params = array('typ'=>'pagebreak', 'individualfeedback'=>$feedbackid);
+    $params = array('typ'=>'pagebreak', 'feedback'=>$feedbackid);
     $allbreaks = $DB->get_records_menu('individualfeedback_item', $params, 'position', 'id, position');
     if (!$allbreaks) {
         return false;
@@ -2139,7 +2165,7 @@ function individualfeedback_update_values() {
  * @param bool $ignore_empty if this is set true so empty values are not delivered
  * @return array the value-records
  */
-function individualfeedback_get_group_values($item,
+/*function feedback_get_group_values($item,
                                    $groupid = false,
                                    $courseid = false,
                                    $ignore_empty = false) {
@@ -2158,7 +2184,7 @@ function individualfeedback_get_group_values($item,
         }
 
         $query = 'SELECT fbv .  *
-                    FROM {individualfeedback_value} fbv, {individualfeedback_completed} fbc, {groups_members} gm
+                    FROM {feedback_value} fbv, {feedback_completed} fbc, {groups_members} gm
                    WHERE fbv.item = :itemid
                          AND fbv.completed = fbc.id
                          AND fbc.userid = gm.userid
@@ -2181,31 +2207,31 @@ function individualfeedback_get_group_values($item,
         if ($courseid) {
             $select = "item = :itemid AND course_id = :courseid ".$ignore_empty_select;
             $params += array('itemid' => $item->id, 'courseid' => $courseid);
-            $values = $DB->get_records_select('individualfeedback_value', $select, $params);
+            $values = $DB->get_records_select('feedback_value', $select, $params);
         } else {
             $select = "item = :itemid ".$ignore_empty_select;
             $params += array('itemid' => $item->id);
-            $values = $DB->get_records_select('individualfeedback_value', $select, $params);
+            $values = $DB->get_records_select('feedback_value', $select, $params);
         }
     }
-    $params = array('id'=>$item->individualfeedback);
-    if ($DB->get_field('individualfeedback', 'anonymous', $params) == INDIVIDUALFEEDBACK_ANONYMOUS_YES) {
+    $params = array('id'=>$item->feedback);
+    if ($DB->get_field('feedback', 'anonymous', $params) == FEEDBACK_ANONYMOUS_YES) {
         if (is_array($values)) {
             shuffle($values);
         }
     }
     return $values;
-}
+}*/
 
 /**
  * check for multiple_submit = false.
- * if the feedback is global so the courseid must be given
+ * if the individualfeedback is global so the courseid must be given
  *
  * @global object
  * @global object
  * @param int $feedbackid
  * @param int $courseid
- * @return boolean true if the feedback already is submitted otherwise false
+ * @return boolean true if the individualfeedback already is submitted otherwise false
  */
 function individualfeedback_is_already_submitted($feedbackid, $courseid = false) {
     global $USER, $DB;
@@ -2214,7 +2240,7 @@ function individualfeedback_is_already_submitted($feedbackid, $courseid = false)
         return false;
     }
 
-    $params = array('userid' => $USER->id, 'individualfeedback' => $feedbackid);
+    $params = array('userid' => individualfeedback_hash_userid($USER->id), 'individualfeedback' => $feedbackid);
     if ($courseid) {
         $params['courseid'] = $courseid;
     }
@@ -2222,11 +2248,11 @@ function individualfeedback_is_already_submitted($feedbackid, $courseid = false)
 }
 
 /**
- * @deprecated since Moodle 3.1. Use individualfeedback_get_current_completed_tmp() or individualfeedback_get_last_completed.
+ * @deprecated since Moodle 3.1. Use feedback_get_current_completed_tmp() or feedback_get_last_completed.
  */
 function individualfeedback_get_current_completed() {
     throw new coding_exception('individualfeedback_get_current_completed() can not be used anymore. Please ' .
-            'use either individualfeedback_get_current_completed_tmp() or individualfeedback_get_last_completed()');
+        'use either individualfeedback_get_current_completed_tmp() or individualfeedback_get_last_completed()');
 }
 
 /**
@@ -2267,7 +2293,7 @@ function individualfeedback_get_completeds_group($feedback, $groupid = false, $c
                 return false;
             }
         } else {
-            if ($values = $DB->get_records('individualfeedback_completed', array('individualfeedback'=>$feedback->id))) {
+            if ($values = $DB->get_records('individualfeedback_completed', array('feedback'=>$feedback->id))) {
                 return $values;
             } else {
                 return false;
@@ -2308,7 +2334,7 @@ function individualfeedback_get_completeds_group_count($feedback, $groupid = fal
 }
 
 /**
- * deletes all completed-recordsets from a feedback.
+ * deletes all completed-recordsets from a individualfeedback.
  * all related data such as values also will be deleted
  *
  * @param stdClass|int $feedback
@@ -2360,7 +2386,7 @@ function individualfeedback_delete_completed($completed, $feedback = null, $cm =
         }
     }
 
-    if (!$feedback && !($feedback = $DB->get_record('individualfeedback', array('id' => $completed->individualfeedback)))) {
+    if (!$feedback && !($feedback = $DB->get_record('individualfeedback', array('id' => $completed->feedback)))) {
         return false;
     }
 
@@ -2411,55 +2437,55 @@ function individualfeedback_is_individualfeedback_in_sitecourse_map() {
 }
 
 /**
- * gets the feedbacks from table individualfeedback_sitecourse_map.
- * this is used to show the global feedbacks on the feedback block
- * all feedbacks with the following criteria will be selected:<br />
+ * gets the individualfeedbacks from table individualfeedback_sitecourse_map.
+ * this is used to show the global individualfeedbacks on the individualfeedback block
+ * all individualfeedbacks with the following criteria will be selected:<br />
  *
- * 1) all feedbacks which id are listed together with the courseid in sitecoursemap and<br />
- * 2) all feedbacks which not are listed in sitecoursemap
+ * 1) all individualfeedbacks which id are listed together with the courseid in sitecoursemap and<br />
+ * 2) all individualfeedbacks which not are listed in sitecoursemap
  *
  * @global object
  * @param int $courseid
- * @return array the feedback-records
+ * @return array the individualfeedback-records
  */
-function individualfeedback_get_feedbacks_from_sitecourse_map($courseid) {
+function individualfeedback_get_individualfeedbacks_from_sitecourse_map($courseid) {
     global $DB;
 
-    //first get all feedbacks listed in sitecourse_map with named courseid
+    //first get all individualfeedbacks listed in sitecourse_map with named courseid
     $sql = "SELECT f.id AS id,
                    cm.id AS cmid,
                    f.name AS name,
                    f.timeopen AS timeopen,
                    f.timeclose AS timeclose
-            FROM {feedback} f, {course_modules} cm, {individualfeedback_sitecourse_map} sm, {modules} m
+            FROM {individualfeedback} f, {course_modules} cm, {individualfeedback_sitecourse_map} sm, {modules} m
             WHERE f.id = cm.instance
                    AND f.course = '".SITEID."'
                    AND m.id = cm.module
                    AND m.name = 'individualfeedback'
                    AND sm.courseid = ?
-                   AND sm.feedbackid = f.id";
+                   AND sm.individualfeedbackid = f.id";
 
     if (!$feedbacks1 = $DB->get_records_sql($sql, array($courseid))) {
         $feedbacks1 = array();
     }
 
-    //second get all feedbacks not listed in sitecourse_map
+    //second get all individualfeedbacks not listed in sitecourse_map
     $feedbacks2 = array();
     $sql = "SELECT f.id AS id,
                    cm.id AS cmid,
                    f.name AS name,
                    f.timeopen AS timeopen,
                    f.timeclose AS timeclose
-            FROM {feedback} f, {course_modules} cm, {modules} m
+            FROM {individualfeedback} f, {course_modules} cm, {modules} m
             WHERE f.id = cm.instance
                    AND f.course = '".SITEID."'
                    AND m.id = cm.module
                    AND m.name = 'individualfeedback'";
-    if (!$allfeedbacks = $DB->get_records_sql($sql)) {
-        $allfeedbacks = array();
+    if (!$allindividualfeedbacks = $DB->get_records_sql($sql)) {
+        $allindividualfeedbacks = array();
     }
-    foreach ($allfeedbacks as $a) {
-        if (!$DB->record_exists('individualfeedback_sitecourse_map', array('feedbackid'=>$a->id))) {
+    foreach ($allindividualfeedbacks as $a) {
+        if (!$DB->record_exists('individualfeedback_sitecourse_map', array('individualfeedbackid'=>$a->id))) {
             $feedbacks2[] = $a;
         }
     }
@@ -2484,7 +2510,7 @@ function individualfeedback_get_courses_from_sitecourse_map($feedbackid) {
     $sql = "SELECT c.id, c.fullname, c.shortname
               FROM {individualfeedback_sitecourse_map} f, {course} c
              WHERE c.id = f.courseid
-                   AND f.feedbackid = ?
+                   AND f.individualfeedbackid = ?
           ORDER BY c.fullname";
 
     return $DB->get_records_sql($sql, array($feedbackid));
@@ -2492,7 +2518,7 @@ function individualfeedback_get_courses_from_sitecourse_map($feedbackid) {
 }
 
 /**
- * Updates the course mapping for the feedback
+ * Updates the course mapping for the individualfeedback
  *
  * @param stdClass $feedback
  * @param array $courses array of course ids
@@ -2502,12 +2528,12 @@ function individualfeedback_update_sitecourse_map($feedback, $courses) {
     if (empty($courses)) {
         $courses = array();
     }
-    $currentmapping = $DB->get_fieldset_select('individualfeedback_sitecourse_map', 'courseid', 'feedbackid=?', array($feedback->id));
+    $currentmapping = $DB->get_fieldset_select('individualfeedback_sitecourse_map', 'courseid', 'individualfeedbackid=?', array($feedback->id));
     foreach (array_diff($courses, $currentmapping) as $courseid) {
-        $DB->insert_record('individualfeedback_sitecourse_map', array('feedbackid' => $feedback->id, 'courseid' => $courseid));
+        $DB->insert_record('individualfeedback_sitecourse_map', array('individualfeedbackid' => $feedback->id, 'courseid' => $courseid));
     }
     foreach (array_diff($currentmapping, $courses) as $courseid) {
-        $DB->delete_records('individualfeedback_sitecourse_map', array('feedbackid' => $feedback->id, 'courseid' => $courseid));
+        $DB->delete_records('individualfeedback_sitecourse_map', array('individualfeedbackid' => $feedback->id, 'courseid' => $courseid));
     }
     // TODO MDL-53574 add events.
 }
@@ -2533,7 +2559,7 @@ function individualfeedback_print_numeric_option_list() {
 }
 
 /**
- * sends an email to the teachers of the course where the given feedback is placed.
+ * sends an email to the teachers of the course where the given individualfeedback is placed.
  *
  * @global object
  * @global object
@@ -2579,33 +2605,33 @@ function individualfeedback_send_email($cm, $feedback, $course, $user, $complete
 
     if ($teachers) {
 
-        $strfeedbacks = get_string('modulenameplural', 'mod_individualfeedback');
-        $strfeedback  = get_string('modulename', 'mod_individualfeedback');
+        $strindividualfeedbacks = get_string('modulenameplural', 'individualfeedback');
+        $strindividualfeedback  = get_string('modulename', 'individualfeedback');
 
         if ($feedback->anonymous == INDIVIDUALFEEDBACK_ANONYMOUS_NO) {
             $printusername = fullname($user);
         } else {
-            $printusername = get_string('anonymous_user', 'mod_individualfeedback');
+            $printusername = get_string('anonymous_user', 'individualfeedback');
         }
 
         foreach ($teachers as $teacher) {
             $info = new stdClass();
             $info->username = $printusername;
-            $info->individualfeedback = format_string($feedback->name, true);
+            $info->feedback = format_string($feedback->name, true);
             $info->url = $CFG->wwwroot.'/mod/individualfeedback/show_entries.php?'.
                             'id='.$cm->id.'&'.
                             'userid=' . $user->id;
             if ($completed) {
                 $info->url .= '&showcompleted=' . $completed->id;
                 if ($feedback->course == SITEID) {
-                    // Course where feedback was completed (for site feedbacks only).
+                    // Course where individualfeedback was completed (for site individualfeedbacks only).
                     $info->url .= '&courseid=' . $completed->courseid;
                 }
             }
 
-            $a = array('username' => $info->username, 'feedbackname' => $feedback->name);
+            $a = array('username' => $info->username, 'individualfeedbackname' => $feedback->name);
 
-            $postsubject = get_string('feedbackcompleted', 'individualfeedback', $a);
+            $postsubject = get_string('individualfeedbackcompleted', 'individualfeedback', $a);
             $posttext = individualfeedback_send_email_text($info, $course);
 
             if ($teacher->mailformat == 1) {
@@ -2667,7 +2693,7 @@ function individualfeedback_send_email($cm, $feedback, $course, $user, $complete
 }
 
 /**
- * sends an email to the teachers of the course where the given feedback is placed.
+ * sends an email to the teachers of the course where the given individualfeedback is placed.
  *
  * @global object
  * @uses FORMAT_PLAIN
@@ -2687,19 +2713,19 @@ function individualfeedback_send_email_anonym($cm, $feedback, $course) {
 
     if ($teachers) {
 
-        $strfeedbacks = get_string('modulenameplural', 'mod_individualfeedback');
-        $strfeedback  = get_string('modulename', 'mod_individualfeedback');
-        $printusername = get_string('anonymous_user', 'mod_individualfeedback');
+        $strindividualfeedbacks = get_string('modulenameplural', 'individualfeedback');
+        $strindividualfeedback  = get_string('modulename', 'individualfeedback');
+        $printusername = get_string('anonymous_user', 'individualfeedback');
 
         foreach ($teachers as $teacher) {
             $info = new stdClass();
             $info->username = $printusername;
-            $info->individualfeedback = format_string($feedback->name, true);
+            $info->feedback = format_string($feedback->name, true);
             $info->url = $CFG->wwwroot.'/mod/individualfeedback/show_entries.php?id=' . $cm->id;
 
-            $a = array('username' => $info->username, 'feedbackname' => $feedback->name);
+            $a = array('username' => $info->username, 'individualfeedbackname' => $feedback->name);
 
-            $postsubject = get_string('feedbackcompleted', 'individualfeedback', $a);
+            $postsubject = get_string('individualfeedbackcompleted', 'individualfeedback', $a);
             $posttext = individualfeedback_send_email_text($info, $course);
 
             if ($teacher->mailformat == 1) {
@@ -2737,14 +2763,14 @@ function individualfeedback_send_email_anonym($cm, $feedback, $course) {
 /**
  * send the text-part of the email
  *
- * @param object $info includes some infos about the feedback you want to send
+ * @param object $info includes some infos about the individualfeedback you want to send
  * @param object $course
  * @return string the text you want to post
  */
 function individualfeedback_send_email_text($info, $course) {
     $coursecontext = context_course::instance($course->id);
     $courseshortname = format_string($course->shortname, true, array('context' => $coursecontext));
-    $posttext  = $courseshortname.' -> '.get_string('modulenameplural', 'mod_individualfeedback').' -> '.
+    $posttext  = $courseshortname.' -> '.get_string('modulenameplural', 'individualfeedback').' -> '.
                     $info->feedback."\n";
     $posttext .= '---------------------------------------------------------------------'."\n";
     $posttext .= get_string("emailteachermail", "individualfeedback", $info)."\n";
@@ -2757,7 +2783,7 @@ function individualfeedback_send_email_text($info, $course) {
  * send the html-part of the email
  *
  * @global object
- * @param object $info includes some infos about the feedback you want to send
+ * @param object $info includes some infos about the individualfeedback you want to send
  * @param object $course
  * @return string the text you want to post
  */
@@ -2766,13 +2792,13 @@ function individualfeedback_send_email_html($info, $course, $cm) {
     $coursecontext = context_course::instance($course->id);
     $courseshortname = format_string($course->shortname, true, array('context' => $coursecontext));
     $course_url = $CFG->wwwroot.'/course/view.php?id='.$course->id;
-    $individualfeedback_all_url = $CFG->wwwroot.'/mod/individualfeedback/index.php?id='.$course->id;
-    $individualfeedback_url = $CFG->wwwroot.'/mod/individualfeedback/view.php?id='.$cm->id;
+    $feedback_all_url = $CFG->wwwroot.'/mod/individualfeedback/index.php?id='.$course->id;
+    $feedback_url = $CFG->wwwroot.'/mod/individualfeedback/view.php?id='.$cm->id;
 
     $posthtml = '<p><font face="sans-serif">'.
             '<a href="'.$course_url.'">'.$courseshortname.'</a> ->'.
-            '<a href="'.$individualfeedback_all_url.'">'.get_string('modulenameplural', 'mod_individualfeedback').'</a> ->'.
-            '<a href="'.$individualfeedback_url.'">'.$info->feedback.'</a></font></p>';
+            '<a href="'.$feedback_all_url.'">'.get_string('modulenameplural', 'individualfeedback').'</a> ->'.
+            '<a href="'.$feedback_url.'">'.$info->feedback.'</a></font></p>';
     $posthtml .= '<hr /><font face="sans-serif">';
     $posthtml .= '<p>'.get_string('emailteachermailhtml', 'individualfeedback', $info).'</p>';
     $posthtml .= '</font><hr />';
@@ -2805,28 +2831,28 @@ function individualfeedback_extend_settings_navigation(settings_navigation $sett
     }
 
     if (has_capability('mod/individualfeedback:edititems', $context)) {
-        $feedbacknode->add(get_string('questions', 'mod_individualfeedback'),
+        $feedbacknode->add(get_string('questions', 'individualfeedback'),
             new moodle_url('/mod/individualfeedback/edit.php', ['id' => $settings->get_page()->cm->id]),
             navigation_node::TYPE_CUSTOM, null, 'questionnode');
 
-        $feedbacknode->add(get_string('templates', 'mod_individualfeedback'),
+        $feedbacknode->add(get_string('templates', 'individualfeedback'),
             new moodle_url('/mod/individualfeedback/manage_templates.php', ['id' => $settings->get_page()->cm->id, 'mode' => 'manage']),
             navigation_node::TYPE_CUSTOM, null, 'templatenode');
     }
 
     if (has_capability('mod/individualfeedback:mapcourse', $context) && $settings->get_page()->course->id == SITEID) {
-        $feedbacknode->add(get_string('mappedcourses', 'mod_individualfeedback'),
+        $feedbacknode->add(get_string('mappedcourses', 'individualfeedback'),
             new moodle_url('/mod/individualfeedback/mapcourse.php', ['id' => $settings->get_page()->cm->id]),
             navigation_node::TYPE_CUSTOM, null, 'mapcourse');
     }
 
     $feedback = $settings->get_page()->activityrecord;
     if ($feedback->course == SITEID) {
-        $analysisnode = navigation_node::create(get_string('analysis', 'mod_individualfeedback'),
+        $analysisnode = navigation_node::create(get_string('analysis', 'individualfeedback'),
             new moodle_url('/mod/individualfeedback/analysis_course.php', ['id' => $settings->get_page()->cm->id]),
             navigation_node::TYPE_CUSTOM, null, 'feedbackanalysis');
     } else {
-        $analysisnode = navigation_node::create(get_string('analysis', 'mod_individualfeedback'),
+        $analysisnode = navigation_node::create(get_string('analysis', 'individualfeedback'),
             new moodle_url('/mod/individualfeedback/analysis.php', ['id' => $settings->get_page()->cm->id]),
             navigation_node::TYPE_CUSTOM, null, 'feedbackanalysis');
     }
@@ -2845,10 +2871,10 @@ function individualfeedback_extend_settings_navigation(settings_navigation $sett
 }
 
 function individualfeedback_init_individualfeedback_session() {
-    //initialize the feedback-Session - not nice at all!!
+    //initialize the individualfeedback-Session - not nice at all!!
     global $SESSION;
     if (!empty($SESSION)) {
-        if (!isset($SESSION->feedback) OR !is_object($SESSION->feedback)) {
+        if (!isset($SESSION->individualfeedback) OR !is_object($SESSION->individualfeedback)) {
             $SESSION->individualfeedback = new stdClass();
         }
     }
@@ -2861,13 +2887,13 @@ function individualfeedback_init_individualfeedback_session() {
  * @param stdClass $currentcontext Current context of block
  */
 function individualfeedback_page_type_list($pagetype, $parentcontext, $currentcontext) {
-    $module_pagetype = array('mod-feedback-*'=>get_string('page-mod-feedback-x', 'mod_individualfeedback'));
+    $module_pagetype = array('mod-individualfeedback-*'=>get_string('page-mod-individualfeedback-x', 'individualfeedback'));
     return $module_pagetype;
 }
 
 /**
  * Move save the items of the given $feedback in the order of $itemlist.
- * @param array $itemlist a list with item ids
+ * @param string $itemlist a comma separated list with item ids
  * @param stdClass $feedback
  * @return bool true if success
  */
@@ -2881,13 +2907,13 @@ function individualfeedback_ajax_saveitemorder($itemlist, $feedback) {
         $result = $result && $DB->set_field('individualfeedback_item',
                                             'position',
                                             $position,
-                                            array('id'=>$itemid, 'individualfeedback'=>$feedback->id));
+                                            array('id'=>$itemid, 'feedback'=>$feedback->id));
     }
     return $result;
 }
 
 /**
- * Checks if current user is able to view feedback on this course.
+ * Checks if current user is able to view individualfeedback on this course.
  *
  * @param stdClass $feedback
  * @param context_module $context
@@ -2940,7 +2966,7 @@ function individualfeedback_check_updates_since(cm_info $cm, $from, $filter = ar
     $updates->attemptsfinished = (object) array('updated' => false);
     $updates->attemptsunfinished = (object) array('updated' => false);
     $select = 'individualfeedback = ? AND userid = ? AND timemodified > ?';
-    $params = array($cm->instance, $USER->id, $from);
+    $params = array($cm->instance, individualfeedback_hash_userid($USER->id), $from);
 
     $attemptsfinished = $DB->get_records_select('individualfeedback_completed', $select, $params, '', 'id');
     if (!empty($attemptsfinished)) {
@@ -2998,8 +3024,8 @@ function individualfeedback_check_updates_since(cm_info $cm, $from, $filter = ar
  * @return \core_calendar\local\event\entities\action_interface|null
  */
 function mod_individualfeedback_core_calendar_provide_event_action(calendar_event $event,
-                                                         \core_calendar\action_factory $factory,
-                                                         int $userid = 0) {
+                                                                    \core_calendar\action_factory $factory,
+                                                                    int $userid = 0) {
 
     global $USER;
 
@@ -3025,7 +3051,7 @@ function mod_individualfeedback_core_calendar_provide_event_action(calendar_even
     $feedbackcompletion = new mod_individualfeedback_completion(null, $cm, 0, false, null, null, $userid);
 
     if (!empty($cm->customdata['timeclose']) && $cm->customdata['timeclose'] < time()) {
-        // Feedback is already closed, do not display it even if it was never submitted.
+        // individualfeedback is already closed, do not display it even if it was never submitted.
         return null;
     }
 
@@ -3034,16 +3060,16 @@ function mod_individualfeedback_core_calendar_provide_event_action(calendar_even
         return null;
     }
 
-    // The feedback is actionable if it does not have timeopen or timeopen is in the past.
+    // The individualfeedback is actionable if it does not have timeopen or timeopen is in the past.
     $actionable = $feedbackcompletion->is_open();
 
-    if ($actionable && $feedbackcompletion->is_already_submitted(false)) {
-        // There is no need to display anything if the user has already submitted the feedback.
+    if ($actionable && $feedbackcompletion->is_already_submitted()) {
+        // There is no need to display anything if the user has already submitted the individualfeedback.
         return null;
     }
 
     return $factory->create_instance(
-        get_string('answerquestions', 'mod_individualfeedback'),
+        get_string('answerquestions', 'individualfeedback'),
         new \moodle_url('/mod/individualfeedback/view.php', ['id' => $cm->id]),
         1,
         $actionable
@@ -3051,7 +3077,7 @@ function mod_individualfeedback_core_calendar_provide_event_action(calendar_even
 }
 
 /**
- * Add a get_coursemodule_info function in case any feedback type wants to add 'extra' information
+ * Add a get_coursemodule_info function in case any individualfeedback type wants to add 'extra' information
  * for the course (see resource).
  *
  * Given a course_module object, this function returns any "extra" information that may be needed
@@ -3114,7 +3140,7 @@ function mod_individualfeedback_get_completion_active_rule_descriptions($cm) {
         switch ($key) {
             case 'completionsubmit':
                 if (!empty($val)) {
-                    $descriptions[] = get_string('completionsubmit', 'mod_individualfeedback');
+                    $descriptions[] = get_string('completionsubmit', 'individualfeedback');
                 }
                 break;
             default:
@@ -3155,7 +3181,7 @@ function mod_individualfeedback_core_calendar_get_valid_event_timestart_range(\c
         if (!empty($instance->timeclose)) {
             $maxdate = [
                 $instance->timeclose,
-                get_string('openafterclose', 'mod_individualfeedback')
+                get_string('openafterclose', 'individualfeedback')
             ];
         }
     } else if ($event->eventtype == INDIVIDUALFEEDBACK_EVENT_TYPE_CLOSE) {
@@ -3164,7 +3190,7 @@ function mod_individualfeedback_core_calendar_get_valid_event_timestart_range(\c
         if (!empty($instance->timeopen)) {
             $mindate = [
                 $instance->timeopen,
-                get_string('closebeforeopen', 'mod_individualfeedback')
+                get_string('closebeforeopen', 'individualfeedback')
             ];
         }
     }
@@ -3173,10 +3199,10 @@ function mod_individualfeedback_core_calendar_get_valid_event_timestart_range(\c
 }
 
 /**
- * This function will update the feedback module according to the
+ * This function will update the individualfeedback module according to the
  * event that has been modified.
  *
- * It will set the timeopen or timeclose value of the feedback instance
+ * It will set the timeopen or timeclose value of the individualfeedback instance
  * according to the type of event provided.
  *
  * @throws \moodle_exception
@@ -3212,8 +3238,8 @@ function mod_individualfeedback_core_calendar_event_timestart_updated(\calendar_
     }
 
     if ($event->eventtype == INDIVIDUALFEEDBACK_EVENT_TYPE_OPEN) {
-        // If the event is for the feedback activity opening then we should
-        // set the start time of the feedback activity to be the new start
+        // If the event is for the individualfeedback activity opening then we should
+        // set the start time of the individualfeedback activity to be the new start
         // time of the event.
         if ($feedback->timeopen != $event->timestart) {
             $feedback->timeopen = $event->timestart;
@@ -3221,8 +3247,8 @@ function mod_individualfeedback_core_calendar_event_timestart_updated(\calendar_
             $modified = true;
         }
     } else if ($event->eventtype == INDIVIDUALFEEDBACK_EVENT_TYPE_CLOSE) {
-        // If the event is for the feedback activity closing then we should
-        // set the end time of the feedback activity to be the new start
+        // If the event is for the individualfeedback activity closing then we should
+        // set the end time of the individualfeedback activity to be the new start
         // time of the event.
         if ($feedback->timeclose != $event->timestart) {
             $feedback->timeclose = $event->timestart;
@@ -3244,8 +3270,9 @@ function mod_individualfeedback_core_calendar_event_timestart_updated(\calendar_
  * @param string $eventtype The event type.
  * @return lang_string The event type lang string.
  */
-function mod_individualfeedback_core_calendar_get_event_action_string(string $eventtype): string {
-    $modulename = get_string('modulename', 'mod_individualfeedback');
+function mod_individualfeedback_core_calendar_get_event_action_string(string $eventtype): string
+{
+    $modulename = get_string('modulename', 'individualfeedback');
 
     switch ($eventtype) {
         case INDIVIDUALFEEDBACK_EVENT_TYPE_OPEN:
@@ -3260,3 +3287,232 @@ function mod_individualfeedback_core_calendar_get_event_action_string(string $ev
 
     return get_string($identifier, 'individualfeedback', $modulename);
 }
+
+// New functions from here.
+
+// ByCS selfmade addon functions
+// Please add additinonal descriptions and inline documentation to these functions.
+
+/**
+ * @param $userid
+ * @return string
+ */
+function individualfeedback_hash_userid($userid) {
+    $salt = 'IeJ8GI6CD06UDU0y3lUVMQ8D7slxBlZm0LVRZRZV';
+    return sha1($salt . $userid);
+}
+
+/**
+ * @return string[]
+ */
+function individualfeedback_get_statistic_question_types() {
+    return array('multichoice', 'fourlevelapproval', 'fourlevelfrequency', 'fivelevelapproval');
+}
+
+/**
+ * @param $feedbackid
+ * @return false|mixed
+ * @throws dml_exception
+ */
+function individualfeedback_get_linkedid($feedbackid) {
+    global $DB;
+
+    return $DB->get_field('individualfeedback_linked', 'linkedid', array('feedbackid' => $feedbackid));
+}
+
+/**
+ * @param $oldid
+ * @param $newid
+ * @return void
+ * @throws dml_exception
+ */
+function individualfeedback_create_linked_record($oldid, $newid) {
+    global $DB;
+
+    $linkedid = individualfeedback_get_linkedid($oldid);
+
+    // No linked instances yet.
+    if (!$linkedid) {
+        $sql = "SELECT MAX(linkedid) FROM {individualfeedback_linked}";
+        if (!$highestid = $DB->get_field_sql($sql)) {
+            $highestid = 0;
+        }
+
+        // Raise the highestid.
+        $highestid++;
+
+        $record = new stdClass();
+        $record->linkedid = $highestid;
+        $record->feedbackid = $oldid;
+        $DB->insert_record('individualfeedback_linked', $record);
+
+        $record = new stdClass();
+        $record->linkedid = $highestid;
+        $record->feedbackid = $newid;
+        $DB->insert_record('individualfeedback_linked', $record);
+    } else {
+        $record = new stdClass();
+        $record->linkedid = $linkedid;
+        $record->feedbackid = $newid;
+        $DB->insert_record('individualfeedback_linked', $record);
+    }
+}
+
+/**
+ * @param $feedbackid
+ * @return bool
+ * @throws dml_exception
+ */
+function individualfeedback_check_linked_questions($feedbackid) {
+    global $DB;
+
+    $allfeedbacks = individualfeedback_get_linked_individualfeedbacks($feedbackid);
+    if (count($allfeedbacks) < 2) {
+        return false;
+    }
+
+    $countitems = 0;
+    $firsttime = true;
+    foreach ($allfeedbacks as $feedback) {
+        $items = $DB->get_records('individualfeedback_item', array('individualfeedback' => $feedback->id));
+        $allfeedbacks[$feedback->id]->items = $items;
+        if (!$firsttime) {
+            if ($countitems != count($items)) {
+                return false;
+            }
+        }
+
+        $firsttime = false;
+        $countitems = count($items);
+    }
+
+    $base = reset($allfeedbacks);
+    $baseitemkeys = array_keys($base->items);
+
+    $firsttime = true;
+    $checkfields = array('name', 'label', 'typ', 'position');
+    foreach ($allfeedbacks as $feedback) {
+        // Skip the first run, because you don't need to compare with itself.
+        if ($firsttime) {
+            $firsttime = false;
+            continue;
+        }
+
+        $counter = 0;
+        foreach ($feedback->items as $key => $item) {
+            $checkitemkey = $baseitemkeys[$counter];
+            $checkitem = $base->items[$checkitemkey];
+            foreach ($checkfields as $field) {
+                if ($item->$field != $checkitem->$field) {
+                    return false;
+                }
+            }
+
+            $counter++;
+        }
+    }
+
+    return true;
+}
+
+/**
+ * @param $feedbackid
+ * @return array
+ * @throws dml_exception
+ */
+function individualfeedback_get_linked_individualfeedbacks($feedbackid) {
+    global $DB;
+
+    if (!$linkedid = individualfeedback_get_linkedid($feedbackid)) {
+        return array();
+    }
+
+    $sql = "SELECT ifb.*
+    FROM {individualfeedback} ifb
+    JOIN {individualfeedback_linked} ifbl ON ifb.id = ifbl.individualfeedbackid
+    WHERE ifbl.linkedid = :linkedid
+    ORDER BY ifb.timemodified DESC";
+
+    return $DB->get_records_sql($sql, array('linkedid' => $linkedid));
+}
+
+/**
+ * Returns all other caps used in module.
+ *
+ * @return array
+ */
+function individualfeedback_get_extra_capabilities() {
+    return array('moodle/site:accessallgroups');
+}
+
+/**
+ *  Returns true if the current users is logged in as someone else.
+ *
+ * @global object
+ * @return boolean
+ */
+function individualfeedback_check_is_loggedinas() {
+    global $USER;
+    if (isset($USER->realuser) && $USER->realuser != $USER->id) {
+        return true;
+    }
+
+    return false;
+}
+
+/**
+ * Get the items of a template
+ *
+ * @param int $templateid
+ * @return array the template items
+ */
+function individualfeedback_get_template_items($templateid) {
+    global $DB;
+
+    return $DB->get_records('individualfeedback_item', array('template' => $templateid), 'position');
+}
+
+/**
+ * deletes all items of the given group, before groups get's deleted.
+ *
+ * @global object
+ * @param int $feedbackid
+ * @return void
+ */
+function individualfeedback_delete_group_items($groupitem) {
+    global $DB;
+
+    if (!$endgroupitem = $DB->get_record('individualfeedback_item', array('dependitem' => $groupitem->id, 'typ' => 'questiongroupend'))) {
+        return false;
+    }
+
+    $where = 'feedback = :feedback AND template = :template
+                AND position > :startposition AND position <= :endposition';
+    $params = array('feedback' => $groupitem->feedback, 'template' => $groupitem->template,
+                        'startposition' => $groupitem->position, 'endposition' => $endgroupitem->position);
+
+    if ($groupitems = $DB->get_records_select('individualfeedback_item', $where, $params)) {
+        foreach ($groupitems as $item) {
+            if (!\mod_individualfeedback\hack\lib::is_running_core_test()) {
+                \mod_individualfeedback\hack\lib::individualfeedback_delete_item($item->id);
+            }
+        }
+    }
+}
+
+/**
+ * The event is only visible anywhere if the user can submit individualfeedback.
+ *
+ * @param calendar_event $event
+ * @return bool Returns true if the event is visible to the current user, false otherwise.
+ */
+function mod_individualfeedback_core_calendar_is_event_visible(calendar_event $event) {
+    global $DB;
+
+    $cm = get_fast_modinfo($event->courseid)->instances['individualfeedback'][$event->instance];
+    $feedbackcompletion = new mod_individualfeedback_completion(null, $cm, 0);
+
+    // The event is only visible if the user can submit it.
+    return $feedbackcompletion->can_complete();
+}
+

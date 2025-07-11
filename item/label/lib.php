@@ -38,7 +38,7 @@ class individualfeedback_item_label extends individualfeedback_item_base {
 
         //get the lastposition number of the individualfeedback_items
         $position = $item->position;
-        $lastposition = $DB->count_records('individualfeedback_item', array('individualfeedback'=>$feedback->id));
+        $lastposition = $DB->count_records('individualfeedback_item', array('feedback'=>$feedback->id));
         if ($position == -1) {
             $i_formselect_last = $lastposition + 1;
             $i_formselect_value = $lastposition + 1;
@@ -56,7 +56,7 @@ class individualfeedback_item_label extends individualfeedback_item_base {
                              'id'=>isset($item->id) ? $item->id : null,
                              'typ'=>$item->typ,
                              'items'=>$feedbackitems,
-                             'individualfeedback'=>$feedback->id);
+                             'feedback'=>$feedback->id);
 
         $this->context = context_module::instance($cm->id);
 
@@ -132,7 +132,7 @@ class individualfeedback_item_label extends individualfeedback_item_base {
         require_once($CFG->libdir . '/filelib.php');
 
         //is the item a template?
-        if (!$item->individualfeedback AND $item->template) {
+        if (!$item->feedback AND $item->template) {
             $template = $DB->get_record('individualfeedback_template', array('id'=>$item->template));
             if ($template->ispublic) {
                 $context = context_system::instance();
@@ -141,7 +141,7 @@ class individualfeedback_item_label extends individualfeedback_item_base {
             }
             $filearea = 'template';
         } else {
-            $cm = get_coursemodule_from_instance('individualfeedback', $item->individualfeedback);
+            $cm = get_coursemodule_from_instance('individualfeedback', $item->feedback);
             $context = context_module::instance($cm->id);
             $filearea = 'item';
         }
@@ -177,7 +177,7 @@ class individualfeedback_item_label extends individualfeedback_item_base {
      */
     public function complete_form_element($item, $form) {
         global $DB;
-        if (!$item->individualfeedback AND $item->template) {
+        if (!$item->feedback AND $item->template) {
             // This is a template.
             $template = $DB->get_record('individualfeedback_template', array('id' => $item->template));
             if ($template->ispublic) {
@@ -187,7 +187,7 @@ class individualfeedback_item_label extends individualfeedback_item_base {
             }
             $filearea = 'template';
         } else {
-            // This is a question in the current feedback.
+            // This is a question in the current individualfeedback.
             $context = $form->get_cm()->context;
             $filearea = 'item';
         }

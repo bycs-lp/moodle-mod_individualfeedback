@@ -27,49 +27,61 @@ class individualfeedback_multichoice_form extends individualfeedback_item_form {
 
         $mform =& $this->_form;
 
-        $mform->addElement('header', 'general', get_string($this->type, 'feedback'));
+        $mform->addElement('header', 'general', get_string($this->type, 'individualfeedback'));
 
-        $mform->addElement('advcheckbox', 'required', get_string('required', 'mod_individualfeedback'), '' , null , array(0, 1));
+        // +++ NEW CODE
+        //$mform->addElement('advcheckbox', 'required', get_string('required', 'individualfeedback'), '' , null , array(0, 1));
+        $mform->addElement('hidden', 'required', 0);
+        $mform->setType('required', PARAM_INT);
+        // --- NEW CODE
 
         $mform->addElement('text',
                             'name',
-                            get_string('item_name', 'mod_individualfeedback'),
+                            get_string('item_name', 'individualfeedback'),
                             array('size' => INDIVIDUALFEEDBACK_ITEM_NAME_TEXTBOX_SIZE,
                                   'maxlength' => 255));
 
         $mform->addElement('text',
                             'label',
-                            get_string('item_label', 'mod_individualfeedback'),
+                            get_string('item_label', 'individualfeedback'),
                             array('size' => INDIVIDUALFEEDBACK_ITEM_LABEL_TEXTBOX_SIZE,
                                   'maxlength' => 255));
 
+        // +++ NEW CODE
+        //check whether the question is negatively formulated
+        $mform->addElement('selectyesno',
+                   'negativeformulated',
+                   get_string('negative_formulated', 'individualfeedback'));
+        $mform->addHelpButton('negativeformulated', 'negative_formulated', 'individualfeedback');
+        // --- NEW CODE
+
         $mform->addElement('select',
                             'subtype',
-                            get_string('multichoicetype', 'mod_individualfeedback').'&nbsp;',
-                            array('r'=>get_string('radio', 'mod_individualfeedback'),
-                                  'c'=>get_string('check', 'mod_individualfeedback'),
-                                  'd'=>get_string('dropdown', 'mod_individualfeedback')));
+                            get_string('multichoicetype', 'individualfeedback').'&nbsp;',
+                            array('r'=>get_string('radio', 'individualfeedback'),
+                                  'c'=>get_string('check', 'individualfeedback'),
+                                  'd'=>get_string('dropdown', 'individualfeedback')));
 
         $mform->addElement('select',
                             'horizontal',
-                            get_string('adjustment', 'mod_individualfeedback').'&nbsp;',
-                            array(0 => get_string('vertical', 'mod_individualfeedback'),
-                                  1 => get_string('horizontal', 'mod_individualfeedback')));
-        $mform->hideIf('horizontal', 'subtype', 'eq', 'd');
+                            get_string('adjustment', 'individualfeedback').'&nbsp;',
+                            array(0 => get_string('vertical', 'individualfeedback'),
+                                  1 => get_string('horizontal', 'individualfeedback')));
+        $mform->disabledIf('horizontal', 'subtype', 'eq', 'd');
 
         $mform->addElement('selectyesno',
                            'hidenoselect',
-                           get_string('hide_no_select_option', 'mod_individualfeedback'));
-        $mform->hideIf('hidenoselect', 'subtype', 'ne', 'r');
+                           get_string('hide_no_select_option', 'individualfeedback'));
+        $mform->disabledIf('hidenoselect', 'subtype', 'ne', 'r');
 
         $mform->addElement('selectyesno',
                            'ignoreempty',
-                           get_string('do_not_analyse_empty_submits', 'mod_individualfeedback'));
+                           get_string('do_not_analyse_empty_submits', 'individualfeedback'));
 
-        $mform->addElement('textarea', 'values', get_string('multichoice_values', 'mod_individualfeedback'),
+        $mform->addElement('textarea', 'values', get_string('multichoice_values', 'individualfeedback'),
             'wrap="virtual" rows="10" cols="65"');
 
-        $mform->addElement('static', 'hint', '', get_string('use_one_line_for_each_value', 'mod_individualfeedback'));
+        $mform->addElement('static', 'hint', '', get_string('use_one_line_for_each_value', 'individualfeedback'));
 
         parent::definition();
         $this->set_data($item);
@@ -111,6 +123,12 @@ class individualfeedback_multichoice_form extends individualfeedback_item_form {
             $item->ignoreempty = 0;
         }
 
+        // +++ NEW CODE
+        if (!isset($item->negativeformulated)) {
+            $item->negativeformulated = 0;
+        }
+        // --- NEW CODE
+        
         $item->presentation = $subtype.INDIVIDUALFEEDBACK_MULTICHOICE_TYPE_SEP.$presentation;
         return $item;
     }

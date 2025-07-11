@@ -24,7 +24,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Form for mapping courses to the feedback
+ * Form for mapping courses to the individualfeedback
  *
  * @package   mod_individualfeedback
  * @copyright 2016 Marina Glancy
@@ -33,19 +33,19 @@ defined('MOODLE_INTERNAL') || die();
 class mod_individualfeedback_course_select_form extends moodleform {
     /** @var moodle_url */
     protected $action;
-    /** @var mod_individualfeedback_structure $feedbackstructure */
-    protected $feedbackstructure;
+    /** @var mod_individualfeedback_structure $individualfeedbackstructure */
+    protected $individualfeedbackstructure;
 
     /**
      * Constructor
      *
      * @param string|moodle_url $action the action attribute for the form
-     * @param mod_individualfeedback_structure $feedbackstructure
+     * @param mod_individualfeedback_structure $individualfeedbackstructure
      * @param bool $editable
      */
-    public function __construct($action, mod_individualfeedback_structure $feedbackstructure, $editable = true) {
+    public function __construct($action, mod_individualfeedback_structure $individualfeedbackstructure, $editable = true) {
         $this->action = new moodle_url($action, ['courseid' => null]);
-        $this->feedbackstructure = $feedbackstructure;
+        $this->individualfeedbackstructure = $individualfeedbackstructure;
         parent::__construct($action, null, 'post', '', ['id' => 'individualfeedback_course_filter'], $editable);
     }
 
@@ -54,19 +54,19 @@ class mod_individualfeedback_course_select_form extends moodleform {
      */
     public function definition() {
         $mform = $this->_form;
-        $feedbackstructure = $this->feedbackstructure;
+        $individualfeedbackstructure = $this->individualfeedbackstructure;
 
         $mform->addElement('hidden', 'id');
         $mform->setType('id', PARAM_INT);
 
-        if (!$this->_form->_freezeAll && ($courses = $feedbackstructure->get_completed_courses()) && count($courses) > 1) {
+        if (!$this->_form->_freezeAll && ($courses = $individualfeedbackstructure->get_completed_courses()) && count($courses) > 1) {
             $elements = [];
-            $elements[] = $mform->createElement('autocomplete', 'courseid', get_string('filter_by_course', 'mod_individualfeedback'),
+            $elements[] = $mform->createElement('autocomplete', 'courseid', get_string('filter_by_course', 'individualfeedback'),
                 ['' => get_string('fulllistofcourses')] + $courses);
             $elements[] = $mform->createElement('submit', 'submitbutton', get_string('filter'));
-            if ($feedbackstructure->get_courseid()) {
+            if ($individualfeedbackstructure->get_courseid()) {
                 $elements[] = $mform->createElement('static', 'showall', '',
-                    html_writer::link($this->action, get_string('show_all', 'mod_individualfeedback')));
+                    html_writer::link($this->action, get_string('show_all', 'individualfeedback')));
             }
             if (defined('BEHAT_SITE_RUNNING')) {
                 // TODO MDL-53734 remove this - behat does not recognise autocomplete element inside a group.
@@ -74,10 +74,10 @@ class mod_individualfeedback_course_select_form extends moodleform {
                     $mform->addElement($element);
                 }
             } else {
-                $mform->addGroup($elements, 'coursefilter', get_string('filter_by_course', 'mod_individualfeedback'), array(' '), false);
+                $mform->addGroup($elements, 'coursefilter', get_string('filter_by_course', 'individualfeedback'), array(' '), false);
             }
         }
 
-        $this->set_data(['courseid' => $feedbackstructure->get_courseid(), 'id' => $feedbackstructure->get_cm()->id]);
+        $this->set_data(['courseid' => $individualfeedbackstructure->get_courseid(), 'id' => $individualfeedbackstructure->get_cm()->id]);
     }
 }

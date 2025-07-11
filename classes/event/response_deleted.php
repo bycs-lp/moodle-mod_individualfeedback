@@ -28,12 +28,12 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * The mod_individualfeedback response deleted event class.
  *
- * This event is triggered when a feedback response is deleted.
+ * This event is triggered when a individualfeedback response is deleted.
  *
  * @property-read array $other {
  *      Extra information about event.
  *
- *      - int anonymous: if feedback is anonymous.
+ *      - int anonymous: if individualfeedback is anonymous.
  *      - int cmid: course module id.
  *      - int instanceid: id of instance.
  * }
@@ -59,24 +59,32 @@ class response_deleted extends \core\event\base {
      *
      * @param stdClass $completed
      * @param stdClass|cm_info $cm
-     * @param stdClass $feedback
+     * @param stdClass $individualfeedback
      * @return self
      */
-    public static function create_from_record($completed, $cm, $feedback) {
-        $event = self::create(array(
-            'relateduserid' => $completed->userid,
+    public static function create_from_record($completed, $cm, $individualfeedback) {
+        $eventdata = array(
+            'relateduserid' => 0,
             'objectid' => $completed->id,
             'courseid' => $cm->course,
             'context' => \context_module::instance($cm->id),
             'anonymous' => ($completed->anonymous_response == INDIVIDUALFEEDBACK_ANONYMOUS_YES),
+            // Anonymize user in events.
+            'userid' => 0,
             'other' => array(
                 'cmid' => $cm->id,
-                'instanceid' => $feedback->id,
+                'instanceid' => $individualfeedback->id,
                 'anonymous' => $completed->anonymous_response) // Deprecated.
-        ));
+        );
+
+        if (!$completed->anonymous_response) {
+            $eventdata['relateduserid'] = $completed->userid;
+        }
+
+        $event = self::create($eventdata);
 
         $event->add_record_snapshot('individualfeedback_completed', $completed);
-        $event->add_record_snapshot('feedback', $feedback);
+        $event->add_record_snapshot('individualfeedback', $individualfeedback);
         return $event;
     }
 
@@ -95,8 +103,8 @@ class response_deleted extends \core\event\base {
      * @return string
      */
     public function get_description() {
-        return "The user with id '$this->userid' deleted the feedback for the user with id '$this->relateduserid' " .
-            "for the feedback activity with course module id '$this->contextinstanceid'.";
+        return "The user with id '$this->userid' deleted the individualfeedback for the user with id '$this->relateduserid' " .
+            "for the individualfeedback activity with course module id '$this->contextinstanceid'.";
     }
 
     /**
@@ -150,7 +158,7 @@ class response_deleted extends \core\event\base {
     public static function get_other_mapping() {
         $othermapped = array();
         $othermapped['cmid'] = array('db' => 'course_modules', 'restore' => 'course_module');
-        $othermapped['instanceid'] = array('db' => 'feedback', 'restore' => 'feedback');
+        $othermapped['instanceid'] = array('db' => 'individualfeedback', 'restore' => 'individualfeedback');
 
         return $othermapped;
     }

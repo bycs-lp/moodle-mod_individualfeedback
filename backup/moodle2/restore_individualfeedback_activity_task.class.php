@@ -53,7 +53,7 @@ class restore_individualfeedback_activity_task extends restore_activity_task {
     public static function define_decode_contents() {
         $contents = array();
 
-        $contents[] = new restore_decode_content('feedback', array('intro', 'site_after_submit', 'page_after_submit'), 'feedback');
+        $contents[] = new restore_decode_content('individualfeedback', array('intro', 'site_after_submit', 'page_after_submit'), 'individualfeedback');
         $contents[] = new restore_decode_content('individualfeedback_item', array('presentation'), 'individualfeedback_item');
         $contents[] = new restore_decode_content('individualfeedback_value', array('value'), 'individualfeedback_value');
 
@@ -64,7 +64,7 @@ class restore_individualfeedback_activity_task extends restore_activity_task {
      * Define the decoding rules for links belonging
      * to the activity to be executed by the link decoder
      */
-    public static function define_decode_rules() {
+    static public function define_decode_rules() {
         $rules = array();
 
         $rules[] = new restore_decode_rule('INDIVIDUALFEEDBACKINDEX', '/mod/individualfeedback/index.php?id=$1', 'course');
@@ -79,10 +79,10 @@ class restore_individualfeedback_activity_task extends restore_activity_task {
     /**
      * Define the restore log rules that will be applied
      * by the {@link restore_logs_processor} when restoring
-     * feedback logs. It must return one array
+     * individualfeedback logs. It must return one array
      * of {@link restore_log_rule} objects
      */
-    public static function define_restore_log_rules() {
+    static public function define_restore_log_rules() {
         $rules = array();
 
         $rules[] = new restore_log_rule('individualfeedback', 'add', 'view.php?id={course_module}', '{individualfeedback}');

@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Class for exporting a feedback item (question).
+ * Class for exporting a individualfeedback item (question).
  *
  * @package    mod_individualfeedback
  * @copyright  2017 Juan Leyva <juan@moodle.com>
@@ -24,12 +24,13 @@
 namespace mod_individualfeedback\external;
 defined('MOODLE_INTERNAL') || die();
 
+use mod_individualfeedback\individualfeedback;
 use core\external\exporter;
 use renderer_base;
 use core_files\external\stored_file_exporter;
 
 /**
- * Class for exporting a feedback item (question).
+ * Class for exporting a individualfeedback item (question).
  *
  * @copyright  2017 Juan Leyva <juan@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -44,7 +45,7 @@ class individualfeedback_item_exporter extends exporter {
             ),
             'individualfeedback' => array(
                 'type' => PARAM_INT,
-                'description' => 'The feedback instance id this records belongs to.',
+                'description' => 'The individualfeedback instance id this records belongs to.',
                 'default' => 0,
             ),
             'template' => array(
@@ -56,12 +57,6 @@ class individualfeedback_item_exporter extends exporter {
                 'type' => PARAM_RAW,
                 'description' => 'The item name.',
             ),
-            'nameformat' => [
-                'choices' => [FORMAT_HTML, FORMAT_MOODLE, FORMAT_PLAIN, FORMAT_MARKDOWN],
-                'type' => PARAM_INT,
-                'description' => 'The format of the item name.',
-                'default' => FORMAT_HTML,
-            ],
             'label' => array(
                 'type' => PARAM_NOTAGS,
                 'description' => 'The item label.',
@@ -70,12 +65,6 @@ class individualfeedback_item_exporter extends exporter {
                 'type' => PARAM_RAW,
                 'description' => 'The text describing the item or the available possible answers.',
             ),
-            'presentationformat' => [
-                'choices' => [FORMAT_HTML, FORMAT_MOODLE, FORMAT_PLAIN, FORMAT_MARKDOWN],
-                'type' => PARAM_INT,
-                'description' => 'The format of the text describing the item or the available possible answers.',
-                'default' => FORMAT_HTML,
-            ],
             'typ' => array(
                 'type' => PARAM_ALPHA,
                 'description' => 'The type of the item.',
@@ -170,8 +159,7 @@ class individualfeedback_item_exporter extends exporter {
         return [
             'component' => 'mod_individualfeedback',
             'filearea' => 'item',
-            'itemid' => $this->data->id,
-            'options' => ['noclean' => true, 'para' => false],
+            'itemid' => $this->data->id
         ];
     }
 
@@ -184,8 +172,7 @@ class individualfeedback_item_exporter extends exporter {
         return [
             'component' => 'mod_individualfeedback',
             'filearea' => 'item',
-            'itemid' => $this->data->id,
-            'options' => ['noclean' => true, 'para' => false],
+            'itemid' => $this->data->id
         ];
     }
 }

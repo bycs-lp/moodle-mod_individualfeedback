@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Social breadth indicator - feedback.
+ * Social breadth indicator - individualfeedback.
  *
  * @package   mod_individualfeedback
  * @copyright 2017 David Monllao {@link http://www.davidmonllao.com}
@@ -27,7 +27,7 @@ namespace mod_individualfeedback\analytics\indicator;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Social breadth indicator - feedback.
+ * Social breadth indicator - individualfeedback.
  *
  * @package   mod_individualfeedback
  * @copyright 2017 David Monllao {@link http://www.davidmonllao.com}

@@ -47,8 +47,8 @@ $feedbackstructure = new mod_individualfeedback_structure($feedback, $cm, 0, $te
 require_capability('mod/individualfeedback:edititems', $context);
 
 /// Print the page header
-$strfeedbacks = get_string("modulenameplural", "feedback");
-$strfeedback  = get_string("modulename", "feedback");
+$strfeedbacks = get_string("modulenameplural", "individualfeedback");
+$strfeedback  = get_string("modulename", "individualfeedback");
 
 $params = ['id' => $id];
 $params += ($mode ? ['mode' => $mode] : []);
@@ -69,8 +69,7 @@ echo $OUTPUT->header();
 echo $renderer->main_action_bar($actionbar);
 
 $form = new mod_individualfeedback_complete_form(mod_individualfeedback_complete_form::MODE_VIEW_TEMPLATE,
-        $feedbackstructure, 'individualfeedback_preview_form', ['templateid' => $templateid]);
+    $feedbackstructure, 'individualfeedback_preview_form', ['templateid' => $templateid]);
 $form->display();
 
 echo $OUTPUT->footer();
-

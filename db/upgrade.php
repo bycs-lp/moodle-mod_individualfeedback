@@ -104,5 +104,75 @@ function xmldb_individualfeedback_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2024100708, 'individualfeedback');
     }
 
+    // Return to original column names and add new fields and create new table.
+    if ($oldversion < 2025071002) {
+        // Rename columns in individualfeedback_item table
+        $table = new xmldb_table('individualfeedback_item');
+        $field = new xmldb_field('individualfeedback', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'id');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->rename_field($table, $field, 'feedback');
+        }
+
+        // Rename columns in individualfeedback_completed table
+        $table = new xmldb_table('individualfeedback_completed');
+        $field = new xmldb_field('individualfeedback', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'id');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->rename_field($table, $field, 'feedback');
+        }
+
+        // Rename columns in individualfeedback_completedtmp table
+        $table = new xmldb_table('individualfeedback_completedtmp');
+        $field = new xmldb_field('individualfeedback', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'id');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->rename_field($table, $field, 'feedback');
+        }
+
+        // Rename columns in individualfeedback_sitecourse_map table
+        $table = new xmldb_table('individualfeedback_sitecourse_map');
+        $field = new xmldb_field('individualfeedbackid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'id');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->rename_field($table, $field, 'feedbackid');
+        }
+    
+        // Add the userid field (bigint, default NULL) to the individualfeedback_template table.
+        $table = new xmldb_table('individualfeedback_template');
+        $field = new xmldb_field('userid', XMLDB_TYPE_INTEGER, '18', null, null, null, null, 'name');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Add the selfassessment field (tinyint, default 0) to the individualfeedback_completed table.
+        $table = new xmldb_table('individualfeedback_completed');
+        $field = new xmldb_field('selfassessment', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'courseid');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Add the selfassessment field (tinyint, default 0) to the individualfeedback_completedtmp table.
+        $table = new xmldb_table('individualfeedback_completedtmp');
+        $field = new xmldb_field('selfassessment', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'courseid');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define table individualfeedback_linked to be created.
+        $table = new xmldb_table('individualfeedback_linked');
+
+        // Adding fields to table individualfeedback_linked.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('linkedid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('feedbackid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+
+        // Adding keys to table individualfeedback_linked.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+        $table->add_key('feedbackid', XMLDB_KEY_FOREIGN, array('feedbackid'), 'individualfeedback', array('id'));
+
+        // Conditionally launch create table for individualfeedback_linked.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        upgrade_mod_savepoint(true, 2025071002, 'individualfeedback');
+    }
     return true;
 }

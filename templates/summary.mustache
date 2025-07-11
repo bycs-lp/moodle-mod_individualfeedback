@@ -17,7 +17,7 @@
 {{!
     @template mod_individualfeedback/summary
 
-    Displays feedback summary
+    Displays individualfeedback summary
 
     Classes required for JS:
     * none
@@ -31,14 +31,15 @@
     Example context (json):
     {
         "completedcount" : 15,
-        "itemscount" : 5
+        "itemscount" : 5,
+        "timeopen" : "May 15, 2016"
     }
 
 }}
 
 <div class="individualfeedback_info">
     <span
-        class="individualfeedback_info">{{#str}}completed_feedbacks, mod_individualfeedback{{/str}}: </span><span
+        class="individualfeedback_info">{{#str}}completed_individualfeedbacks, mod_individualfeedback{{/str}}: </span><span
         class="individualfeedback_info_value">{{completedcount}}</span>
 </div>
 
@@ -47,3 +48,20 @@
         class="individualfeedback_info">{{#str}}questions, mod_individualfeedback{{/str}}: </span><span
         class="individualfeedback_info_value">{{itemscount}}</span>
 </div>
+
+{{#timeopen}}
+    <div class="individualfeedback_info">
+        <span
+            class="individualfeedback_info">{{#str}}individualfeedbackopen, mod_individualfeedback{{/str}}: </span><span
+            class="individualfeedback_info_value">{{timeopen}}</span>
+    </div>
+{{/timeopen}}
+
+{{#timeclose}}
+    <div class="individualfeedback_info">
+        <span
+            class="individualfeedback_info">{{#str}}individualfeedbackclose, mod_individualfeedback{{/str}}: </span><span
+            class="individualfeedback_info_value">{{timeclose}}</span>
+    </div>
+{{/timeclose}}
+

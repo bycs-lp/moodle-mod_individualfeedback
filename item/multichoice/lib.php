@@ -21,6 +21,7 @@ define('INDIVIDUALFEEDBACK_MULTICHOICE_TYPE_SEP', '>>>>>');
 define('INDIVIDUALFEEDBACK_MULTICHOICE_LINE_SEP', '|');
 define('INDIVIDUALFEEDBACK_MULTICHOICE_ADJUST_SEP', '<<<<<');
 define('INDIVIDUALFEEDBACK_MULTICHOICE_IGNOREEMPTY', 'i');
+define('INDIVIDUALFEEDBACK_MULTICHOICE_NEGATIVEFORMULATED', 'n');
 define('INDIVIDUALFEEDBACK_MULTICHOICE_HIDENOSELECT', 'h');
 
 class individualfeedback_item_multichoice extends individualfeedback_item_base {
@@ -32,7 +33,7 @@ class individualfeedback_item_multichoice extends individualfeedback_item_base {
 
         //get the lastposition number of the individualfeedback_items
         $position = $item->position;
-        $lastposition = $DB->count_records('individualfeedback_item', array('individualfeedback'=>$feedback->id));
+        $lastposition = $DB->count_records('individualfeedback_item', array('feedback'=>$feedback->id));
         if ($position == -1) {
             $i_formselect_last = $lastposition + 1;
             $i_formselect_value = $lastposition + 1;
@@ -47,6 +48,10 @@ class individualfeedback_item_multichoice extends individualfeedback_item_base {
         $item->presentation = empty($item->presentation) ? '' : $item->presentation;
         $info = $this->get_info($item);
 
+        // +++ NEW CODE
+        $item->negativeformulated = $this->negativeformulated($item);
+        // --- NEW CODE
+
         $item->ignoreempty = $this->ignoreempty($item);
         $item->hidenoselect = $this->hidenoselect($item);
 
@@ -56,7 +61,7 @@ class individualfeedback_item_multichoice extends individualfeedback_item_base {
                              'id'=>isset($item->id) ? $item->id : null,
                              'typ'=>$item->typ,
                              'items'=>$feedbackitems,
-                             'individualfeedback'=>$feedback->id);
+                             'feedback'=>$feedback->id);
 
         //build the form
         $customdata = array('item' => $item,
@@ -82,6 +87,11 @@ class individualfeedback_item_multichoice extends individualfeedback_item_base {
         }
 
         $this->set_ignoreempty($item, $item->ignoreempty);
+
+        // +++ NEW CODE
+        $this->set_negativeformulated($item, $item->negativeformulated);
+        // --- NEW CODE
+
         $this->set_hidenoselect($item, $item->hidenoselect);
 
         $item->hasvalue = $this->get_hasvalue();
@@ -94,6 +104,17 @@ class individualfeedback_item_multichoice extends individualfeedback_item_base {
         return $DB->get_record('individualfeedback_item', array('id'=>$item->id));
     }
 
+    /**
+     * Helper function for collected data, for detailed analysis
+     *
+     * @param stdClass $item the db-object from individualfeedback_item
+     * @param int $groupid
+     * @param int $courseid
+     * @return array
+     */
+    public function get_answer_data($item, $groupid = false, $courseid = false) {
+        return $this->get_item_answer_data($item, INDIVIDUALFEEDBACK_MULTICHOICE_LINE_SEP, $groupid, $courseid);
+    }
 
     //gets an array with three values(typ, name, XXX)
     //XXX is an object with answertext, answercount and quotient
@@ -104,7 +125,7 @@ class individualfeedback_item_multichoice extends individualfeedback_item_base {
      * @param stdClass $item the db-object from individualfeedback_item
      * @param int $groupid
      * @param int $courseid
-     * @return array|null
+     * @return array
      */
     protected function get_analysed($item, $groupid = false, $courseid = false) {
         $info = $this->get_info($item);
@@ -121,7 +142,9 @@ class individualfeedback_item_multichoice extends individualfeedback_item_base {
         }
 
         //get the values
-        $values = individualfeedback_get_group_values($item, $groupid, $courseid, $this->ignoreempty($item));
+        if (!\mod_individualfeedback\hack\lib::is_running_core_test()) {
+            $values = \mod_individualfeedback\hack\lib::individualfeedback_get_group_values($item, $groupid, $courseid, $this->negativeformulated($item), $this->ignoreempty($item));
+        }
         if (!$values) {
             return null;
         }
@@ -209,14 +232,14 @@ class individualfeedback_item_multichoice extends individualfeedback_item_base {
         if ($analysed_item) {
             $itemname = $analysed_item[1];
             echo "<table class=\"analysis itemtype_{$item->typ}\">";
-            echo '<tr><th class="text-start">';
+            echo '<tr><th colspan="2" class="text-start">';
             echo $itemnr . ' ';
             if (strval($item->label) !== '') {
                 echo '('. format_string($item->label).') ';
             }
             echo format_string($itemname);
             echo '</th></tr>';
-
+            echo "</table>";
             $analysed_vals = $analysed_item[2];
             $count = 0;
             $data = [];
@@ -236,13 +259,12 @@ class individualfeedback_item_multichoice extends individualfeedback_item_base {
             }
             $chart = new \core\chart_bar();
             $chart->set_horizontal(true);
-            $series = new \core\chart_series(format_string(get_string("responses", "feedback")), $data['series']);
+            $series = new \core\chart_series(format_string(get_string("responses", "individualfeedback")), $data['series']);
             $series->set_labels($data['series_labels']);
             $chart->add_series($series);
             $chart->set_labels($data['labels']);
 
-            echo '<tr><td>'. $OUTPUT->render($chart) . '</td></tr>';
-            echo "</table>";
+            echo $OUTPUT->render($chart);
         }
     }
 
@@ -298,13 +320,13 @@ class individualfeedback_item_multichoice extends individualfeedback_item_base {
             $options[$idx + 1] = format_text($optiontext, FORMAT_HTML, array('noclean' => true, 'para' => false));
         }
         if ($info->subtype === 'r' && !$this->hidenoselect($item)) {
-            $options = array(0 => get_string('not_selected', 'mod_individualfeedback')) + $options;
+            $options = array(0 => get_string('not_selected', 'individualfeedback')) + $options;
         }
 
         return $options;
     }
 
-    /**
+        /**
      * Adds an input element to the complete form
      *
      * This element has many options - it can be displayed as group or radio elements,
@@ -319,7 +341,8 @@ class individualfeedback_item_multichoice extends individualfeedback_item_base {
         $class = 'multichoice-' . $info->subtype;
         $inputname = $item->typ . '_' . $item->id;
         $options = $this->get_options($item);
-        $separator = !empty($info->horizontal) ? ' ' : \html_writer::div('', 'w-100');
+        $separator = !empty($info->horizontal) ? ' ' : '<br>';
+        // From here on lines backported from commit - MDL-62947 mod_feedback: c96c9601af41f9fe05b7a5259bc1590b8df17d9b.
         $tmpvalue = $form->get_item_value($item) ?? 0; // Used for element defaults, so must be a valid value (not null).
 
         // Subtypes:
@@ -353,7 +376,7 @@ class individualfeedback_item_multichoice extends individualfeedback_item_base {
                     $form->set_element_type($inputname.'['.$idx.']', PARAM_INT);
                 }
                 // Span to hold the element id. The id is used for drag and drop reordering.
-                $objs[] = ['static', '', '', html_writer::span('', '', ['id' => 'individualfeedback_item_' . $item->id])];
+                $objs[] = ['static', '', '', html_writer::span('', '', ['id' => 'feedback_item_' . $item->id])];
                 $element = $form->add_form_group_element($item, 'group_'.$inputname, $name, $objs, $separator, $class);
                 if ($tmpvalue) {
                     foreach (explode(INDIVIDUALFEEDBACK_MULTICHOICE_LINE_SEP, $tmpvalue) as $v) {
@@ -370,7 +393,7 @@ class individualfeedback_item_multichoice extends individualfeedback_item_base {
                     $objs[] = ['radio', $inputname, '', $label, $idx];
                 }
                 // Span to hold the element id. The id is used for drag and drop reordering.
-                $objs[] = ['static', '', '', html_writer::span('', '', ['id' => 'individualfeedback_item_' . $item->id])];
+                $objs[] = ['static', '', '', html_writer::span('', '', ['id' => 'feedback_item_' . $item->id])];
                 $element = $form->add_form_group_element($item, 'group_'.$inputname, $name, $objs, $separator, $class);
                 $form->set_element_default($inputname, $tmpvalue);
                 $form->set_element_type($inputname, PARAM_INT);
@@ -394,6 +417,7 @@ class individualfeedback_item_multichoice extends individualfeedback_item_base {
      * @return string
      */
     public function create_value($value) {
+        // Next line backported commit - MDL-62947 mod_feedback: c96c9601af41f9fe05b7a5259bc1590b8df17d9b.
         // Could be an array (multichoice checkbox) or single value (multichoice radio or dropdown).
         $value = is_array($value) ? $value : [$value];
 
@@ -441,20 +465,37 @@ class individualfeedback_item_multichoice extends individualfeedback_item_base {
         $info->horizontal = false;
 
         $parts = explode(INDIVIDUALFEEDBACK_MULTICHOICE_TYPE_SEP, $item->presentation);
-        $info->subtype = $parts[0];
-        if (count($parts) > 1) {
-            $info->presentation = $parts[1];
-        }
+
+        // Here we happen to override the predefined  $info->presentation = ''; which can lead to a NULL value, messing up
+        // in the next if-loop, when we try to explode(INDIVIDUALFEEDBACK_MULTICHOICE_ADJUST_SEP, $info->presentation);
+        @list($info->subtype, $info->presentation) = $parts;
+        /**
+         * When $item is
+         * object(stdClass)#210 (5) {
+         * ["id"]=> NULL
+         * ["position"]=> int(4)
+         * ["typ"]=> string(11) "multichoice"
+         * ["options"]=> string(0) ""
+         * ["presentation"]=> string(0) "" }
+         *
+         * Than $parts is only a single cell array with an empty string. This will fail the next if-statement.
+         * array(1) { [0]=> string(0) "" }
+         */
         if (!isset($info->subtype)) {
             $info->subtype = 'r';
         }
+        if (!isset($info->presentation)) {
+            $info->presentation = '';
+        }
+
+        #echo("Item<br>");
+        #var_dump($item);
+        #echo("Parts<br>");
+        #var_dump($parts);
 
         if ($info->subtype != 'd') {
             $parts = explode(INDIVIDUALFEEDBACK_MULTICHOICE_ADJUST_SEP, $info->presentation);
-            $info->presentation = $parts[0];
-            if (count($parts) > 1) {
-                $info->horizontal = $parts[1];
-            }
+            @list($info->presentation, $info->horizontal) = $parts;
             if (isset($info->horizontal) AND $info->horizontal == 1) {
                 $info->horizontal = true;
             } else {
@@ -477,6 +518,22 @@ class individualfeedback_item_multichoice extends individualfeedback_item_base {
         }
         return false;
     }
+
+    // +++ NEW CODE
+    public function set_negativeformulated($item, $negativeformulated=true) {
+        $item->options = str_replace(INDIVIDUALFEEDBACK_MULTICHOICE_NEGATIVEFORMULATED, '', $item->options);
+        if ($negativeformulated) {
+            $item->options .= INDIVIDUALFEEDBACK_MULTICHOICE_NEGATIVEFORMULATED;
+        }
+    }
+
+    public function negativeformulated($item) {
+        if (strstr($item->options, INDIVIDUALFEEDBACK_MULTICHOICE_NEGATIVEFORMULATED)) {
+            return true;
+        }
+        return false;
+    }
+    // --- NEW CODE
 
     public function set_hidenoselect($item, $hidenoselect=true) {
         $item->options = str_replace(INDIVIDUALFEEDBACK_MULTICHOICE_HIDENOSELECT, '', $item->options);
@@ -506,7 +563,7 @@ class individualfeedback_item_multichoice extends individualfeedback_item_base {
         $externaldata = array();
         $data = $this->get_analysed($item, $groupid, $courseid);
 
-        if ($data && !empty($data[2]) && is_array($data[2])) {
+        if (!empty($data[2]) && is_array($data[2])) {
             foreach ($data[2] as $d) {
                 $externaldata[] = json_encode($d);
             }

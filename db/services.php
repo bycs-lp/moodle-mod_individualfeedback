@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Feedback external functions and service definitions.
+ * individualfeedback external functions and service definitions.
  *
  * @package    mod_individualfeedback
  * @category   external
@@ -28,10 +28,10 @@ defined('MOODLE_INTERNAL') || die;
 
 $functions = array(
 
-    'mod_individualfeedback_get_feedbacks_by_courses' => array(
+    'mod_individualfeedback_get_individualfeedbacks_by_courses' => array(
         'classname'     => 'mod_individualfeedback_external',
-        'methodname'    => 'get_feedbacks_by_courses',
-        'description'   => 'Returns a list of feedbacks in a provided list of courses, if no list is provided all feedbacks that
+        'methodname'    => 'get_individualfeedbacks_by_courses',
+        'description'   => 'Returns a list of individualfeedbacks in a provided list of courses, if no list is provided all individualfeedbacks that
                             the user can view will be returned.',
         'type'          => 'read',
         'capabilities'  => 'mod/individualfeedback:view',
@@ -40,14 +40,14 @@ $functions = array(
     'mod_individualfeedback_get_individualfeedback_access_information' => array(
         'classname'     => 'mod_individualfeedback_external',
         'methodname'    => 'get_individualfeedback_access_information',
-        'description'   => 'Return access information for a given feedback.',
+        'description'   => 'Return access information for a given individualfeedback.',
         'type'          => 'read',
         'capabilities'  => 'mod/individualfeedback:view',
         'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE),
     ),
-    'mod_individualfeedback_view_feedback' => array(
+    'mod_individualfeedback_view_individualfeedback' => array(
         'classname'     => 'mod_individualfeedback_external',
-        'methodname'    => 'view_feedback',
+        'methodname'    => 'view_individualfeedback',
         'description'   => 'Trigger the course module viewed event and update the module completion status.',
         'type'          => 'write',
         'capabilities'  => 'mod/individualfeedback:view',
@@ -64,15 +64,15 @@ $functions = array(
     'mod_individualfeedback_get_items' => array(
         'classname'     => 'mod_individualfeedback_external',
         'methodname'    => 'get_items',
-        'description'   => 'Returns the items (questions) in the given feedback.',
+        'description'   => 'Returns the items (questions) in the given individualfeedback.',
         'type'          => 'read',
         'capabilities'  => 'mod/individualfeedback:view',
         'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
     ),
-    'mod_individualfeedback_launch_feedback' => array(
+    'mod_individualfeedback_launch_individualfeedback' => array(
         'classname'     => 'mod_individualfeedback_external',
-        'methodname'    => 'launch_feedback',
-        'description'   => 'Starts or continues a feedback submission.',
+        'methodname'    => 'launch_individualfeedback',
+        'description'   => 'Starts or continues a individualfeedback submission.',
         'type'          => 'write',
         'capabilities'  => 'mod/individualfeedback:complete',
         'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
@@ -80,7 +80,7 @@ $functions = array(
     'mod_individualfeedback_get_page_items' => array(
         'classname'     => 'mod_individualfeedback_external',
         'methodname'    => 'get_page_items',
-        'description'   => 'Get a single feedback page items.',
+        'description'   => 'Get a single individualfeedback page items.',
         'type'          => 'read',
         'capabilities'  => 'mod/individualfeedback:complete',
         'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
@@ -96,7 +96,7 @@ $functions = array(
     'mod_individualfeedback_get_analysis' => array(
         'classname'     => 'mod_individualfeedback_external',
         'methodname'    => 'get_analysis',
-        'description'   => 'Retrieves the feedback analysis.',
+        'description'   => 'Retrieves the individualfeedback analysis.',
         'type'          => 'read',
         'capabilities'  => 'mod/individualfeedback:viewanalysepage',
         'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
@@ -120,7 +120,7 @@ $functions = array(
     'mod_individualfeedback_get_non_respondents' => array(
         'classname'     => 'mod_individualfeedback_external',
         'methodname'    => 'get_non_respondents',
-        'description'   => 'Retrieves a list of students who didn\'t submit the feedback.',
+        'description'   => 'Retrieves a list of students who didn\'t submit the individualfeedback.',
         'type'          => 'read',
         'capabilities'  => 'mod/individualfeedback:viewreports',
         'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
@@ -128,7 +128,7 @@ $functions = array(
     'mod_individualfeedback_get_responses_analysis' => array(
         'classname'     => 'mod_individualfeedback_external',
         'methodname'    => 'get_responses_analysis',
-        'description'   => 'Return the feedback user responses analysis.',
+        'description'   => 'Return the individualfeedback user responses analysis.',
         'type'          => 'read',
         'capabilities'  => 'mod/individualfeedback:viewreports',
         'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
@@ -141,11 +141,4 @@ $functions = array(
         'capabilities'  => 'mod/individualfeedback:view',
         'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
     ),
-    'mod_individualfeedback_questions_reorder' => [
-        'classname'     => 'mod_individualfeedback\external\questions\reorder',
-        'description'   => 'Saves the new order of the questions in the feedback.',
-        'type'          => 'write',
-        'ajax'          => true,
-        'capabilities'  => 'mod/individualfeedback:edititems',
-    ],
 );

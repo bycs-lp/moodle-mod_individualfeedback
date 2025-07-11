@@ -45,7 +45,7 @@ abstract class activity_base extends \core_analytics\local\indicator\community_o
      * @return bool
      */
     protected function individualfeedback_viewed(\cm_info $cm, $contextid, $userid, $after = null) {
-        // If stats are published any write action counts as viewed feedback.
+        // If stats are published any write action counts as viewed individualfeedback.
         if (!empty($this->instancedata[$cm->instance]->publish_stats)) {
             $user = (object)['id' => $userid];
             return $this->any_write_log($contextid, $user);

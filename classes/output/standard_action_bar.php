@@ -31,16 +31,16 @@ use moodle_url;
 class standard_action_bar extends base_action_bar {
     /** @var int $startpage The page to resume with. */
     private $startpage;
-    /** @var int $viewcompletion Whether or not the user can finish the feedback */
+    /** @var int $viewcompletion Whether or not the user can finish the individualfeedback */
     private $viewcompletion;
 
     /**
      * standard_action_bar constructor.
      *
      * @param int $cmid
-     * @param bool $viewcompletion Whether or not the user can finish the feedback
+     * @param bool $viewcompletion Whether or not the user can finish the individualfeedback
      * @param int|null $startpage The page to resume with.
-     * @param int|null $courseid The course that the feedback is being accessed from. If null, courseid will be
+     * @param int|null $courseid The course that the individualfeedback is being accessed from. If null, courseid will be
      *                              set via the $cmid relationship
      */
     public function __construct(int $cmid, bool $viewcompletion, ?int $startpage = null, ?int $courseid = null) {
@@ -63,7 +63,7 @@ class standard_action_bar extends base_action_bar {
 
         if (has_capability('mod/individualfeedback:edititems', $this->context)) {
             $editurl = new moodle_url('/mod/individualfeedback/edit.php', $this->urlparams);
-            $items['left'][]['actionlink'] = new action_link($editurl, get_string('edit_items', 'mod_individualfeedback'),
+            $items['left'][]['actionlink'] = new action_link($editurl, get_string('edit_items', 'individualfeedback'),
                 null, ['class' => 'btn btn-secondary']);
         }
 
@@ -78,19 +78,19 @@ class standard_action_bar extends base_action_bar {
             if ($this->course->id) {
                 $previewlnk->param('courseid', $this->course->id);
             }
-            $items['left'][]['actionlink'] = new action_link($previewlnk, get_string('previewquestions', 'mod_individualfeedback'),
+            $items['left'][]['actionlink'] = new action_link($previewlnk, get_string('previewquestions', 'individualfeedback'),
             null, ['class' => 'btn btn-secondary']);
         }
 
         if ($this->viewcompletion) {
-            // Display a link to complete feedback or resume.
+            // Display a link to complete individualfeedback or resume.
             $completeurl = new moodle_url('/mod/individualfeedback/complete.php',
                 ['id' => $this->cmid, 'courseid' => $this->course->id]);
             if ($this->startpage) {
                 $completeurl->param('gopage', $this->startpage);
-                $label = get_string('continue_the_form', 'mod_individualfeedback');
+                $label = get_string('continue_the_form', 'individualfeedback');
             } else {
-                $label = get_string('complete_the_form', 'mod_individualfeedback');
+                $label = get_string('complete_the_form', 'individualfeedback');
             }
             $items['left'][]['actionlink'] = new action_link($completeurl, $label, null, ['class' => 'btn btn-primary']);
         }

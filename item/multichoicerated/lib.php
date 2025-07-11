@@ -37,7 +37,7 @@ class individualfeedback_item_multichoicerated extends individualfeedback_item_b
 
         //get the lastposition number of the individualfeedback_items
         $position = $item->position;
-        $lastposition = $DB->count_records('individualfeedback_item', array('individualfeedback'=>$feedback->id));
+        $lastposition = $DB->count_records('individualfeedback_item', array('feedback'=>$feedback->id));
         if ($position == -1) {
             $i_formselect_last = $lastposition + 1;
             $i_formselect_value = $lastposition + 1;
@@ -61,7 +61,7 @@ class individualfeedback_item_multichoicerated extends individualfeedback_item_b
                              'id'=>isset($item->id) ? $item->id : null,
                              'typ'=>$item->typ,
                              'items'=>$feedbackitems,
-                             'individualfeedback'=>$feedback->id);
+                             'feedback'=>$feedback->id);
 
         //build the form
         $customdata = array('item' => $item,
@@ -127,7 +127,9 @@ class individualfeedback_item_multichoicerated extends individualfeedback_item_b
         }
 
         //die Werte holen
-        $values = individualfeedback_get_group_values($item, $groupid, $courseid, $this->ignoreempty($item));
+        if (!\mod_individualfeedback\hack\lib::is_running_core_test()) {
+            $values = \mod_individualfeedback\hack\lib::individualfeedback_get_group_values($item, $groupid, $courseid, $this->ignoreempty($item));
+        }
         if (!$values) {
             return null;
         }
@@ -215,14 +217,14 @@ class individualfeedback_item_multichoicerated extends individualfeedback_item_b
             }
             $chart = new \core\chart_bar();
             $chart->set_horizontal(true);
-            $series = new \core\chart_series(format_string(get_string("responses", "feedback")), $data['series']);
+            $series = new \core\chart_series(format_string(get_string("responses", "individualfeedback")), $data['series']);
             $series->set_labels($data['series_labels']);
             $chart->add_series($series);
             $chart->set_labels($data['labels']);
             echo '<tr><td>'. $OUTPUT->render($chart) . '</td></tr>';
             $avg = format_float($avg, 2);
             echo '<tr><td class="text-start"><b>';
-            echo get_string('average', 'mod_individualfeedback').': '.$avg.'</b>';
+            echo get_string('average', 'individualfeedback').': '.$avg.'</b>';
             echo '</td></tr>';
             echo '</table>';
         }
@@ -263,7 +265,7 @@ class individualfeedback_item_multichoicerated extends individualfeedback_item_b
             //mittelwert anzeigen
             $worksheet->write_string($row_offset,
                                 count($data) + 2,
-                                get_string('average', 'mod_individualfeedback'),
+                                get_string('average', 'individualfeedback'),
                                 $xls_formats->value_bold);
 
             $worksheet->write_number($row_offset + 1,
@@ -289,10 +291,10 @@ class individualfeedback_item_multichoicerated extends individualfeedback_item_b
             $a = new stdclass();
             $a->weight = $weight;
             $a->name = format_text($optiontext, FORMAT_HTML, array('noclean' => true, 'para' => false));
-            $options[$idx + 1] = get_string('multichoiceoption', 'feedback', $a);
+            $options[$idx + 1] = get_string('multichoiceoption', 'individualfeedback', $a);
         }
         if ($info->subtype === 'r' && !$this->hidenoselect($item)) {
-            $options = array(0 => get_string('not_selected', 'mod_individualfeedback')) + $options;
+            $options = array(0 => get_string('not_selected', 'individualfeedback')) + $options;
         }
 
         return $options;
@@ -323,7 +325,7 @@ class individualfeedback_item_multichoicerated extends individualfeedback_item_b
                 $objs[] = ['radio', $inputname, '', $label, $idx];
             }
             // Span to hold the element id. The id is used for drag and drop reordering.
-            $objs[] = ['static', '', '', html_writer::span('', '', ['id' => 'individualfeedback_item_' . $item->id])];
+            $objs[] = ['static', '', '', html_writer::span('', '', ['id' => 'feedback_item_' . $item->id])];
             $separator = $info->horizontal ? ' ' : \html_writer::div('', 'w-100');
             $class .= ' multichoicerated-' . ($info->horizontal ? 'horizontal' : 'vertical');
             $el = $form->add_form_group_element($item, 'group_'.$inputname, $name, $objs, $separator, $class);

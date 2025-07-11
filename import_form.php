@@ -19,7 +19,7 @@
  *
  * @author Andreas Grabs
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
- * @package mod_individualfeedback
+ * @package mod_feedback
  */
 
 //It must be included from a Moodle page
@@ -34,20 +34,20 @@ class individualfeedback_import_form extends moodleform {
         global $CFG;
         $mform =& $this->_form;
 
-        $strdeleteolditmes = get_string('delete_old_items', 'mod_individualfeedback').
-                             ' ('.get_string('oldvalueswillbedeleted', 'mod_individualfeedback').')';
+        $strdeleteolditmes = get_string('delete_old_items', 'individualfeedback').
+            ' ('.get_string('oldvalueswillbedeleted', 'individualfeedback').')';
 
-        $strnodeleteolditmes = get_string('append_new_items', 'mod_individualfeedback').
-                               ' ('.get_string('oldvaluespreserved', 'mod_individualfeedback').')';
+        $strnodeleteolditmes = get_string('append_new_items', 'individualfeedback').
+            ' ('.get_string('oldvaluespreserved', 'individualfeedback').')';
 
         // hidden elements
         $mform->addElement('hidden', 'id');
         $mform->setType('id', PARAM_INT);
         $mform->addElement('filepicker',
-                           'choosefile',
-                           get_string('file'),
-                           null,
-                           array('maxbytes' => $CFG->maxbytes, 'filetypes' => '*'));
+            'choosefile',
+            get_string('file'),
+            null,
+            array('maxbytes' => $CFG->maxbytes, 'filetypes' => '*'));
 
         $mform->addElement('radio', 'deleteolditems', '', $strdeleteolditmes, true);
         $mform->addElement('radio', 'deleteolditems', '', $strnodeleteolditmes);

@@ -27,27 +27,32 @@ class individualfeedback_textarea_form extends individualfeedback_item_form {
 
         $mform =& $this->_form;
 
-        $mform->addElement('header', 'general', get_string($this->type, 'feedback'));
-        $mform->addElement('advcheckbox', 'required', get_string('required', 'mod_individualfeedback'), '' , null , array(0, 1));
+        $mform->addElement('header', 'general', get_string($this->type, 'individualfeedback'));
+        
+        // +++ NEW CODE
+        // $mform->addElement('advcheckbox', 'required', get_string('required', 'individualfeedback'), '' , null , array(0, 1));
+        $mform->addElement('hidden', 'required', 0);
+        $mform->setType('required', PARAM_INT);
+        // --- NEW CODE
 
         $mform->addElement('text',
-                            'name',
-                            get_string('item_name', 'mod_individualfeedback'),
-                            array('size'=>INDIVIDUALFEEDBACK_ITEM_NAME_TEXTBOX_SIZE, 'maxlength'=>255));
+            'name',
+            get_string('item_name', 'individualfeedback'),
+            array('size'=>INDIVIDUALFEEDBACK_ITEM_NAME_TEXTBOX_SIZE, 'maxlength'=>255));
         $mform->addElement('text',
-                            'label',
-                            get_string('item_label', 'mod_individualfeedback'),
-                            array('size'=>INDIVIDUALFEEDBACK_ITEM_LABEL_TEXTBOX_SIZE, 'maxlength'=>255));
+            'label',
+            get_string('item_label', 'individualfeedback'),
+            array('size'=>INDIVIDUALFEEDBACK_ITEM_LABEL_TEXTBOX_SIZE, 'maxlength'=>255));
 
         $mform->addElement('select',
-                            'itemwidth',
-                            get_string('textarea_width', 'mod_individualfeedback').'&nbsp;',
-                            array_slice(range(0, 80), 5, 80, true));
+            'itemwidth',
+            get_string('textarea_width', 'individualfeedback').'&nbsp;',
+            array_slice(range(0, 80), 5, 80, true));
 
         $mform->addElement('select',
-                            'itemheight',
-                            get_string('textarea_height', 'mod_individualfeedback').'&nbsp;',
-                            array_slice(range(0, 40), 5, 40, true));
+            'itemheight',
+            get_string('textarea_height', 'individualfeedback').'&nbsp;',
+            array_slice(range(0, 40), 5, 40, true));
 
         parent::definition();
         $this->set_data($item);
@@ -63,4 +68,5 @@ class individualfeedback_textarea_form extends individualfeedback_item_form {
         return $item;
     }
 }
+
 

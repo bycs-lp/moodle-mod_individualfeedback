@@ -38,8 +38,8 @@ class individualfeedback_label_form extends individualfeedback_item_form {
         $mform->addElement('hidden', 'label', '');
         $mform->setType('label', PARAM_ALPHA);
 
-        $mform->addElement('header', 'general', get_string($this->type, 'feedback'));
-        $mform->addElement('editor', 'presentation_editor', get_string('labelcontents', 'mod_individualfeedback'), null, $presentationoptions);
+        $mform->addElement('header', 'general', get_string($this->type, 'individualfeedback'));
+        $mform->addElement('editor', 'presentation_editor', get_string('labelcontents', 'individualfeedback'), null, $presentationoptions);
         $mform->setType('presentation_editor', PARAM_RAW);
 
         parent::definition();

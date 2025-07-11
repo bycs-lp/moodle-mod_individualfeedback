@@ -26,7 +26,7 @@
  */
 
 /**
- * Define the complete feedback structure for backup, with file and id annotations
+ * Define the complete individualfeedback structure for backup, with file and id annotations
  */
 class backup_individualfeedback_activity_structure_step extends backup_activity_structure_step {
 
@@ -36,7 +36,7 @@ class backup_individualfeedback_activity_structure_step extends backup_activity_
         $userinfo = $this->get_setting_value('userinfo');
 
         // Define each element separated
-        $feedback = new backup_nested_element('feedback', array('id'), array(
+        $feedback = new backup_nested_element('individualfeedback', array('id'), array(
                                                 'name',
                                                 'intro',
                                                 'introformat',
@@ -97,16 +97,16 @@ class backup_individualfeedback_activity_structure_step extends backup_activity_
         $values->add_child($value);
 
         // Define sources
-        $feedback->set_source_table('feedback', array('id' => backup::VAR_ACTIVITYID));
+        $feedback->set_source_table('individualfeedback', array('id' => backup::VAR_ACTIVITYID));
 
-        $item->set_source_table('individualfeedback_item', array('individualfeedback' => backup::VAR_PARENTID));
+        $item->set_source_table('individualfeedback_item', array('feedback' => backup::VAR_PARENTID));
 
         // All these source definitions only happen if we are including user info
         if ($userinfo) {
             $completed->set_source_sql('
                 SELECT *
                   FROM {individualfeedback_completed}
-                 WHERE individualfeedback = ?',
+                 WHERE feedback = ?',
                 array(backup::VAR_PARENTID));
 
             $value->set_source_table('individualfeedback_value', array('completed' => backup::VAR_PARENTID));
@@ -123,7 +123,7 @@ class backup_individualfeedback_activity_structure_step extends backup_activity_
 
         $item->annotate_files('mod_individualfeedback', 'item', 'id');
 
-        // Return the root element (feedback), wrapped into standard activity structure
+        // Return the root element (individualfeedback), wrapped into standard activity structure
         return $this->prepare_activity_structure($feedback);
     }
 

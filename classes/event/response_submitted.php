@@ -28,12 +28,12 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * The mod_individualfeedback response submitted event class.
  *
- * This event is triggered when a feedback response is submitted.
+ * This event is triggered when a individualfeedback response is submitted.
  *
  * @property-read array $other {
  *      Extra information about event.
  *
- *      - int anonymous: if feedback is anonymous.
+ *      - int anonymous: if individualfeedback is anonymous.
  *      - int cmid: course module id.
  *      - int instanceid: id of instance.
  * }
@@ -65,17 +65,25 @@ class response_submitted extends \core\event\base {
      * @return self
      */
     public static function create_from_record($completed, $cm) {
-        $event = self::create(array(
-            'relateduserid' => $completed->userid,
+        $eventdata = array(
+            'relateduserid' => 0,
             'objectid' => $completed->id,
             'context' => \context_module::instance($cm->id),
             'anonymous' => ($completed->anonymous_response == INDIVIDUALFEEDBACK_ANONYMOUS_YES),
+            // Anonymize user in events.
+            'userid' => 0,
             'other' => array(
                 'cmid' => $cm->id,
                 'instanceid' => $completed->feedback,
                 'anonymous' => $completed->anonymous_response // Deprecated.
             )
-        ));
+        );
+
+        if (!$completed->anonymous_response) {
+            $eventdata['relateduserid'] = $completed->userid;
+        }
+
+        $event = self::create($eventdata);
         $event->add_record_snapshot('individualfeedback_completed', $completed);
         return $event;
     }
@@ -95,7 +103,7 @@ class response_submitted extends \core\event\base {
      * @return string
      */
     public function get_description() {
-        return "The user with id '$this->userid' submitted response for 'feedback' activity with "
+        return "The user with id '$this->userid' submitted response for 'individualfeedback' activity with "
                 . "course module id '$this->contextinstanceid'.";
     }
 
@@ -164,7 +172,7 @@ class response_submitted extends \core\event\base {
     public static function get_other_mapping() {
         $othermapped = array();
         $othermapped['cmid'] = array('db' => 'course_modules', 'restore' => 'course_module');
-        $othermapped['instanceid'] = array('db' => 'feedback', 'restore' => 'feedback');
+        $othermapped['instanceid'] = array('db' => 'individualfeedback', 'restore' => 'individualfeedback');
 
         return $othermapped;
     }

@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * print the form to map courses for global feedbacks
+ * print the form to map courses for global individualfeedbacks
  *
  * @author Andreas Grabs
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
@@ -46,18 +46,18 @@ if ($form->is_cancelled()) {
     redirect($mainurl);
 } else if ($data = $form->get_data()) {
     individualfeedback_update_sitecourse_map($feedback, $data->mappedcourses);
-    redirect($mainurl, get_string('mappingchanged', 'mod_individualfeedback'), null, \core\output\notification::NOTIFY_SUCCESS);
+    redirect($mainurl, get_string('mappingchanged', 'individualfeedback'), null, \core\output\notification::NOTIFY_SUCCESS);
 }
 
 // Print the page header.
-$strfeedbacks = get_string("modulenameplural", "feedback");
-$strfeedback  = get_string("modulename", "feedback");
+$strfeedbacks = get_string("modulenameplural", "individualfeedback");
+$strfeedback  = get_string("modulename", "individualfeedback");
 
 $PAGE->set_heading($course->fullname);
 $PAGE->set_title($feedback->name);
 echo $OUTPUT->header();
 
-echo $OUTPUT->box(get_string('mapcourseinfo', 'mod_individualfeedback'));
+echo $OUTPUT->box(get_string('mapcourseinfo', 'individualfeedback'));
 
 $form->display();
 
