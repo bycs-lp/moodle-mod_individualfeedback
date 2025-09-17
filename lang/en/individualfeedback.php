@@ -17,7 +17,7 @@
 /**
  * Strings for component 'feedback', language 'en', branch 'MOODLE_20_STABLE'
  *
- * @package mod_feedback
+ * @package mod_individualfeedback
  * @copyright 1999 onwards Martin Dougiamas  {@link http://moodle.com}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -119,8 +119,8 @@ $string['feedback:createpublictemplate'] = 'Create public template';
 $string['feedback:deletesubmissions'] = 'Delete completed submissions';
 $string['feedback:deletetemplate'] = 'Delete template';
 $string['feedback:edititems'] = 'Edit items';
-$string['feedback_is_not_for_anonymous'] = 'Feedback is not for anonymous';
-$string['feedback_is_not_open'] = 'The feedback is not open';
+$string['individualfeedback_is_not_for_anonymous'] = 'Feedback is not for anonymous';
+$string['individualfeedback_is_not_open'] = 'The feedback is not open';
 $string['feedback:mapcourse'] = 'Map courses to global feedbacks';
 $string['feedbackopen'] = 'Allow answers from';
 $string['feedback:receivemail'] = 'Receive email notification';
@@ -137,7 +137,7 @@ $string['check'] = 'Multiple choice - multiple answers';
 $string['checkbox'] = 'Multiple choice - multiple answers allowed (check boxes)';
 $string['check_values'] = 'Possible responses';
 $string['choosefile'] = 'Choose a file';
-$string['chosen_feedback_response'] = 'Chosen feedback response';
+$string['chosen_individualfeedback_response'] = 'Chosen feedback response';
 $string['downloadresponseas'] = 'Download all responses as:';
 $string['importfromthisfile'] = 'Import from this file';
 $string['import_questions'] = 'Import questions';
@@ -175,19 +175,19 @@ $string['maximal'] = 'Maximum';
 $string['messageprovider:message'] = 'Feedback reminder';
 $string['messageprovider:submission'] = 'Feedback notifications';
 $string['mode'] = 'Mode';
-$string['modulename'] = 'Feedback';
-$string['modulename_help'] = 'The feedback activity enables a teacher to create a custom survey for collecting feedback from participants using a variety of question types including multiple choice, yes/no or text input.
+$string['modulename'] = 'Individual Feedback';
+$string['modulename_help'] = 'The Individual Feedback activity is a customized version of the feedback activity module that enables a teacher to create custom surveys for collecting feedback from participants using a variety of question types including multiple choice, yes/no or text input.
 
-Feedback responses may be anonymous if desired, and results may be shown to all participants or restricted to teachers only. Any feedback activities on the site home may also be completed by non-logged-in users.
+Individual Feedback responses may be anonymous if desired, and results may be shown to all participants or restricted to teachers only. Any Individual Feedback activities on the site home may also be completed by non-logged-in users.
 
-Feedback activities may be used
+Individual Feedback activities may be used
 
 * For course evaluations, helping improve the content for later participants
 * To enable participants to sign up for course modules, events etc.
 * For guest surveys of course choices, school policies etc.
 * For anti-bullying surveys in which students can report incidents anonymously';
-$string['modulename_link'] = 'mod/feedback/view';
-$string['modulenameplural'] = 'Feedback';
+$string['modulename_link'] = 'mod/individualfeedback/view';
+$string['modulenameplural'] = 'Individual Feedback';
 $string['move_item'] = 'Move this question';
 $string['multichoice'] = 'Multiple choice';
 $string['multichoiceoption'] = '<span class="weight">({$a->weight}) </span>{$a->name}';
@@ -229,7 +229,7 @@ $string['page-mod-feedback-x'] = 'Any feedback module page';
 $string['page_after_submit'] = 'Completion message';
 $string['pagebreak'] = 'Page break';
 $string['pluginadministration'] = 'Feedback administration';
-$string['pluginname'] = 'Feedback';
+$string['pluginname'] = 'Individual Feedback';
 $string['position'] = 'Position';
 $string['previous_page'] = 'Previous page';
 $string['previewquestions'] = 'Preview questions';
@@ -292,7 +292,7 @@ $string['textfield'] = 'Short text answer';
 $string['textfield_maxlength'] = 'Maximum characters accepted';
 $string['textfield_size'] = 'Textfield width';
 $string['there_are_no_settings_for_recaptcha'] = 'There are no settings for captcha';
-$string['this_feedback_is_already_submitted'] = 'You\'ve already completed this activity.';
+$string['this_individualfeedback_is_already_submitted'] = 'You\'ve already completed this activity.';
 $string['typemissing'] = 'Missing value "type"';
 $string['update_item'] = 'Save changes to question';
 $string['url_for_continue'] = 'Link to next activity';

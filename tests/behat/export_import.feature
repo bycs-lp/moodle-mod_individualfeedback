@@ -1,4 +1,4 @@
-@mod @mod_feedback
+@mod @mod_individualfeedback
 Feature: Exporting and importing feedbacks
   In order to quickly copy feedbacks across courses and sites
   As a teacher

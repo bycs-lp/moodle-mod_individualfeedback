@@ -1,4 +1,4 @@
-@mod @mod_feedback
+@mod @mod_individualfeedback
 Feature: Mapping courses in a feedback
   In order to collect the same feedback about multiple courses
   As a manager

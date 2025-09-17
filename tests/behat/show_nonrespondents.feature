@@ -1,4 +1,4 @@
-@mod @mod_feedback
+@mod @mod_individualfeedback
 Feature: Show users who have not responded to the feedback survey
   In order to harass students about completing the feedback
   As a teacher

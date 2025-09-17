@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * List of deprecated mod_feedback functions.
+ * List of deprecated mod_individualfeedback functions.
  *
- * @package   mod_feedback
+ * @package   mod_individualfeedback
  * @copyright 2021 Jun Pataleta
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -25,8 +25,8 @@
 /**
  * @deprecated since Moodle 3.11
  */
-function feedback_get_completion_state() {
-    $completionclass = \mod_feedback\completion\custom_completion::class;
+function individualfeedback_get_completion_state() {
+    $completionclass = \mod_individualfeedback\completion\custom_completion::class;
     throw new coding_exception(__FUNCTION__ . "() has been removed, please use the '{$completionclass}' class instead");
 }
 
@@ -37,7 +37,7 @@ function feedback_get_completion_state() {
  * @deprecated since Moodle 4.5 - please do not use this function any more, {@see is_role_switched}
  */
 #[\core\attribute\deprecated('is_role_switched', since: '4.5', mdl: 'MDL-72424')]
-function feedback_check_is_switchrole(): bool {
+function individualfeedback_check_is_switchrole(): bool {
     global $USER;
     \core\deprecation::emit_deprecation_if_present(__FUNCTION__);
     return isset($USER->switchrole) && is_array($USER->switchrole) && count($USER->switchrole) > 0;

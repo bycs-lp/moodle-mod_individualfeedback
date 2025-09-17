@@ -17,7 +17,7 @@
 /**
  * Provides support for the conversion of moodle1 backup to the moodle2 format
  *
- * @package    mod_feedback
+ * @package    mod_individualfeedback
  * @copyright  2011 Rossiani Wijaya <rwijaya@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -27,7 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * Feedback module conversion handler
  */
-class moodle1_mod_feedback_handler extends moodle1_mod_handler {
+class moodle1_mod_individualfeedback_handler extends moodle1_mod_handler {
 
     /** @var moodle1_file_manager */
     protected $fileman = null;
@@ -67,7 +67,7 @@ class moodle1_mod_feedback_handler extends moodle1_mod_handler {
                 )
             ),
             new convert_path(
-                'feedback_item', '/MOODLE_BACKUP/COURSE/MODULES/MOD/FEEDBACK/ITEMS/ITEM',
+                'individualfeedback_item', '/MOODLE_BACKUP/COURSE/MODULES/MOD/FEEDBACK/ITEMS/ITEM',
                 array (
                     'newfields' => array(
                         'label' => '',
@@ -96,7 +96,7 @@ class moodle1_mod_feedback_handler extends moodle1_mod_handler {
 
 
         // get a fresh new file manager for this instance
-        $this->fileman = $this->converter->get_file_manager($contextid, 'mod_feedback');
+        $this->fileman = $this->converter->get_file_manager($contextid, 'mod_individualfeedback');
 
         // convert course files embedded into the intro
         $this->fileman->filearea = 'intro';
@@ -110,7 +110,7 @@ class moodle1_mod_feedback_handler extends moodle1_mod_handler {
         }
 
         // start writing feedback.xml
-        $this->open_xml_writer("activities/feedback_{$this->moduleid}/feedback.xml");
+        $this->open_xml_writer("activities/individualfeedback_{$this->moduleid}/feedback.xml");
         $this->xmlwriter->begin_tag('activity', array('id' => $instanceid, 'moduleid' => $this->moduleid,
             'modulename' => 'feedback', 'contextid' => $contextid));
         $this->xmlwriter->begin_tag('feedback', array('id' => $instanceid));
@@ -130,14 +130,14 @@ class moodle1_mod_feedback_handler extends moodle1_mod_handler {
      * This is executed every time we have one /MOODLE_BACKUP/COURSE/MODULES/MOD/FEEDBACK/ITEMS/ITEM
      * data available
      */
-    public function process_feedback_item($data) {
+    public function process_individualfeedback_item($data) {
         $this->write_xml('item', $data, array('/item/id'));
     }
 
     /**
      * This is executed when we reach the closing </MOD> tag of our 'feedback' path
      */
-    public function on_feedback_end() {
+    public function on_individualfeedback_end() {
         // finish writing feedback.xml
         $this->xmlwriter->end_tag('items');
         $this->xmlwriter->end_tag('feedback');
@@ -145,7 +145,7 @@ class moodle1_mod_feedback_handler extends moodle1_mod_handler {
         $this->close_xml_writer();
 
         // write inforef.xml
-        $this->open_xml_writer("activities/feedback_{$this->moduleid}/inforef.xml");
+        $this->open_xml_writer("activities/individualfeedback_{$this->moduleid}/inforef.xml");
         $this->xmlwriter->begin_tag('inforef');
         $this->xmlwriter->begin_tag('fileref');
         foreach ($this->fileman->get_fileids() as $fileid) {

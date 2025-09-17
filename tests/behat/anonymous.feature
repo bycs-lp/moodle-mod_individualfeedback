@@ -1,4 +1,4 @@
-@mod @mod_feedback
+@mod @mod_individualfeedback
 Feature: Anonymous feedback
   In order to collect feedbacks
   As an admin

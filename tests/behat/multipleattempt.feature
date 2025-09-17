@@ -1,4 +1,4 @@
-@mod @mod_feedback
+@mod @mod_individualfeedback
 Feature: Non anonymous feedback with multiple submissions
   In order to modify feedback response
   As a student

@@ -14,15 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace mod_feedback\external\questions;
+namespace mod_individualfeedback\external\questions;
 
 use core_external\external_api;
 
 /**
  * Unit tests of external class for re-ordering feedback question items
  *
- * @package    mod_feedback
- * @covers     \mod_feedback\external\questions\reorder
+ * @package    mod_individualfeedback
+ * @covers     \mod_individualfeedback\external\questions\reorder
  * @copyright  2024 Mikel Martín <mikel@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -38,15 +38,15 @@ final class reorder_test extends \advanced_testcase {
         // Create a course with a feedback activity and some questions.
         $course = $this->getDataGenerator()->create_course();
         $feedback = $this->getDataGenerator()->create_module('feedback', ['course' => $course->id]);
-        $cm = get_coursemodule_from_instance('feedback', $feedback->id);
+        $cm = get_coursemodule_from_instance('individualfeedback', $feedback->id);
 
-        $feedbackgenerator = $this->getDataGenerator()->get_plugin_generator('mod_feedback');
+        $feedbackgenerator = $this->getDataGenerator()->get_plugin_generator('mod_individualfeedback');
         $item1 = $feedbackgenerator->create_item_label($feedback);
         $item2 = $feedbackgenerator->create_item_info($feedback);
         $item3 = $feedbackgenerator->create_item_numeric($feedback);
 
         // Check initial items order.
-        $this->assertEquals([$item1->id, $item2->id, $item3->id], $this->get_feedback_item_order($feedback));
+        $this->assertEquals([$item1->id, $item2->id, $item3->id], $this->get_individualfeedback_item_order($feedback));
 
         // Call the execute method to invert the items order.
         $result = reorder::execute($cm->id, "$item3->id,$item2->id,$item1->id");
@@ -54,7 +54,7 @@ final class reorder_test extends \advanced_testcase {
         $this->assertTrue($result);
 
         // Check items order is inverted.
-        $this->assertEquals([$item3->id, $item2->id, $item1->id], $this->get_feedback_item_order($feedback));
+        $this->assertEquals([$item3->id, $item2->id, $item1->id], $this->get_individualfeedback_item_order($feedback));
     }
 
     /**
@@ -63,10 +63,10 @@ final class reorder_test extends \advanced_testcase {
      * @param object $feedback The feedback activity.
      * @return array
      */
-    private function get_feedback_item_order($feedback) {
+    private function get_individualfeedback_item_order($feedback) {
         global $DB;
         return $DB->get_fieldset_select(
-            'feedback_item',
+            'individualfeedback_item',
             'id',
             'feedback = :feedbackid ORDER BY position ASC',
             ['feedbackid' => $feedback->id]

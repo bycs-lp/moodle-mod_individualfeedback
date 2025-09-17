@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace mod_feedback\output;
+namespace mod_individualfeedback\output;
 
 use moodle_url;
 use action_menu;
@@ -24,7 +24,7 @@ use pix_icon;
 /**
  * Class actionbar - Display the action bar
  *
- * @package   mod_feedback
+ * @package   mod_individualfeedback
  * @copyright 2021 Peter Dias
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -53,7 +53,7 @@ class edit_action_bar extends base_action_bar {
      * @return array
      */
     public function get_items(): array {
-        if (!has_capability('mod/feedback:edititems', $this->context)) {
+        if (!has_capability('mod/individualfeedback:edititems', $this->context)) {
             return [];
         }
         return [
@@ -69,12 +69,12 @@ class edit_action_bar extends base_action_bar {
      */
     private function get_add_question_menu(): action_menu {
         $addselect = new action_menu();
-        $addselect->set_menu_trigger(get_string('add_item', 'mod_feedback'), 'btn btn-primary');
+        $addselect->set_menu_trigger(get_string('add_item', 'mod_individualfeedback'), 'btn btn-primary');
         $addselect->set_menu_left();
         $addselectparams = ['cmid' => $this->cmid, 'position' => $this->lastposition, 'sesskey' => sesskey()];
-        foreach (feedback_load_feedback_items_options() as $key => $value) {
+        foreach (individualfeedback_load_individualfeedback_items_options() as $key => $value) {
             $addselect->add(new action_menu_link(
-                new moodle_url('/mod/feedback/edit_item.php', $addselectparams + ['typ' => $key]),
+                new moodle_url('/mod/individualfeedback/edit_item.php', $addselectparams + ['typ' => $key]),
                 null,
                 $value,
                 false,
@@ -96,35 +96,35 @@ class edit_action_bar extends base_action_bar {
         $actionsselect->set_menu_trigger(get_string('actions'), 'btn btn-outline-primary');
 
         // Export.
-        if ($DB->record_exists('feedback_item', ['feedback' => $this->feedback->id])) {
-            $exporturl = new moodle_url('/mod/feedback/export.php', $this->urlparams + ['action' => 'exportfile']);
+        if ($DB->record_exists('individualfeedback_item', ['individualfeedback' => $this->feedback->id])) {
+            $exporturl = new moodle_url('/mod/individualfeedback/export.php', $this->urlparams + ['action' => 'exportfile']);
             $actionsselect->add(new action_menu_link(
                 $exporturl,
-                new pix_icon('i/file_export', get_string('export_questions', 'feedback')),
-                get_string('export_questions', 'feedback'),
+                new pix_icon('i/file_export', get_string('export_questions', 'mod_individualfeedback')),
+                get_string('export_questions', 'mod_individualfeedback'),
                 false,
             ));
         }
 
         // Import.
-        $importurl = new moodle_url('/mod/feedback/import.php', $this->urlparams);
+        $importurl = new moodle_url('/mod/individualfeedback/import.php', $this->urlparams);
         $actionsselect->add(new action_menu_link(
             $importurl,
-            new pix_icon('i/file_import', get_string('import_questions', 'feedback')),
-            get_string('import_questions', 'feedback'),
+            new pix_icon('i/file_import', get_string('import_questions', 'mod_individualfeedback')),
+            get_string('import_questions', 'mod_individualfeedback'),
             false,
         ));
 
         // Save as template.
         $cancreatetemplates = has_any_capability([
-            'mod/feedback:createprivatetemplate',
-            'mod/feedback:createpublictemplate'], \context_module::instance($this->cmid));
+            'mod/individualfeedback:createprivatetemplate',
+            'mod/individualfeedback:createpublictemplate'], \context_module::instance($this->cmid));
         if ($cancreatetemplates) {
-            $PAGE->requires->js_call_amd('mod_feedback/createtemplate', 'init');
+            $PAGE->requires->js_call_amd('mod_individualfeedback/createtemplate', 'init');
             $actionsselect->add(new action_menu_link(
                 new moodle_url('#'),
-                new pix_icon('i/file_plus', get_string('save_as_new_template', 'feedback')),
-                get_string('save_as_new_template', 'feedback'),
+                new pix_icon('i/file_plus', get_string('save_as_new_template', 'mod_individualfeedback')),
+                get_string('save_as_new_template', 'mod_individualfeedback'),
                 false,
                 ['data-action' => 'createtemplate', 'data-dataid' => $this->cmid],
             ));

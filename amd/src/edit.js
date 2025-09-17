@@ -16,7 +16,7 @@
 /**
  * Edit items in feedback module
  *
- * @module     mod_feedback/edit
+ * @module     mod_individualfeedback/edit
  * @copyright  2016 Marina Glancy
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -30,23 +30,23 @@ import {prefetchStrings} from 'core/prefetch';
 import SortableList from 'core/sortable_list';
 import {getString, getStrings} from 'core/str';
 import {add as addToast} from 'core/toast';
-import {reorderQuestions} from 'mod_feedback/local/repository';
+import {reorderQuestions} from 'mod_individualfeedback/local/repository';
 
 const Selectors = {
     deleteQuestionButton: '[data-action="delete"]',
     sortableListRegion: '[data-region="questions-sortable-list"]',
-    sortableElement: '[data-region="questions-sortable-list"] .feedback_itemlist[id]',
+    sortableElement: '[data-region="questions-sortable-list"] .individualfeedback_itemlist[id]',
     sortableElementTitle: '[data-region="item-title"]',
 };
 
 /**
  * Returns the Feedback question item id from the DOM id of an item.
  *
- * @param {String} id The dom id, f.g.: feedback_item_22
+ * @param {String} id The dom id, f.g.: individualfeedback_item_22
  * @return int
  */
 const getItemId = (id) => {
-    return Number(id.replace(/^.*feedback_item_/i, ''));
+    return Number(id.replace(/^.*individualfeedback_item_/i, ''));
 };
 
 /**
@@ -88,7 +88,7 @@ export const init = (cmId) => {
     prefetchStrings('admin', [
         'confirmation',
     ]);
-    prefetchStrings('mod_feedback', [
+    prefetchStrings('mod_individualfeedback', [
         'confirmdeleteitem',
         'questionmoved',
     ]);
@@ -102,7 +102,7 @@ export const init = (cmId) => {
             event.preventDefault();
             const confirmationStrings = await getStrings([
                 {key: 'confirmation', component: 'admin'},
-                {key: 'confirmdeleteitem', component: 'mod_feedback'},
+                {key: 'confirmdeleteitem', component: 'mod_individualfeedback'},
                 {key: 'yes', component: 'core'},
                 {key: 'no', component: 'core'},
             ]);
@@ -121,11 +121,11 @@ export const init = (cmId) => {
         if (!event.detail.positionChanged) {
             return;
         }
-        const pendingPromise = new Pending('mod_feedback/questions:reorder');
+        const pendingPromise = new Pending('mod_individualfeedback/questions:reorder');
         const itemOrder = getItemOrder(event.detail.element[0]);
         addIconToContainerRemoveOnCompletion(event.detail.element[0], pendingPromise);
         reorderQuestions(moduleId, itemOrder)
-            .then(() => getString('questionmoved', 'mod_feedback'))
+            .then(() => getString('questionmoved', 'mod_individualfeedback'))
             .then(addToast)
             .then(() => pendingPromise.resolve())
             .catch(Notification.exception);

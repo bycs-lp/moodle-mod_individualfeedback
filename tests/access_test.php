@@ -14,19 +14,19 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace mod_feedback;
+namespace mod_individualfeedback;
 
-use mod_feedback_completion;
+use mod_individualfeedback_completion;
 
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 
-require_once($CFG->dirroot . '/mod/feedback/lib.php');
+require_once($CFG->dirroot . '/mod/individualfeedback/lib.php');
 
 /**
  * Unit tests to check group membership for teacher access to responses.
- * @package    mod_feedback
+ * @package    mod_individualfeedback
  * @copyright  2024 Leon Stringer
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -42,10 +42,10 @@ final class access_test extends \advanced_testcase {
      * @param \stdClass $cm Course module.
      * @param int $itemid ID of a textfield on the form to complete.
      * @param int $userid ID of the user submitting the response.
-     * @return mod_feedback_completion
+     * @return mod_individualfeedback_completion
      */
-    private function student_response(\stdClass $feedback, \stdClass $cm, int $itemid, int $userid): mod_feedback_completion {
-        $completion = new mod_feedback_completion($feedback, $cm,
+    private function student_response(\stdClass $feedback, \stdClass $cm, int $itemid, int $userid): mod_individualfeedback_completion {
+        $completion = new mod_individualfeedback_completion($feedback, $cm,
                     $cm->course, false, null, $userid, $userid);
         $answers = ['textfield_' . $itemid => "test"];
         $completion->save_response_tmp((object) $answers);
@@ -57,7 +57,7 @@ final class access_test extends \advanced_testcase {
      * Test access to feedback responses is allowed or denied correctly for
      * activity group mode and users group membership.
      * @param int $groupmode NOGROUPS, SEPARATEGROUPS, etc.
-     * @param int $anonymous FEEDBACK_ANONYMOUS_NO or FEEDBACK_ANONYMOUS_YES.
+     * @param int $anonymous INDIVIDUALFEEDBACK_ANONYMOUS_NO or INDIVIDUALFEEDBACK_ANONYMOUS_YES.
      * @param array $studentgroups Zero or more names of groups to add the
      * student to, for example, ['group1'].
      * @param array $teacheraccess List of teachers' usernames and whether they
@@ -96,13 +96,13 @@ final class access_test extends \advanced_testcase {
         }
 
         $feedback = $this->getDataGenerator()->create_module('feedback', ['course' => $course->id, 'anonymous' => $anonymous]);
-        $cm = get_coursemodule_from_instance('feedback', $feedback->id);
+        $cm = get_coursemodule_from_instance('individualfeedback', $feedback->id);
 
-        $feedbackgenerator = $this->getDataGenerator()->get_plugin_generator('mod_feedback');
+        $feedbackgenerator = $this->getDataGenerator()->get_plugin_generator('mod_individualfeedback');
         $item = $feedbackgenerator->create_item_textfield($feedback);
         $completion = $this->student_response($feedback, $cm, $item->id, $student->id);
         $showcompleted = $completion->get_completed()->id;
-        $userid = '';   // Value used on mod/feedback/show_entries.php.
+        $userid = '';   // Value used on mod/individualfeedback/show_entries.php.
 
         foreach ($teacheraccesses as $teacher => $access) {
             $this->setUser($teachers[$teacher]);
@@ -110,7 +110,7 @@ final class access_test extends \advanced_testcase {
             // moodle_exception should be thrown if teacher doesn't have
             // access.
             try {
-                new mod_feedback_completion($feedback, $cm, 0, true, $showcompleted, $userid);
+                new mod_individualfeedback_completion($feedback, $cm, 0, true, $showcompleted, $userid);
                 $this->assertTrue($access);
             } catch (\moodle_exception $ex) {
                 $this->assertTrue(!$access);
@@ -132,7 +132,7 @@ final class access_test extends \advanced_testcase {
              */
             'separate_groups_student1' => [
                 'groupmode' => SEPARATEGROUPS,
-                'anonymous' => FEEDBACK_ANONYMOUS_NO,
+                'anonymous' => INDIVIDUALFEEDBACK_ANONYMOUS_NO,
                 'studentgroups' => ['group1'],
                 'teacheraccesses' => ['teacher1' => true, 'teacher2' => true, 'teacher3' => false, 'teacher4' => true],
             ],
@@ -144,7 +144,7 @@ final class access_test extends \advanced_testcase {
              */
             'separate_groups_student2' => [
                 'groupmode' => SEPARATEGROUPS,
-                'anonymous' => FEEDBACK_ANONYMOUS_NO,
+                'anonymous' => INDIVIDUALFEEDBACK_ANONYMOUS_NO,
                 'studentgroups' => ['group2'],
                 'teacheraccesses' => ['teacher1' => true, 'teacher2' => false, 'teacher3' => false, 'teacher4' => true],
             ],
@@ -156,73 +156,73 @@ final class access_test extends \advanced_testcase {
              */
             'separate_groups_student3' => [
                 'groupmode' => SEPARATEGROUPS,
-                'anonymous' => FEEDBACK_ANONYMOUS_NO,
+                'anonymous' => INDIVIDUALFEEDBACK_ANONYMOUS_NO,
                 'studentgroups' => [],
                 'teacheraccesses' => ['teacher1' => true, 'teacher2' => false, 'teacher3' => false, 'teacher4' => true],
             ],
 
             /*
-             * Same three tests with FEEDBACK_ANONYMOUS_YES.
+             * Same three tests with INDIVIDUALFEEDBACK_ANONYMOUS_YES.
              */
             'separate_groups_anon_student1' => [
                 'groupmode' => SEPARATEGROUPS,
-                'anonymous' => FEEDBACK_ANONYMOUS_YES,
+                'anonymous' => INDIVIDUALFEEDBACK_ANONYMOUS_YES,
                 'studentgroups' => ['group1'],
                 'teacheraccesses' => ['teacher1' => true, 'teacher2' => true, 'teacher3' => false, 'teacher4' => true],
             ],
             'separate_groups_anon_student2' => [
                 'groupmode' => SEPARATEGROUPS,
-                'anonymous' => FEEDBACK_ANONYMOUS_YES,
+                'anonymous' => INDIVIDUALFEEDBACK_ANONYMOUS_YES,
                 'studentgroups' => ['group2'],
                 'teacheraccesses' => ['teacher1' => true, 'teacher2' => false, 'teacher3' => false, 'teacher4' => true],
             ],
             'separate_groups_anon_student3' => [
                 'groupmode' => SEPARATEGROUPS,
-                'anonymous' => FEEDBACK_ANONYMOUS_YES,
+                'anonymous' => INDIVIDUALFEEDBACK_ANONYMOUS_YES,
                 'studentgroups' => [],
                 'teacheraccesses' => ['teacher1' => true, 'teacher2' => false, 'teacher3' => false, 'teacher4' => true],
             ],
 
             /*
-             * Same three tests with NOGROUPS and FEEDBACK_ANONYMOUS_NO.
+             * Same three tests with NOGROUPS and INDIVIDUALFEEDBACK_ANONYMOUS_NO.
              */
             'no_groups_student1' => [
                 'groupmode' => NOGROUPS,
-                'anonymous' => FEEDBACK_ANONYMOUS_NO,
+                'anonymous' => INDIVIDUALFEEDBACK_ANONYMOUS_NO,
                 'studentgroups' => ['group1'],
                 'teacheraccesses' => ['teacher1' => true, 'teacher2' => true, 'teacher3' => true, 'teacher4' => true],
             ],
             'no_groups_student2' => [
                 'groupmode' => NOGROUPS,
-                'anonymous' => FEEDBACK_ANONYMOUS_NO,
+                'anonymous' => INDIVIDUALFEEDBACK_ANONYMOUS_NO,
                 'studentgroups' => ['group2'],
                 'teacheraccesses' => ['teacher1' => true, 'teacher2' => true, 'teacher3' => true, 'teacher4' => true],
             ],
             'no_groups_student3' => [
                 'groupmode' => NOGROUPS,
-                'anonymous' => FEEDBACK_ANONYMOUS_NO,
+                'anonymous' => INDIVIDUALFEEDBACK_ANONYMOUS_NO,
                 'studentgroups' => [],
                 'teacheraccesses' => ['teacher1' => true, 'teacher2' => true, 'teacher3' => true, 'teacher4' => true],
             ],
 
             /*
-             * Same three tests with NOGROUPS and FEEDBACK_ANONYMOUS_YES.
+             * Same three tests with NOGROUPS and INDIVIDUALFEEDBACK_ANONYMOUS_YES.
              */
             'no_groups_anon_student1' => [
                 'groupmode' => NOGROUPS,
-                'anonymous' => FEEDBACK_ANONYMOUS_YES,
+                'anonymous' => INDIVIDUALFEEDBACK_ANONYMOUS_YES,
                 'studentgroups' => ['group1'],
                 'teacheraccesses' => ['teacher1' => true, 'teacher2' => true, 'teacher3' => true, 'teacher4' => true],
             ],
             'no_groups_anon_student2' => [
                 'groupmode' => NOGROUPS,
-                'anonymous' => FEEDBACK_ANONYMOUS_YES,
+                'anonymous' => INDIVIDUALFEEDBACK_ANONYMOUS_YES,
                 'studentgroups' => ['group2'],
                 'teacheraccesses' => ['teacher1' => true, 'teacher2' => true, 'teacher3' => true, 'teacher4' => true],
             ],
             'no_groups_anon_student3' => [
                 'groupmode' => NOGROUPS,
-                'anonymous' => FEEDBACK_ANONYMOUS_YES,
+                'anonymous' => INDIVIDUALFEEDBACK_ANONYMOUS_YES,
                 'studentgroups' => [],
                 'teacheraccesses' => ['teacher1' => true, 'teacher2' => true, 'teacher3' => true, 'teacher4' => true],
             ],

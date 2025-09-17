@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Contains unit tests for mod_feedback\dates.
+ * Contains unit tests for mod_individualfeedback\dates.
  *
- * @package   mod_feedback
+ * @package   mod_individualfeedback
  * @category  test
  * @copyright 2021 Shamim Rezaie <shamim@moodle.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -25,14 +25,14 @@
 
 declare(strict_types=1);
 
-namespace mod_feedback;
+namespace mod_individualfeedback;
 
 use advanced_testcase;
 use cm_info;
 use core\activity_dates;
 
 /**
- * Class for unit testing mod_feedback\dates.
+ * Class for unit testing mod_individualfeedback\dates.
  *
  * @copyright 2021 Shamim Rezaie <shamim@moodle.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -111,7 +111,7 @@ final class dates_test extends advanced_testcase {
 
         $this->setUser($user);
 
-        $cm = get_coursemodule_from_instance('feedback', $feedback->id);
+        $cm = get_coursemodule_from_instance('individualfeedback', $feedback->id);
         // Make sure we're using a cm_info object.
         $cm = cm_info::create($cm);
 

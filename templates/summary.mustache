@@ -15,7 +15,7 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{!
-    @template mod_feedback/summary
+    @template mod_individualfeedback/summary
 
     Displays feedback summary
 
@@ -36,14 +36,14 @@
 
 }}
 
-<div class="feedback_info">
+<div class="individualfeedback_info">
     <span
-        class="feedback_info">{{#str}}completed_feedbacks, mod_feedback{{/str}}: </span><span
-        class="feedback_info_value">{{completedcount}}</span>
+        class="individualfeedback_info">{{#str}}completed_feedbacks, mod_individualfeedback{{/str}}: </span><span
+        class="individualfeedback_info_value">{{completedcount}}</span>
 </div>
 
-<div class="feedback_info">
+<div class="individualfeedback_info">
     <span
-        class="feedback_info">{{#str}}questions, mod_feedback{{/str}}: </span><span
-        class="feedback_info_value">{{itemscount}}</span>
+        class="individualfeedback_info">{{#str}}questions, mod_individualfeedback{{/str}}: </span><span
+        class="individualfeedback_info_value">{{itemscount}}</span>
 </div>

@@ -1,4 +1,4 @@
-@mod @mod_feedback
+@mod @mod_individualfeedback
 Feature: Testing multichoice questions in feedback
   In order to create feedbacks
   As a teacher
@@ -151,7 +151,7 @@ Feature: Testing multichoice questions in feedback
     # Change the settings so we don't analyse empty submits
     And I am on the "Learning experience" "feedback activity" page
     And I navigate to "Questions" in current page administration
-    And I click on "Edit" "link" in the "this is a multiple choice 1" "mod_feedback > Question"
+    And I click on "Edit" "link" in the "this is a multiple choice 1" "mod_individualfeedback > Question"
     And I choose "Edit question" in the open action menu
     And I set the field "Omit empty submits in analysis" to "Yes"
     And I press "Save changes to question"
@@ -290,7 +290,7 @@ Feature: Testing multichoice questions in feedback
     # Change the settings so we don't analyse empty submits
     And I am on the "Learning experience" "feedback activity" page
     And I navigate to "Questions" in current page administration
-    And I click on "Edit" "link" in the "this is a multiple choice 1" "mod_feedback > Question"
+    And I click on "Edit" "link" in the "this is a multiple choice 1" "mod_individualfeedback > Question"
     And I choose "Edit question" in the open action menu
     And I set the field "Omit empty submits in analysis" to "Yes"
     And I press "Save changes to question"
@@ -408,7 +408,7 @@ Feature: Testing multichoice questions in feedback
     # Change the settings so we don't analyse empty submits
     And I am on the "Learning experience" "feedback activity" page
     And I navigate to "Questions" in current page administration
-    And I click on "Edit" "link" in the "this is a multiple choice 1" "mod_feedback > Question"
+    And I click on "Edit" "link" in the "this is a multiple choice 1" "mod_individualfeedback > Question"
     And I choose "Edit question" in the open action menu
     And I set the field "Omit empty submits in analysis" to "Yes"
     And I press "Save changes to question"

@@ -19,7 +19,7 @@
  *
  * @author Andreas Grabs
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
- * @package mod_feedback
+ * @package mod_individualfeedback
  */
 
 require_once("../../config.php");
@@ -27,7 +27,7 @@ require_once("lib.php");
 
 $id = required_param('id', PARAM_INT);
 
-$url = new moodle_url('/mod/feedback/index.php', array('id'=>$id));
+$url = new moodle_url('/mod/individualfeedback/index.php', array('id'=>$id));
 
 $PAGE->set_url($url);
 
@@ -42,7 +42,7 @@ $PAGE->set_pagelayout('incourse');
 $PAGE->add_body_class('limitedwidth');
 
 // Trigger instances list viewed event.
-$event = \mod_feedback\event\course_module_instance_list_viewed::create(array('context' => $context));
+$event = \mod_individualfeedback\event\course_module_instance_list_viewed::create(array('context' => $context));
 $event->add_record_snapshot('course', $course);
 $event->trigger();
 
@@ -52,7 +52,7 @@ $strfeedback  = get_string("modulename", "feedback");
 
 $PAGE->navbar->add($strfeedbacks);
 $PAGE->set_heading($course->fullname);
-$PAGE->set_title(get_string('modulename', 'feedback').' '.get_string('activities'));
+$PAGE->set_title(get_string('modulename', 'mod_individualfeedback').' '.get_string('activities'));
 echo $OUTPUT->header();
 if (!$PAGE->has_secondary_navigation()) {
     echo $OUTPUT->heading($strfeedbacks);
@@ -72,13 +72,13 @@ $usesections = course_format_uses_sections($course->format);
 
 $timenow = time();
 $strname  = get_string("name");
-$strresponses = get_string('responses', 'feedback');
+$strresponses = get_string('responses', 'mod_individualfeedback');
 
 $table = new html_table();
 
 if ($usesections) {
     $strsectionname = get_string('sectionname', 'format_'.$course->format);
-    if (has_capability('mod/feedback:viewreports', $context)) {
+    if (has_capability('mod/individualfeedback:viewreports', $context)) {
         $table->head  = array ($strsectionname, $strname, $strresponses);
         $table->align = array ("center", "left", 'center');
     } else {
@@ -86,7 +86,7 @@ if ($usesections) {
         $table->align = array ("center", "left");
     }
 } else {
-    if (has_capability('mod/feedback:viewreports', $context)) {
+    if (has_capability('mod/individualfeedback:viewreports', $context)) {
         $table->head  = array ($strname, $strresponses);
         $table->align = array ("left", "center");
     } else {
@@ -98,10 +98,10 @@ if ($usesections) {
 
 foreach ($feedbacks as $feedback) {
     //get the responses of each feedback
-    $viewurl = new moodle_url('/mod/feedback/view.php', array('id'=>$feedback->coursemodule));
+    $viewurl = new moodle_url('/mod/individualfeedback/view.php', array('id'=>$feedback->coursemodule));
 
-    if (has_capability('mod/feedback:viewreports', $context)) {
-        $completed_feedback_count = intval(feedback_get_completeds_group_count($feedback));
+    if (has_capability('mod/individualfeedback:viewreports', $context)) {
+        $completed_individualfeedback_count = intval(individualfeedback_get_completeds_group_count($feedback));
     }
 
     $dimmedclass = $feedback->visible ? '' : 'class="dimmed"';
@@ -112,8 +112,8 @@ foreach ($feedbacks as $feedback) {
     } else {
         $tabledata = array ($link);
     }
-    if (has_capability('mod/feedback:viewreports', $context)) {
-        $tabledata[] = $completed_feedback_count;
+    if (has_capability('mod/individualfeedback:viewreports', $context)) {
+        $tabledata[] = $completed_individualfeedback_count;
     }
 
     $table->data[] = $tabledata;

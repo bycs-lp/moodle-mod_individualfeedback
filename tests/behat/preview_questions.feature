@@ -1,4 +1,4 @@
-@mod @mod_feedback
+@mod @mod_individualfeedback
 Feature: Preview feedback questions
   In order to view the feedback questions
   As a teacher

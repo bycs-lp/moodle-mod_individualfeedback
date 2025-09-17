@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace mod_feedback\form;
+namespace mod_individualfeedback\form;
 
 use core_form\dynamic_form;
 use moodle_url;
@@ -26,7 +26,7 @@ use context_module;
  *
  * @copyright 2021 Peter Dias
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
- * @package mod_feedback
+ * @package mod_individualfeedback
  */
 class use_template_form extends dynamic_form {
     /**
@@ -36,8 +36,8 @@ class use_template_form extends dynamic_form {
         $mform =& $this->_form;
 
         $mform->addElement('static', 'generalheader', '', get_string("whatfor", 'feedback'));
-        $mform->addElement('radio', 'deleteolditems', '', get_string('delete_old_items', 'feedback'), 1);
-        $mform->addElement('radio', 'deleteolditems', '', get_string('append_new_items', 'feedback'), 0);
+        $mform->addElement('radio', 'deleteolditems', '', get_string('delete_old_items', 'mod_individualfeedback'), 1);
+        $mform->addElement('radio', 'deleteolditems', '', get_string('append_new_items', 'mod_individualfeedback'), 0);
         $mform->setType('deleteolditems', PARAM_INT);
         $mform->setDefault('deleteolditems', 1);
 
@@ -54,7 +54,7 @@ class use_template_form extends dynamic_form {
      */
     protected function get_context_for_dynamic_submission(): context {
         $id = $this->optional_param('id', null, PARAM_INT);
-        list($course, $cm) = get_course_and_cm_from_cmid($id, 'feedback');
+        list($course, $cm) = get_course_and_cm_from_cmid($id, 'individualfeedback');
         return context_module::instance($cm->id);
     }
 
@@ -64,7 +64,7 @@ class use_template_form extends dynamic_form {
      * @throws \moodle_exception User does not have capability to access the form
      */
     protected function check_access_for_dynamic_submission(): void {
-        if (!has_capability('mod/feedback:edititems', $this->get_context_for_dynamic_submission())) {
+        if (!has_capability('mod/individualfeedback:edititems', $this->get_context_for_dynamic_submission())) {
             throw new \moodle_exception('nocapabilitytousethisservice');
         }
     }
@@ -81,12 +81,12 @@ class use_template_form extends dynamic_form {
         $formdata = $this->get_data();
         $templateid = $this->optional_param('templateid', null, PARAM_INT);
         $id = $this->optional_param('id', null, PARAM_INT);
-        $response = feedback_items_from_template($PAGE->activityrecord, $templateid, $formdata->deleteolditems);
-        $url = new moodle_url('/mod/feedback/edit.php', ['id' => $id]);
+        $response = individualfeedback_items_from_template($PAGE->activityrecord, $templateid, $formdata->deleteolditems);
+        $url = new moodle_url('/mod/individualfeedback/edit.php', ['id' => $id]);
 
         if ($response !== false) {
             // Provide a notification on success as the user will be redirected.
-            \core\notification::add(get_string('feedbackupdated', 'feedback'), \core\notification::SUCCESS);
+            \core\notification::add(get_string('feedbackupdated', 'mod_individualfeedback'), \core\notification::SUCCESS);
         }
 
         return [
@@ -115,6 +115,6 @@ class use_template_form extends dynamic_form {
             'id' => $this->optional_param('id', null, PARAM_INT),
             'templateid' => $this->optional_param('templateid', null, PARAM_INT)
         ];
-        return new moodle_url('/mod/feedback/use_templ.php', $params);
+        return new moodle_url('/mod/individualfeedback/use_templ.php', $params);
     }
 }

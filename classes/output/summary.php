@@ -15,32 +15,32 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Contains class mod_feedback\output\summary
+ * Contains class mod_individualfeedback\output\summary
  *
- * @package   mod_feedback
+ * @package   mod_individualfeedback
  * @copyright 2016 Marina Glancy
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_feedback\output;
+namespace mod_individualfeedback\output;
 
 use renderable;
 use templatable;
 use renderer_base;
 use stdClass;
 use moodle_url;
-use mod_feedback_structure;
+use mod_individualfeedback_structure;
 
 /**
  * Class to help display feedback summary
  *
- * @package   mod_feedback
+ * @package   mod_individualfeedback
  * @copyright 2016 Marina Glancy
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class summary implements renderable, templatable {
 
-    /** @var mod_feedback_structure */
+    /** @var mod_individualfeedback_structure */
     protected $feedbackstructure;
 
     /** @var int */
@@ -49,7 +49,7 @@ class summary implements renderable, templatable {
     /**
      * Constructor.
      *
-     * @param mod_feedback_structure $feedbackstructure
+     * @param mod_individualfeedback_structure $feedbackstructure
      * @param int $mygroupid currently selected group
      */
     public function __construct($feedbackstructure, $mygroupid = false) {
