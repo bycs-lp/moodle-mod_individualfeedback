@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Class for exporting a feedback tmp response.
+ * Class for exporting a individualfeedback tmp response.
  *
  * @package    mod_individualfeedback
  * @copyright  2017 Juan Leyva <juan@moodle.com>
@@ -27,7 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 use core\external\exporter;
 
 /**
- * Class for exporting a feedback tmp response.
+ * Class for exporting a individualfeedback tmp response.
  *
  * @copyright  2017 Juan Leyva <juan@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later

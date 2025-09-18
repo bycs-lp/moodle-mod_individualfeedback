@@ -90,15 +90,15 @@ class provider implements
             SELECT DISTINCT ctx.id
               FROM {%s} fc
               JOIN {modules} m
-                ON m.name = :feedback
+                ON m.name = :individualfeedback
               JOIN {course_modules} cm
-                ON cm.instance = fc.feedback
+                ON cm.instance = fc.individualfeedback
                AND cm.module = m.id
               JOIN {context} ctx
                 ON ctx.instanceid = cm.id
                AND ctx.contextlevel = :modlevel
              WHERE fc.userid = :userid";
-        $params = ['individualfeedback' => 'feedback', 'modlevel' => CONTEXT_MODULE, 'userid' => $userid];
+        $params = ['individualfeedback' => 'individualfeedback', 'modlevel' => CONTEXT_MODULE, 'userid' => $userid];
         $contextlist = new contextlist();
         $contextlist->add_from_sql(sprintf($sql, 'individualfeedback_completed'), $params);
         $contextlist->add_from_sql(sprintf($sql, 'individualfeedback_completedtmp'), $params);
@@ -123,15 +123,15 @@ class provider implements
             SELECT fc.userid
               FROM {%s} fc
               JOIN {modules} m
-                ON m.name = :feedback
+                ON m.name = :individualfeedback
               JOIN {course_modules} cm
-                ON cm.instance = fc.feedback
+                ON cm.instance = fc.individualfeedback
                AND cm.module = m.id
               JOIN {context} ctx
                 ON ctx.instanceid = cm.id
                AND ctx.contextlevel = :modlevel
              WHERE ctx.id = :contextid";
-        $params = ['individualfeedback' => 'feedback', 'modlevel' => CONTEXT_MODULE, 'contextid' => $context->id];
+        $params = ['individualfeedback' => 'individualfeedback', 'modlevel' => CONTEXT_MODULE, 'contextid' => $context->id];
 
         $userlist->add_from_sql('userid', sprintf($sql, 'individualfeedback_completed'), $params);
         $userlist->add_from_sql('userid', sprintf($sql, 'individualfeedback_completedtmp'), $params);
@@ -236,12 +236,12 @@ class provider implements
             SELECT fc.id
               FROM {%s} fc
               JOIN {modules} m
-                ON m.name = :feedback
+                ON m.name = :individualfeedback
               JOIN {course_modules} cm
-                ON cm.instance = fc.feedback
+                ON cm.instance = fc.individualfeedback
                AND cm.module = m.id
              WHERE cm.id = :cmid";
-        $completedparams = ['cmid' => $context->instanceid, 'individualfeedback' => 'feedback'];
+        $completedparams = ['cmid' => $context->instanceid, 'individualfeedback' => 'individualfeedback'];
 
         // Delete temp answers and submissions.
         $completedtmpids = $DB->get_fieldset_sql(sprintf($completedsql, 'individualfeedback_completedtmp'), $completedparams);
@@ -282,13 +282,13 @@ class provider implements
             SELECT fc.id
               FROM {%s} fc
               JOIN {modules} m
-                ON m.name = :feedback
+                ON m.name = :individualfeedback
               JOIN {course_modules} cm
-                ON cm.instance = fc.feedback
+                ON cm.instance = fc.individualfeedback
                AND cm.module = m.id
              WHERE fc.userid = :userid
                AND cm.id $insql";
-        $completedparams = array_merge($inparams, ['userid' => $userid, 'individualfeedback' => 'feedback']);
+        $completedparams = array_merge($inparams, ['userid' => $userid, 'individualfeedback' => 'individualfeedback']);
 
         // Delete all submissions in progress.
         $completedtmpids = $DB->get_fieldset_sql(sprintf($completedsql, 'individualfeedback_completedtmp'), $completedparams);
@@ -324,13 +324,13 @@ class provider implements
             SELECT fc.id
               FROM {%s} fc
               JOIN {modules} m
-                ON m.name = :feedback
+                ON m.name = :individualfeedback
               JOIN {course_modules} cm
-                ON cm.instance = fc.feedback
+                ON cm.instance = fc.individualfeedback
                AND cm.module = m.id
              WHERE cm.id = :instanceid
                AND fc.userid $insql";
-        $completedparams = array_merge($inparams, ['instanceid' => $context->instanceid, 'individualfeedback' => 'feedback']);
+        $completedparams = array_merge($inparams, ['instanceid' => $context->instanceid, 'individualfeedback' => 'individualfeedback']);
 
         // Delete all submissions in progress.
         $completedtmpids = $DB->get_fieldset_sql(sprintf($completedsql, 'individualfeedback_completedtmp'), $completedparams);
@@ -413,7 +413,7 @@ class provider implements
 
             $sql = "
                 SELECT $uniqid AS uniqid,
-                       f.id AS feedbackid,
+                       f.id AS individualfeedbackid,
                        ctx.id AS contextid,
 
                        $istmpsqlval AS istmp,
@@ -431,7 +431,7 @@ class provider implements
                   FROM {context} ctx
                   JOIN {course_modules} cm
                     ON cm.id = ctx.instanceid
-                  JOIN {feedback} f
+                  JOIN {individualfeedback} f
                     ON f.id = cm.instance
                   JOIN {%s} fc
                     ON fc.individualfeedback = f.id
@@ -460,7 +460,7 @@ class provider implements
                    COALESCE(fv.value, fvt.value) AS valuevalue,
 
                    fi.id AS itemid,
-                   fi.feedback AS itemfeedback,
+                   fi.individualfeedback AS itemindividualfeedback,
                    fi.template AS itemtemplate,
                    fi.name AS itemname,
                    fi.label AS itemlabel,

@@ -27,26 +27,31 @@ class individualfeedback_textfield_form extends individualfeedback_item_form {
 
         $mform =& $this->_form;
 
-        $mform->addElement('header', 'general', get_string($this->type, 'feedback'));
-        $mform->addElement('advcheckbox', 'required', get_string('required', 'mod_individualfeedback'), '' , null , array(0, 1));
-
+        $mform->addElement('header', 'general', get_string($this->type, 'individualfeedback'));
+        
+        // +++ NEW CODE
+        // $mform->addElement('advcheckbox', 'required', get_string('required', 'individualfeedback'), '' , null , array(0, 1));
+        $mform->addElement('hidden', 'required', 0);
+        $mform->setType('required', PARAM_INT);
+        // --- NEW CODE
+        
         $mform->addElement('text',
-                            'name',
-                            get_string('item_name', 'mod_individualfeedback'),
-                            array('size'=>INDIVIDUALFEEDBACK_ITEM_NAME_TEXTBOX_SIZE, 'maxlength'=>255));
+            'name',
+            get_string('item_name', 'individualfeedback'),
+            array('size'=>INDIVIDUALFEEDBACK_ITEM_NAME_TEXTBOX_SIZE, 'maxlength'=>255));
         $mform->addElement('text',
-                            'label',
-                            get_string('item_label', 'mod_individualfeedback'),
-                            array('size'=>INDIVIDUALFEEDBACK_ITEM_LABEL_TEXTBOX_SIZE, 'maxlength'=>255));
+            'label',
+            get_string('item_label', 'individualfeedback'),
+            array('size'=>INDIVIDUALFEEDBACK_ITEM_LABEL_TEXTBOX_SIZE, 'maxlength'=>255));
 
         $mform->addElement('select',
-                            'itemsize',
-                            get_string('textfield_size', 'mod_individualfeedback').'&nbsp;',
-                            array_slice(range(0, 255), 5, 255, true));
+            'itemsize',
+            get_string('textfield_size', 'individualfeedback').'&nbsp;',
+            array_slice(range(0, 255), 5, 255, true));
 
         $mform->addElement('text',
-                            'itemmaxlength',
-                            get_string('textfield_maxlength', 'mod_individualfeedback'));
+            'itemmaxlength',
+            get_string('textfield_maxlength', 'individualfeedback'));
         $mform->setType('itemmaxlength', PARAM_INT);
         $mform->addRule('itemmaxlength', null, 'numeric', null, 'client');
 

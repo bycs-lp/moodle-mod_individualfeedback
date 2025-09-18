@@ -47,7 +47,7 @@ if ($message) {
 }
 
 list ($course, $cm) = get_course_and_cm_from_cmid($id, 'individualfeedback');
-if (! $feedback = $DB->get_record("feedback", array("id"=>$cm->instance))) {
+if (! $feedback = $DB->get_record("individualfeedback", array("id"=>$cm->instance))) {
     throw new \moodle_exception('invalidcoursemodule');
 }
 
@@ -82,7 +82,7 @@ if ($action == 'sendmessage' && $canbulkmessaging) {
     $shortname = format_string($course->shortname,
                             true,
                             array('context' => $coursecontext));
-    $strfeedbacks = get_string("modulenameplural", "feedback");
+    $strfeedbacks = get_string("modulenameplural", "individualfeedback");
 
     $htmlmessage = "<body id=\"email\">";
 
@@ -176,7 +176,7 @@ if ($canbulkmessaging) {
 
     // Build the select/deselect all control.
     $selectallid = 'selectall-non-respondents';
-    $mastercheckbox = new \core\output\checkbox_toggleall('feedback-non-respondents', true, [
+    $mastercheckbox = new \core\output\checkbox_toggleall('individualfeedback-non-respondents', true, [
         'id' => $selectallid,
         'name' => $selectallid,
         'value' => 1,
@@ -189,7 +189,7 @@ if ($canbulkmessaging) {
     $tableheaders[] = $OUTPUT->render($mastercheckbox);
 }
 
-$table = new flexible_table('feedback-shownonrespondents-'.$course->id);
+$table = new flexible_table('individualfeedback-shownonrespondents-'.$course->id);
 
 $table->define_columns($tablecolumns);
 $table->define_headers($tableheaders);
@@ -233,7 +233,7 @@ if ($showall) {
 $students = individualfeedback_get_incomplete_users($cm, $currentgroup, $sort, $startpage, $pagecount, true);
 //####### viewreports-start
 //print the list of students
-echo $OUTPUT->heading(get_string('non_respondents_students', 'feedback', $matchcount), 4);
+echo $OUTPUT->heading(get_string('non_respondents_students', 'individualfeedback', $matchcount), 4);
 echo isset($groupselect) ? $groupselect : '';
 echo '<div class="clearer"></div>';
 
@@ -242,7 +242,7 @@ if (empty($students)) {
 } else {
 
     if ($canbulkmessaging) {
-        echo '<form class="mform" action="show_nonrespondents.php" method="post" id="individualfeedback_sendmessageform">';
+        echo '<form class="mform" action="show_nonrespondents.php" method="post" id="feedback_sendmessageform">';
     }
 
     foreach ($students as $student) {
@@ -252,19 +252,19 @@ if (empty($students)) {
         $data = array($OUTPUT->user_picture($student, array('courseid' => $course->id)), $profilelink);
 
         if ($student->feedbackstarted) {
-            $data[] = get_string('started', 'mod_individualfeedback');
+            $data[] = get_string('started', 'individualfeedback');
         } else {
-            $data[] = get_string('not_started', 'mod_individualfeedback');
+            $data[] = get_string('not_started', 'individualfeedback');
         }
 
         //selections to bulk messaging
         if ($canbulkmessaging) {
-            $checkbox = new \core\output\checkbox_toggleall('feedback-non-respondents', false, [
+            $checkbox = new \core\output\checkbox_toggleall('individualfeedback-non-respondents', false, [
                 'id' => 'messageuser-' . $student->id,
                 'name' => 'messageuser[]',
                 'classes' => 'me-1',
                 'value' => $student->id,
-                'label' => get_string('includeuserinrecipientslist', 'mod_individualfeedback', fullname($student)),
+                'label' => get_string('includeuserinrecipientslist', 'individualfeedback', fullname($student)),
                 'labelclasses' => 'accesshide',
             ]);
             $data[] = $OUTPUT->render($checkbox);
@@ -286,16 +286,16 @@ if (empty($students)) {
     }
     if ($canbulkmessaging) {
         echo '<fieldset class="clearfix">';
-        echo '<legend class="ftoggler">'.get_string('send_message', 'mod_individualfeedback').'</legend>';
+        echo '<legend class="ftoggler">'.get_string('send_message', 'individualfeedback').'</legend>';
         echo '<div>';
-        echo '<label for="individualfeedback_subject">'.get_string('subject', 'mod_individualfeedback').'&nbsp;</label>';
-        echo '<input type="text" id="individualfeedback_subject" size="50" maxlength="255" name="subject" value="'.s($subject).'" />';
+        echo '<label for="feedback_subject">'.get_string('subject', 'individualfeedback').'&nbsp;</label>';
+        echo '<input type="text" id="feedback_subject" size="50" maxlength="255" name="subject" value="'.s($subject).'" />';
         echo '</div>';
         echo $OUTPUT->print_textarea('message', 'edit-message', $message, 15, 25);
         print_string('formathtml');
         echo '<input type="hidden" name="format" value="'.FORMAT_HTML.'" />';
         echo '<br /><div class="buttons">';
-        echo '<input type="submit" name="send_message" value="'.get_string('send', 'mod_individualfeedback').'" class="btn btn-secondary" />';
+        echo '<input type="submit" name="send_message" value="'.get_string('send', 'individualfeedback').'" class="btn btn-secondary" />';
         echo '</div>';
         echo '<input type="hidden" name="sesskey" value="'.sesskey().'" />';
         echo '<input type="hidden" name="action" value="sendmessage" />';

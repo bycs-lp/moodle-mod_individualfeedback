@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * List of deprecated mod_individualfeedback functions.
+ * List of deprecated mod_feedback functions.
  *
  * @package   mod_individualfeedback
  * @copyright 2021 Jun Pataleta

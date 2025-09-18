@@ -23,7 +23,7 @@ use navigation_node;
 /**
  * Custom secondary navigation class
  *
- * A custom construct of secondary nav for feedback. This rearranges the nodes for the secondary
+ * A custom construct of secondary nav for individualfeedback. This rearranges the nodes for the secondary
  *
  * @package     mod_individualfeedback
  * @category    navigation
@@ -38,7 +38,7 @@ class secondary extends core_secondary {
             'templatenode' => 3,
             'responses' => 4,
             'nonrespondents' => 4.1,
-            'feedbackanalysis' => 5,
+            'individualfeedbackanalysis' => 5,
             'mapcourse' => 12,
         ];
 

@@ -51,12 +51,12 @@ class responses_action_bar extends base_action_bar {
         $items = [];
         if (has_capability('mod/individualfeedback:viewreports', $this->context)) {
             $reporturl = new moodle_url('/mod/individualfeedback/show_entries.php', $this->urlparams);
-            $options[$reporturl->out(false)] = get_string('show_entries', 'mod_individualfeedback');
+            $options[$reporturl->out(false)] = get_string('show_entries', 'individualfeedback');
             $selected = $this->currenturl->compare($reporturl, URL_MATCH_BASE) ? $reporturl : $this->currenturl;
 
-            if ($this->feedback->anonymous == INDIVIDUALFEEDBACK_ANONYMOUS_NO && $this->course->id != SITEID) {
+            if ($this->individualfeedback->anonymous == INDIVIDUALFEEDBACK_ANONYMOUS_NO && $this->course->id != SITEID) {
                 $nonrespondenturl = new moodle_url('/mod/individualfeedback/show_nonrespondents.php', $this->urlparams);
-                $options[$nonrespondenturl->out(false)] = get_string('show_nonrespondents', 'mod_individualfeedback');
+                $options[$nonrespondenturl->out(false)] = get_string('show_nonrespondents', 'individualfeedback');
                 $selected = $this->currenturl->compare($nonrespondenturl, URL_MATCH_BASE) ? $nonrespondenturl : $this->currenturl;;
             }
 

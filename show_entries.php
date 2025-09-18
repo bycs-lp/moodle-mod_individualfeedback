@@ -50,7 +50,7 @@ $feedback = $PAGE->activityrecord;
 
 require_capability('mod/individualfeedback:viewreports', $context);
 
-$actionbar = new \mod_individualfeedback\output\responses_action_bar($cm->id, $baseurl);
+$actionbar = new \mod_individualfeedback\output\responses_action_bar($cm->id, $baseurl); // Verificar.
 
 if ($deleteid) {
     // This is a request to delete a reponse.
@@ -89,8 +89,8 @@ $PAGE->set_heading($course->fullname);
 /** @var \mod_individualfeedback\output\renderer $renderer */
 $renderer = $PAGE->get_renderer('mod_individualfeedback');
 $renderer->set_title(
-        [format_string($feedback->name), format_string($course->fullname)],
-        get_string('responses', 'mod_individualfeedback')
+    [format_string($feedback->name), format_string($course->fullname)],
+    get_string('responses', 'individualfeedback')
 );
 
 $PAGE->activityheader->set_attrs([
@@ -100,7 +100,7 @@ $PAGE->activityheader->set_attrs([
 $PAGE->add_body_class('limitedwidth');
 echo $OUTPUT->header();
 echo $renderer->main_action_bar($actionbar);
-echo $OUTPUT->heading(get_string('show_entries', 'mod_individualfeedback'), 3);
+echo $OUTPUT->heading(get_string('show_entries', 'individualfeedback'), 3);
 
 /// Print the main part of the page
 ///////////////////////////////////////////////////////////////////////////
@@ -115,8 +115,8 @@ if ($userid || $showcompleted) {
         $usr = $DB->get_record('user', array('id' => $userid), '*', MUST_EXIST);
         $responsetitle = userdate($completedrecord->timemodified) . ' (' . fullname($usr) . ')';
     } else {
-        $responsetitle = get_string('response_nr', 'mod_individualfeedback') . ': ' .
-                $completedrecord->random_response . ' (' . get_string('anonymous', 'mod_individualfeedback') . ')';
+        $responsetitle = get_string('response_nr', 'individualfeedback') . ': ' .
+                $completedrecord->random_response . ' (' . get_string('anonymous', 'individualfeedback') . ')';
     }
 
     echo $OUTPUT->heading($responsetitle, 4);
@@ -152,18 +152,18 @@ if ($userid || $showcompleted) {
     // Print the list of responses.
     $courseselectform->display();
 
-    // Show non-anonymous responses (always retrieve them even if current feedback is anonymous).
+    // Show non-anonymous responses (always retrieve them even if current individualfeedback is anonymous).
     $totalrows = $responsestable->get_total_responses_count();
     if (!$feedbackstructure->is_anonymous() || $totalrows) {
-        echo $OUTPUT->heading(get_string('non_anonymous_entries', 'feedback', $totalrows), 4);
+        echo $OUTPUT->heading(get_string('non_anonymous_entries', 'individualfeedback', $totalrows), 4);
         $responsestable->display();
     }
 
-    // Show anonymous responses (always retrieve them even if current feedback is not anonymous).
+    // Show anonymous responses (always retrieve them even if current individualfeedback is not anonymous).
     $feedbackstructure->shuffle_anonym_responses();
     $totalrows = $anonresponsestable->get_total_responses_count();
     if ($feedbackstructure->is_anonymous() || $totalrows) {
-        echo $OUTPUT->heading(get_string('anonymous_entries', 'feedback', $totalrows), 4);
+        echo $OUTPUT->heading(get_string('anonymous_entries', 'individualfeedback', $totalrows), 4);
         $anonresponsestable->display();
     }
 

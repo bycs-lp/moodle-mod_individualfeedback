@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * prints an analysed excel-spreadsheet of the feedback
+ * prints an analysed excel-spreadsheet of the individualfeedback
  *
  * @copyright Andreas Grabs
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
@@ -40,22 +40,22 @@ require_login($course, false, $cm);
 $context = context_module::instance($cm->id);
 require_capability('mod/individualfeedback:viewreports', $context);
 
-$feedback = $PAGE->activityrecord;
+$individualfeedback = $PAGE->activityrecord;
 
 // Buffering any output. This prevents some output before the excel-header will be send.
 ob_start();
 ob_end_clean();
 
 // Get the questions (item-names).
-$feedbackstructure = new mod_individualfeedback_structure($feedback, $cm, $course->id);
-if (!$items = $feedbackstructure->get_items(true)) {
-    throw new \moodle_exception('no_items_available_yet', 'feedback', $cm->url);
+$individualfeedbackstructure = new mod_individualfeedback_structure($individualfeedback, $cm, $course->id);
+if (!$items = $individualfeedbackstructure->get_items(true)) {
+    throw new \moodle_exception('no_items_available_yet', 'individualfeedback', $cm->url);
 }
 
 $mygroupid = groups_get_activity_group($cm);
 
 // Creating a workbook.
-$filename = "individualfeedback_" . clean_filename($cm->get_formatted_name()) . ".xls";
+$filename = "individualfeedback_" . clean_filename($cm->get_formatted_name()) . " " . get_string('detail_questions', 'individualfeedback') . ".xls";
 $workbook = new MoodleExcelWorkbook($filename);
 
 // Creating the worksheet.
@@ -80,25 +80,28 @@ $rowoffset1 = 0;
 $worksheet1->write_string($rowoffset1, 0, userdate(time()), $xlsformats->head1);
 
 // Get the completeds.
-$completedscount = $feedbackstructure->count_completed_responses($mygroupid);
-// Write the count of completeds.
-// Keep consistency and write count of completeds even when they are 0.
-$rowoffset1++;
-$worksheet1->write_string($rowoffset1,
-    0,
-    get_string('completed_feedbacks', 'mod_individualfeedback').': '.strval($completedscount),
-    $xlsformats->head1);
+// +++ NEW CODE
+$completedscount = individualfeedback_get_completeds_group_count($individualfeedback, $mygroupid, $courseid);
+if ($completedscount > 0) {
+    // Write the count of completeds.
+    $rowoffset1++;
+    $worksheet1->write_string($rowoffset1,
+        0,
+        $cm->get_module_type_name(true).': '.strval($completedscount),
+        $xlsformats->head1);
+}
+// --- NEW CODE
 
 $rowoffset1++;
 $worksheet1->write_string($rowoffset1,
     0,
-    get_string('questions', 'mod_individualfeedback').': '. strval(count($items)),
+    get_string('questions', 'individualfeedback').': '. strval(count($items)),
     $xlsformats->head1);
 
 $rowoffset1 += 2;
-$worksheet1->write_string($rowoffset1, 0, get_string('item_label', 'mod_individualfeedback'), $xlsformats->head1);
-$worksheet1->write_string($rowoffset1, 1, get_string('question', 'mod_individualfeedback'), $xlsformats->head1);
-$worksheet1->write_string($rowoffset1, 2, get_string('responses', 'mod_individualfeedback'), $xlsformats->head1);
+$worksheet1->write_string($rowoffset1, 0, get_string('item_label', 'individualfeedback'), $xlsformats->head1);
+$worksheet1->write_string($rowoffset1, 1, get_string('question', 'individualfeedback'), $xlsformats->head1);
+$worksheet1->write_string($rowoffset1, 2, get_string('responses', 'individualfeedback'), $xlsformats->head1);
 $rowoffset1++;
 
 foreach ($items as $item) {

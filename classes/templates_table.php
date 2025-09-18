@@ -31,7 +31,7 @@ require_once($CFG->libdir . '/tablelib.php');
  * Class mod_individualfeedback_templates_table
  *
  * @package   mod_individualfeedback
- * @copyright 2016 Marina Glancy
+ * @copyright Andreas Grabs
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mod_individualfeedback_templates_table extends flexible_table {
@@ -52,11 +52,8 @@ class mod_individualfeedback_templates_table extends flexible_table {
         if ($this->mode) {
             $tablecolumns[] = 'actions';
         }
-
-        $tableheaders = [
-            get_string('template', 'mod_individualfeedback'),
-            html_writer::span(get_string('actions'), 'sr-only'),
-        ];
+        
+        $tableheaders = array(get_string('template', 'individualfeedback'), '');
 
         $this->set_attribute('class', 'templateslist');
 
@@ -75,13 +72,13 @@ class mod_individualfeedback_templates_table extends flexible_table {
     public function display($templates) {
         global $OUTPUT;
         if (empty($templates)) {
-            echo $OUTPUT->box(get_string('no_templates_available_yet', 'mod_individualfeedback'),
+            echo $OUTPUT->box(get_string('no_templates_available_yet', 'individualfeedback'),
                              'generalbox boxaligncenter');
             return;
         }
 
         $this->setup();
-        $strdeletefeedback = get_string('delete_template', 'mod_individualfeedback');
+        $strdeletefeedback = get_string('delete_template', 'individualfeedback');
 
         foreach ($templates as $template) {
             $data = [];
@@ -92,15 +89,17 @@ class mod_individualfeedback_templates_table extends flexible_table {
             if ($this->mode && has_capability('mod/individualfeedback:deletetemplate', $this->get_context())) {
                 $deleteurl = new moodle_url('/mod/individualfeedback/manage_templates.php',
                     $url->params() + ['deletetemplate' => $template->id]);
-                $deleteaction = new confirm_action(get_string('confirmdeletetemplate', 'mod_individualfeedback'));
+                $deleteaction = new confirm_action(get_string('confirmdeletetemplate', 'individualfeedback'));
                 $deleteicon = $OUTPUT->action_icon($deleteurl, new pix_icon('t/delete', $strdeletefeedback), $deleteaction);
-                if ($template->ispublic) {
+  
+                if ($template->ispublic == 1) { //New test.
                     $systemcontext = context_system::instance();
                     if (!(has_capability('mod/individualfeedback:createpublictemplate', $systemcontext) &&
                         has_capability('mod/individualfeedback:deletetemplate', $systemcontext))) {
                         $deleteicon = false;
                     }
                 }
+                
                 $data[] = $deleteicon;
             }
 

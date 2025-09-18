@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Cognitive depth indicator - feedback.
+ * Cognitive depth indicator - individualfeedback.
  *
  * @package   mod_individualfeedback
  * @copyright 2017 David Monllao {@link http://www.davidmonllao.com}
@@ -27,7 +27,7 @@ namespace mod_individualfeedback\analytics\indicator;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Cognitive depth indicator - feedback.
+ * Cognitive depth indicator - individualfeedback.
  *
  * @package   mod_individualfeedback
  * @copyright 2017 David Monllao {@link http://www.davidmonllao.com}
@@ -54,7 +54,7 @@ class cognitive_depth extends activity_base {
         $this->fill_instance_data($cm);
 
         if (!empty($this->instancedata[$cm->instance]->publish_stats)) {
-            // If stats are published we count that the user viewed feedback.
+            // If stats are published we count that the user viewed individualfeedback.
             return self::COGNITIVE_LEVEL_3;
         }
         return self::COGNITIVE_LEVEL_2;

@@ -44,8 +44,8 @@ class mod_individualfeedback_use_templ_form extends moodleform {
         $mform =& $this->_form;
 
         // visible elements
-        $mform->addElement('radio', 'deleteolditems', '', get_string('delete_old_items', 'mod_individualfeedback'), 1);
-        $mform->addElement('radio', 'deleteolditems', '', get_string('append_new_items', 'mod_individualfeedback'), 0);
+        $mform->addElement('radio', 'deleteolditems', '', get_string('delete_old_items', 'individualfeedback'), 1);
+        $mform->addElement('radio', 'deleteolditems', '', get_string('append_new_items', 'individualfeedback'), 0);
         $mform->setType('deleteolditems', PARAM_INT);
         $mform->setDefault('deleteolditems', 1);
 
@@ -57,6 +57,14 @@ class mod_individualfeedback_use_templ_form extends moodleform {
         $mform->addElement('hidden', 'do_show');
         $mform->setType('do_show', PARAM_INT);
         $mform->setConstant('do_show', 'edit');
+
+        $questions = $this->_customdata['questions'];
+        if (count($questions)) {
+            foreach ($questions as $question) {
+                $mform->addElement('hidden', 'import_' . $question->id, 1);
+                $mform->setType('import_' . $question->id, PARAM_INT);
+            }
+        }
 
         //-------------------------------------------------------------------------------
         // buttons

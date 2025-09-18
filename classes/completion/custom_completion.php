@@ -43,7 +43,7 @@ class custom_completion extends activity_custom_completion {
 
         $this->validate_rule($rule);
 
-        // Feedback only supports completionsubmit as a custom rule.
+        // individualfeedback only supports completionsubmit as a custom rule.
         $status = $DB->record_exists('individualfeedback_completed', ['individualfeedback' => $this->cm->instance, 'userid' => $this->userid]);
         return $status ? COMPLETION_COMPLETE : COMPLETION_INCOMPLETE;
     }
@@ -64,7 +64,7 @@ class custom_completion extends activity_custom_completion {
      */
     public function get_custom_rule_descriptions(): array {
         return [
-            'completionsubmit' => get_string('completiondetail:submit', 'mod_individualfeedback')
+            'completionsubmit' => get_string('completiondetail:submit', 'individualfeedback')
         ];
     }
 

@@ -14,19 +14,24 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Class for exporting partial individualfeedback data.
+ *
+ * @package    mod_individualfeedback
+ * @copyright  2017 Juan Leyva <juan@moodle.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 namespace mod_individualfeedback\external;
 
 use core\external\exporter;
 use renderer_base;
 use core_external\util as external_util;
 use core_external\external_files;
-
 /**
- * Class for exporting partial feedback data (some fields are only viewable by admins).
+ * Class for exporting partial individualfeedback data (some fields are only viewable by admins).
  *
  * @copyright  2017 Juan Leyva <juan@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @package    mod_individualfeedback
  */
 class individualfeedback_summary_exporter extends exporter {
 
@@ -38,22 +43,22 @@ class individualfeedback_summary_exporter extends exporter {
             ),
             'course' => array(
                 'type' => PARAM_INT,
-                'description' => 'Course id this feedback is part of.',
+                'description' => 'Course id this individualfeedback is part of.',
             ),
             'name' => array(
                 'type' => PARAM_TEXT,
-                'description' => 'Feedback name.',
+                'description' => 'individualfeedback name.',
             ),
             'intro' => array(
                 'default' => '',
                 'type' => PARAM_RAW,
-                'description' => 'Feedback introduction text.',
+                'description' => 'individualfeedback introduction text.',
             ),
             'introformat' => array(
                 'choices' => array(FORMAT_HTML, FORMAT_MOODLE, FORMAT_PLAIN, FORMAT_MARKDOWN),
                 'type' => PARAM_INT,
                 'default' => FORMAT_MOODLE,
-                'description' => 'Feedback intro text format.',
+                'description' => 'Individualfeedback intro text format.',
             ),
             'lang' => array(
                 'type' => PARAM_LANG,
@@ -62,7 +67,7 @@ class individualfeedback_summary_exporter extends exporter {
             ),
             'anonymous' => array(
                 'type' => PARAM_INT,
-                'description' => 'Whether the feedback is anonymous.',
+                'description' => 'Whether the individualfeedback is anonymous.',
             ),
             'email_notification' => array(
                 'type' => PARAM_BOOL,

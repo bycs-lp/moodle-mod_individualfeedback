@@ -19,9 +19,9 @@ require_once($CFG->libdir.'/formslib.php');
 define('INDIVIDUALFEEDBACK_ITEM_NAME_TEXTBOX_SIZE', 80);
 define('INDIVIDUALFEEDBACK_ITEM_LABEL_TEXTBOX_SIZE', 20);
 abstract class individualfeedback_item_form extends moodleform {
-
-    /** @var string type value in the hidden element. */
-    protected $type;
+    
+        /** @var string type value in the hidden element. */
+        protected $type;
 
     public function definition() {
         $item = $this->_customdata['item']; //the item object
@@ -30,8 +30,8 @@ abstract class individualfeedback_item_form extends moodleform {
         //    array('cmid'=>$cm->id,
         //         'id'=>isset($item->id) ? $item->id : NULL,
         //         'typ'=>$item->typ,
-        //         'items'=>$feedbackitems,
-        //         'individualfeedback'=>$feedback->id);
+        //         'items'=>$individualfeedbackitems,
+        //         'individualfeedback'=>$individualfeedback->id);
         $common = $this->_customdata['common'];
 
         //positionlist is an array with possible positions for the item location
@@ -44,15 +44,15 @@ abstract class individualfeedback_item_form extends moodleform {
 
         if (array_filter(array_keys($common['items']))) {
             $mform->addElement('select',
-                                'dependitem',
-                                get_string('dependitem', 'mod_individualfeedback').'&nbsp;',
-                                $common['items']
-                                );
-            $mform->addHelpButton('dependitem', 'depending', 'feedback');
+                'dependitem',
+                get_string('dependitem', 'individualfeedback').'&nbsp;',
+                $common['items']
+            );
+            $mform->addHelpButton('dependitem', 'depending', 'individualfeedback');
             $mform->addElement('text',
-                                'dependvalue',
-                                get_string('dependvalue', 'mod_individualfeedback'),
-                                array('size'=>INDIVIDUALFEEDBACK_ITEM_LABEL_TEXTBOX_SIZE, 'maxlength'=>255));
+                'dependvalue',
+                get_string('dependvalue', 'individualfeedback'),
+                array('size'=>INDIVIDUALFEEDBACK_ITEM_LABEL_TEXTBOX_SIZE, 'maxlength'=>255));
             $mform->hideIf('dependvalue', 'dependitem', 'eq', '0');
         } else {
             $mform->addElement('hidden', 'dependitem', 0);
@@ -63,9 +63,9 @@ abstract class individualfeedback_item_form extends moodleform {
         $mform->setType('dependvalue', PARAM_RAW);
 
         $position_select = $mform->addElement('select',
-                                            'position',
-                                            get_string('position', 'mod_individualfeedback').'&nbsp;',
-                                            $positionlist);
+            'position',
+            get_string('position', 'individualfeedback').'&nbsp;',
+            $positionlist);
         $position_select->setValue($position);
 
         $mform->addElement('hidden', 'cmid', $common['cmid']);
@@ -74,8 +74,8 @@ abstract class individualfeedback_item_form extends moodleform {
         $mform->addElement('hidden', 'id', $common['id']);
         $mform->setType('id', PARAM_INT);
 
-        $mform->addElement('hidden', 'individualfeedback', $common['individualfeedback']);
-        $mform->setType('individualfeedback', PARAM_INT);
+        $mform->addElement('hidden', 'feedback', $common['feedback']);
+        $mform->setType('feedback', PARAM_INT);
 
         $mform->addElement('hidden', 'template', 0);
         $mform->setType('template', PARAM_INT);
@@ -95,12 +95,12 @@ abstract class individualfeedback_item_form extends moodleform {
         $buttonarray = array();
         if (!empty($item->id)) {
             $buttonarray[] = &$mform->createElement('submit',
-                                                    'update_item',
-                                                    get_string('update_item', 'mod_individualfeedback'));
+                'update_item',
+                get_string('update_item', 'individualfeedback'));
 
             $buttonarray[] = &$mform->createElement('submit',
-                                                    'clone_item',
-                                                    get_string('save_as_new_item', 'mod_individualfeedback'));
+                'clone_item',
+                get_string('save_as_new_item', 'individualfeedback'));
         } else {
             $mform->addElement('hidden', 'clone_item', 0);
             $mform->setType('clone_item', PARAM_INT);
@@ -128,4 +128,3 @@ abstract class individualfeedback_item_form extends moodleform {
         return $item;
     }
 }
-

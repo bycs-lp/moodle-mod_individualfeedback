@@ -11,7 +11,7 @@ Information provided here is intended especially for developers.
 * The `$extradetails` parameter of the `\mod_individualfeedback\output\summary` class constructor has been removed
 
 === 4.2 ===
-* The external methods get_items() and get_page_items() now only return the items when the user can access the feedback; if the
+* The external methods get_items() and get_page_items() now only return the items when the user can access the individualfeedback; if the
 user can't see them, a warning message will be returned, with the reasons.
 
 === 4.0 ===
@@ -49,15 +49,15 @@ The $extradetails parameter in the constructor of the mod_individualfeedback\out
   * individualfeedback_is_individualfeedback_in_sitecourse_map()
   * individualfeedback_clean_up_sitecourse_map()
   * individualfeedback_print_numeric_option_list()
-* Web Service functions now support an optional courseid parameter (course where user completes the feedback).
-  This new parameter was necessary to support site feedbacks.
+* Web Service functions now support an optional courseid parameter (course where user completes the individualfeedback).
+  This new parameter was necessary to support site individualfeedbacks.
 
 === 3.5 ===
 
 * The following functions, previously used (exclusively) by upgrade steps are not available
   anymore because of the upgrade cleanup performed for this version. See MDL-59159 for more info:
-    - mod_individualindividualfeedback_upgrade_delete_duplicate_values()
-    - mod_individualindividualfeedback_upgrade_courseid()
+    - mod_individualfeedback_upgrade_delete_duplicate_values()
+    - mod_individualfeedback_upgrade_courseid()
 
 === 3.3.2 ===
 
@@ -67,16 +67,16 @@ The $extradetails parameter in the constructor of the mod_individualfeedback\out
 
 === 3.3 ===
 
-* Method get_current_completed_tmp in mod_individualindividualfeedback_completion class is now public.
+* Method get_current_completed_tmp in mod_individualfeedback_completion class is now public.
 * Function individualfeedback_set_tmp_values is not deprecated anymore.
 
 === 3.1 ===
 
 * individualfeedback_get_courses_from_sitecourse_map() now returns course id as 'id' attribute
-* Base class for feedback items - individualfeedback_item_base - has been significantly changed, all item types now
+* Base class for individualfeedback items - individualfeedback_item_base - has been significantly changed, all item types now
   must implement method complete_form_element() instead of print_item_preview(), print_item_complete(),
   print_item_show_value(), check_values(), clean_input_value() and value_is_array(). Rendering the items
-  on complete form, feedback preview, feedback edit and when viewing response is done using moodleform.
+  on complete form, individualfeedback preview, individualfeedback edit and when viewing response is done using moodleform.
 * The following functions have been deprecated:
   * individualfeedback_print_item_preview()
   * individualfeedback_print_item_complete()

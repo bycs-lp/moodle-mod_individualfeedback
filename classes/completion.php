@@ -15,10 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Collects information and methods about feedback completion (either complete.php or show_entries.php)
+ * Collects information and methods about individualfeedback completion (either complete.php or show_entries.php)
  *
  * @package   mod_individualfeedback
- * @copyright 2016 Marina Glancy
+ * @copyright Andreas Grabs
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mod_individualfeedback_completion extends mod_individualfeedback_structure {
@@ -48,7 +48,7 @@ class mod_individualfeedback_completion extends mod_individualfeedback_structure
      *     (at least one of $feedback or $cm is required)
      * @param int $courseid current course (for site feedbacks only)
      * @param bool $iscompleted has feedback been already completed? If yes either completedid or userid must be specified.
-     * @param int $completedid id in the table individualfeedback_completed, may be omitted if userid is specified
+     * @param int $completedid id in the table feedback_completed, may be omitted if userid is specified
      *     but it is highly recommended because the same user may have multiple responses to the same feedback
      *     for different courses
      * @param int $nonanonymouseuserid - Return only anonymous results or specified user's results.
@@ -68,9 +68,9 @@ class mod_individualfeedback_completion extends mod_individualfeedback_structure
         if ($iscompleted) {
             // Retrieve information about the completion.
             $this->iscompleted = true;
-            $params = array('individualfeedback' => $this->feedback->id);
-            if (!$nonanonymouseuserid && !$completedid) {
-                throw new coding_exception('Either $completedid or $nonanonymouseuserid must be specified for completed feedbacks');
+            $params = array('feedback' => $this->feedback->id);
+            if (!$userid && !$completedid) {
+                throw new coding_exception('Either $completedid or $userid must be specified for completed individualfeedbacks');
             }
             if ($completedid) {
                 $params['id'] = $completedid;
@@ -78,7 +78,7 @@ class mod_individualfeedback_completion extends mod_individualfeedback_structure
             if ($nonanonymouseuserid) {
                 // We must respect the anonymousity of the reply that the user saw when they were completing the feedback,
                 // not the current state that may have been changed later by the teacher.
-                $params['anonymous_response'] = INDIVIDUALFEEDBACK_ANONYMOUS_NO;
+                $params['anonymous_response'] = FEEDBACK_ANONYMOUS_NO;
                 $params['userid'] = $nonanonymouseuserid;
             }
             $this->completed = $DB->get_record('individualfeedback_completed', $params, '*', MUST_EXIST);
@@ -100,9 +100,9 @@ class mod_individualfeedback_completion extends mod_individualfeedback_structure
     }
 
     /**
-     * Check if the feedback was just completed.
+     * Check if the individualfeedback was just completed.
      *
-     * @return bool true if the feedback was just completed.
+     * @return bool true if the individualfeedback was just completed.
      * @since  Moodle 3.3
      */
     public function just_completed() {
@@ -125,9 +125,9 @@ class mod_individualfeedback_completion extends mod_individualfeedback_structure
      * @return stdClass|false record from individualfeedback_completedtmp or false if not found
      */
     public function get_current_completed_tmp() {
-        global $DB, $USER;
+        global $USER, $DB;
         if ($this->completedtmp === null) {
-            $params = array('individualfeedback' => $this->get_feedback()->id);
+            $params = array('feedback' => $this->get_individualfeedback()->id);
             if ($courseid = $this->get_courseid()) {
                 $params['courseid'] = $courseid;
             }
@@ -212,7 +212,7 @@ class mod_individualfeedback_completion extends mod_individualfeedback_structure
     }
 
     /**
-     * Returns a value stored for this item in the feedback (temporary or not, depending on the mode)
+     * Returns a value stored for this item in the individualfeedback (temporary or not, depending on the mode)
      * @param stdClass $item
      * @return string
      */
@@ -242,7 +242,7 @@ class mod_individualfeedback_completion extends mod_individualfeedback_structure
     }
 
     /**
-     * Returns all temporary values for this feedback or just a value for an item
+     * Returns all temporary values for this individualfeedback or just a value for an item
      * @param stdClass $item
      * @return array
      */
@@ -278,7 +278,7 @@ class mod_individualfeedback_completion extends mod_individualfeedback_structure
     }
 
     /**
-     * Returns all completed values for this feedback or just a value for an item
+     * Returns all completed values for this individualfeedback or just a value for an item
      * @param stdClass $item
      * @return array
      */
@@ -298,7 +298,7 @@ class mod_individualfeedback_completion extends mod_individualfeedback_structure
     }
 
     /**
-     * Splits the feedback items into pages
+     * Splits the individualfeedback items into pages
      *
      * Items that we definitely know at this stage as not applicable are excluded.
      * Items that are dependent on something that has not yet been answered are
@@ -310,7 +310,7 @@ class mod_individualfeedback_completion extends mod_individualfeedback_structure
         $pages = [[]]; // The first page always exists.
         $items = $this->get_items();
         foreach ($items as $item) {
-            if ($item->typ === 'pagebreak') {
+            if ($item->typ === 'pagebreak' || $item->typ === 'questiongroupend') {
                 $pages[] = [];
             } else if ($this->can_see_item($item) !== false) {
                 $pages[count($pages) - 1][] = $item;
@@ -362,7 +362,7 @@ class mod_individualfeedback_completion extends mod_individualfeedback_structure
     }
 
     /**
-     * Get the next page for the feedback
+     * Get the next page for the individualfeedback
      *
      * This is normally $gopage+1 but may be bigger if there are empty pages or
      * pages without visible questions.
@@ -387,12 +387,12 @@ class mod_individualfeedback_completion extends mod_individualfeedback_structure
                 return $pageidx;
             }
         }
-        // No further pages in the feedback have any visible items.
+        // No further pages in the individualfeedback have any visible items.
         return null;
     }
 
     /**
-     * Get the previous page for the feedback
+     * Get the previous page for the individualfeedback
      *
      * This is normally $gopage-1 but may be smaller if there are empty pages or
      * pages without visible questions.
@@ -430,9 +430,9 @@ class mod_individualfeedback_completion extends mod_individualfeedback_structure
     }
 
     /**
-     * Page index to resume the feedback
+     * Page index to resume the individualfeedback
      *
-     * When user abandones answering feedback and then comes back to it we should send him
+     * When user abandones answering individualfeedback and then comes back to it we should send him
      * to the first page after the last page he fully completed.
      * @return int
      */
@@ -447,8 +447,8 @@ class mod_individualfeedback_completion extends mod_individualfeedback_structure
      * @return stdClass record from individualfeedback_completedtmp or false if not found
      */
     protected function create_current_completed_tmp() {
-        global $DB, $USER;
-        $record = (object)['individualfeedback' => $this->feedback->id];
+        global $USER, $DB;
+        $record = (object)['feedback' => $this->feedback->id];
         if ($this->get_courseid()) {
             $record->courseid = $this->get_courseid();
         }
@@ -459,6 +459,15 @@ class mod_individualfeedback_completion extends mod_individualfeedback_structure
         }
         $record->timemodified = time();
         $record->anonymous_response = $this->feedback->anonymous;
+
+        // Check if it's a self assessment.
+        /* $selfassessment = 0;   Revisar.
+        $context = context_module::instance($this->cm->id);
+        if (has_capability('mod/individualfeedback:selfassessment', $context)) {
+            $selfassessment = 1;
+        }
+        $record->selfassessment = $selfassessment; */
+
         $id = $DB->insert_record('individualfeedback_completedtmp', $record);
         $this->completedtmp = $DB->get_record('individualfeedback_completedtmp', ['id' => $id]);
         $this->valuestmp = null;
@@ -466,7 +475,7 @@ class mod_individualfeedback_completion extends mod_individualfeedback_structure
     }
 
     /**
-     * If user has already completed the feedback, create the temproray values from last completed attempt
+     * If user has already completed the individualfeedback, create the temproray values from last completed attempt
      *
      * @return stdClass record from individualfeedback_completedtmp or false if not found
      */
@@ -505,7 +514,7 @@ class mod_individualfeedback_completion extends mod_individualfeedback_structure
         $existingvalues = $DB->get_records_menu('individualfeedback_valuetmp',
                 ['completed' => $completedtmp->id], '', 'item, id');
 
-        // Loop through all feedback items and save the ones that are present in $data.
+        // Loop through all individualfeedback items and save the ones that are present in $data.
         $allitems = $this->get_items();
         foreach ($allitems as $item) {
             if (!$item->hasvalue) {
@@ -545,10 +554,10 @@ class mod_individualfeedback_completion extends mod_individualfeedback_structure
      * It is also responsible for sending email notifications when applicable.
      */
     public function save_response() {
-        global $SESSION, $DB, $USER;
+        global $USER, $SESSION, $DB;
 
         $feedbackcompleted = $this->find_last_completed();
-        // If no record is found, change false to null for safe use in individualfeedback_save_tmp_values.
+        // If no record is found, change false to null for safe use in feedback_save_tmp_values.
         $feedbackcompleted = !$feedbackcompleted ? null : $feedbackcompleted;
         $feedbackcompletedtmp = $this->get_current_completed_tmp();
 
@@ -558,18 +567,18 @@ class mod_individualfeedback_completion extends mod_individualfeedback_structure
 
         // Send email.
         if ($this->feedback->anonymous == INDIVIDUALFEEDBACK_ANONYMOUS_NO) {
-            individualfeedback_send_email($this->cm, $this->feedback, $this->cm->get_course(), $this->userid, $this->completed);
+            individualfeedback_send_email($this->cm, $this->feedback, $this->cm->get_course(), $USER, $this->completed);
         } else {
             individualfeedback_send_email_anonym($this->cm, $this->feedback, $this->cm->get_course());
         }
 
-        unset($SESSION->feedback->is_started);
+        unset($SESSION->individualfeedback->is_started);
 
         // Update completion state.
         $completion = new completion_info($this->cm->get_course());
-        if ((isloggedin() || $USER->id != $this->userid) && $completion->is_enabled($this->cm) &&
+        if (isloggedin() && !isguestuser() && $completion->is_enabled($this->cm) &&
                 $this->cm->completion == COMPLETION_TRACKING_AUTOMATIC && $this->feedback->completionsubmit) {
-            $completion->update_state($this->cm, COMPLETION_COMPLETE, $this->userid);
+            $completion->update_state($this->cm, COMPLETION_COMPLETE);
         }
     }
 
@@ -588,7 +597,7 @@ class mod_individualfeedback_completion extends mod_individualfeedback_structure
             // Not possible to retrieve completed anonymous feedback.
             return false;
         }
-        $params = array('individualfeedback' => $this->feedback->id,
+        $params = array('feedback' => $this->feedback->id,
             'userid' => $this->userid,
             'anonymous_response' => INDIVIDUALFEEDBACK_ANONYMOUS_NO
         );
@@ -600,13 +609,13 @@ class mod_individualfeedback_completion extends mod_individualfeedback_structure
     }
 
     /**
-     * Checks if user has capability to submit the feedback
+     * Checks if current user has capability to submit the individualfeedback
      *
-     * There is an exception for fully anonymous feedbacks when guests can complete
-     * feedback without the proper capability.
+     * There is an exception for fully anonymous individualfeedbacks when guests can complete
+     * individualfeedback without the proper capability.
      *
      * This should be followed by checking {@link can_submit()} because even if
-     * user has capablity to complete, they may have already submitted feedback
+     * user has capablity to complete, they may have already submitted individualfeedback
      * and can not re-submit
      *
      * @return bool
@@ -615,7 +624,7 @@ class mod_individualfeedback_completion extends mod_individualfeedback_structure
         global $CFG, $USER;
 
         $context = context_module::instance($this->cm->id);
-        if (has_capability('mod/individualfeedback:complete', $context, $this->userid)) {
+        if (has_capability('mod/individualfeedback:complete', $context)) {
             return true;
         }
 
@@ -623,7 +632,7 @@ class mod_individualfeedback_completion extends mod_individualfeedback_structure
                     AND $this->feedback->course == SITEID
                     AND $this->feedback->anonymous == INDIVIDUALFEEDBACK_ANONYMOUS_YES
                     AND ((!isloggedin() && $USER->id == $this->userid) || isguestuser($this->userid))) {
-            // Guests are allowed to complete fully anonymous feedback without having 'mod/individualfeedback:complete' capability.
+            // Guests are allowed to complete fully anonymous individualfeedback without having 'mod/individualfeedback:complete' capability.
             return true;
         }
 
@@ -638,7 +647,7 @@ class mod_individualfeedback_completion extends mod_individualfeedback_structure
      * @return bool
      */
     public function can_submit() {
-        if ($this->get_feedback()->multiple_submit == 0 ) {
+        if ($this->get_individualfeedback()->multiple_submit == 0 ) {
             if ($this->is_already_submitted()) {
                 return false;
             }
@@ -666,7 +675,7 @@ class mod_individualfeedback_completion extends mod_individualfeedback_structure
         require_once($CFG->libdir . '/completionlib.php');
 
         $completion = new completion_info($this->cm->get_course());
-        $completion->set_module_viewed($this->cm, $this->userid);
+        $completion->set_module_viewed($this->cm);
     }
 
     /**
@@ -696,7 +705,7 @@ class mod_individualfeedback_completion extends mod_individualfeedback_structure
                 ($this->form->is_validated() || $gopreviouspage)) {
             // Form was submitted (skip validation for "Previous page" button).
             $data = $this->form->get_submitted_data();
-            if (!isset($SESSION->feedback->is_started) OR !$SESSION->feedback->is_started == true) {
+            if (!isset($SESSION->individualfeedback->is_started) OR !$SESSION->individualfeedback->is_started == true) {
                 throw new \moodle_exception('error', '', $CFG->wwwroot.'/course/view.php?id='.$this->courseid);
             }
             $this->save_response_tmp($data);
@@ -708,8 +717,8 @@ class mod_individualfeedback_completion extends mod_individualfeedback_structure
                     $this->jumpto = $nextpage;
                 } else {
                     $this->save_response();
-                    if (!$this->get_feedback()->page_after_submit) {
-                        \core\notification::success(get_string('entries_saved', 'mod_individualfeedback'));
+                    if (!$this->get_individualfeedback()->page_after_submit) {
+                        \core\notification::success(get_string('entries_saved', 'individualfeedback'));
                     }
                     $this->justcompleted = true;
                 }
@@ -734,7 +743,20 @@ class mod_individualfeedback_completion extends mod_individualfeedback_structure
         global $SESSION;
 
         // Print the items.
-        $SESSION->feedback->is_started = true;
+        $SESSION->individualfeedback->is_started = true;
         return $this->form->render();
     }
+
+    /**
+     * Deletes the temporary completed and all related temporary values
+     */
+    /* protected function delete_completedtmp() {  Verificar.
+        global $DB;
+
+        if ($completedtmp = $this->get_current_completed_tmp()) {
+            $DB->delete_records('individualfeedback_valuetmp', ['completed' => $completedtmp->id]);
+            $DB->delete_records('individualfeedback_completedtmp', ['id' => $completedtmp->id]);
+            $this->completedtmp = null;
+        }
+    } */
 }

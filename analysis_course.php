@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * shows an analysed view of a feedback on the mainsite
+ * shows an analysed view of a individualfeedback on the mainsite
  *
  * @author Andreas Grabs
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
@@ -25,12 +25,12 @@
 require_once("../../config.php");
 require_once("lib.php");
 
-$id = required_param('id', PARAM_INT);  //the POST dominated the GET
+$id = required_param('id', PARAM_INT);
 $courseitemfilter = optional_param('courseitemfilter', '0', PARAM_INT);
 $courseitemfiltertyp = optional_param('courseitemfiltertyp', '0', PARAM_ALPHANUM);
 $courseid = optional_param('courseid', false, PARAM_INT);
 
-$url = new moodle_url('/mod/individualfeedback/analysis_course.php', array('id'=>$id));
+$url = new moodle_url('/mod/individualfeedback/analysis_course.php', array('id' => $id));
 navigation_node::override_active_url($url);
 if ($courseid !== false) {
     $url->param('courseid', $courseid);
@@ -48,29 +48,29 @@ $context = context_module::instance($cm->id);
 
 require_course_login($course, true, $cm);
 
-$feedback = $PAGE->activityrecord;
+$individualfeedback = $PAGE->activityrecord;
 
-if (!($feedback->publish_stats OR has_capability('mod/individualfeedback:viewreports', $context))) {
+if (!($individualfeedback->publish_stats OR has_capability('mod/individualfeedback:viewreports', $context))) {
     throw new \moodle_exception('error');
 }
 
-$feedbackstructure = new mod_individualfeedback_structure($feedback, $PAGE->cm, $courseid);
+$individualfeedbackstructure = new mod_individualfeedback_structure($individualfeedback, $PAGE->cm, $courseid);
 
 // Process course select form.
-$courseselectform = new mod_individualfeedback_course_select_form($url, $feedbackstructure);
+$courseselectform = new mod_individualfeedback_course_select_form($url, $individualfeedbackstructure);
 if ($data = $courseselectform->get_data()) {
     redirect(new moodle_url($url, ['courseid' => $data->courseid]));
 }
 
-/// Print the page header
-$strfeedbacks = get_string("modulenameplural", "feedback");
-$strfeedback  = get_string("modulename", "feedback");
+// Print the page header.
+$strindividualfeedbacks = get_string("modulenameplural", "individualfeedback");
+$strindividualfeedback  = get_string("modulename", "individualfeedback");
 
 $PAGE->set_heading($course->fullname);
-$PAGE->set_title($feedback->name);
+$PAGE->set_title($individualfeedback->name);
 echo $OUTPUT->header();
 if (!$PAGE->has_secondary_navigation()) {
-    echo $OUTPUT->heading(format_string($feedback->name));
+    echo $OUTPUT->heading(format_string($individualfeedback->name));
 }
 
 //get the groupid
@@ -80,20 +80,20 @@ $mygroupid = false;
 $courseselectform->display();
 
 // Button "Export to excel".
-if (has_capability('mod/individualfeedback:viewreports', $context) && $feedbackstructure->get_items()) {
+if (has_capability('mod/individualfeedback:viewreports', $context) && $individualfeedbackstructure->get_items()) {
     echo $OUTPUT->container_start('form-buttons');
     $aurl = new moodle_url('/mod/individualfeedback/analysis_to_excel.php',
         ['sesskey' => sesskey(), 'id' => $id, 'courseid' => (int)$courseid]);
-    echo $OUTPUT->single_button($aurl, get_string('export_to_excel', 'mod_individualfeedback'));
+    echo $OUTPUT->single_button($aurl, get_string('export_to_excel', 'individualfeedback'));
     echo $OUTPUT->container_end();
 }
 
 // Show the summary.
-$summary = new mod_individualfeedback\output\summary($feedbackstructure);
+$summary = new mod_individualfeedback\output\summary($individualfeedbackstructure);
 echo $OUTPUT->render_from_template('mod_individualfeedback/summary', $summary->export_for_template($OUTPUT));
 
-// Get the items of the feedback.
-$items = $feedbackstructure->get_items(true);
+// Get the items of the individualfeedback.
+$items = $individualfeedbackstructure->get_items(true);
 
 if ($courseitemfilter > 0) {
     $sumvalue = 'SUM(' . $DB->sql_cast_char2real('value', true) . ')';
@@ -134,12 +134,12 @@ if ($courseitemfilter > 0) {
     foreach ($items as $item) {
         echo '<table class="analysis">';
         $itemobj = individualfeedback_get_item_class($item->typ);
-        $printnr = ($feedback->autonumbering && $item->itemnr) ? ($item->itemnr . '.') : '';
-        $itemobj->print_analysed($item, $printnr, $mygroupid, $feedbackstructure->get_courseid());
+        $printnr = ($individualfeedback->autonumbering && $item->itemnr) ? ($item->itemnr . '.') : '';
+        $itemobj->print_analysed($item, $printnr, $mygroupid, $individualfeedbackstructure->get_courseid());
         if (preg_match('/rated$/i', $item->typ)) {
             $url = new moodle_url('/mod/individualfeedback/analysis_course.php', array('id' => $id,
                 'courseitemfilter' => $item->id, 'courseitemfiltertyp' => $item->typ));
-            $anker = html_writer::link($url, get_string('sort_by_course', 'mod_individualfeedback'));
+            $anker = html_writer::link($url, get_string('sort_by_course', 'individualfeedback'));
 
             echo '<tr><td colspan="2">'.$anker.'</td></tr>';
         }
@@ -148,4 +148,3 @@ if ($courseitemfilter > 0) {
 }
 
 echo $OUTPUT->footer();
-

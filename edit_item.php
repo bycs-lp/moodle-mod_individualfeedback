@@ -19,7 +19,7 @@
  *
  * @author Andreas Grabs
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
- * @package mod_individualfeedback
+ * @package mod_feedback
  */
 
 require_once("../../config.php");
@@ -35,7 +35,7 @@ if (!$itemid) {
 
 if ($itemid) {
     $item = $DB->get_record('individualfeedback_item', array('id' => $itemid), '*', MUST_EXIST);
-    list($course, $cm) = get_course_and_cm_from_instance($item->individualfeedback, 'individualfeedback');
+    list($course, $cm) = get_course_and_cm_from_instance($item->feedback, 'individualfeedback');
     $url = new moodle_url('/mod/individualfeedback/edit_item.php', array('id' => $itemid));
     $typ = $item->typ;
 } else {
@@ -60,16 +60,20 @@ if (!$item->id && $typ === 'pagebreak') {
 
     $redirectmessage = '';
     if (!individualfeedback_create_pagebreak($feedback->id)) {
-        $redirectmessage = get_string('cannotcreatepagebreak', 'mod_individualfeedback');
+        $redirectmessage = get_string('cannotcreatepagebreak', 'mod_feedback');
     }
 
     redirect($editurl, $redirectmessage, null, \core\output\notification::NOTIFY_WARNING);
 }
 
-//get the existing item or create it
-if (!$typ) {
+// +++ NEW CODE
+// get the existing item or create it   
+// $formdata->itemid = isset($formdata->itemid) ? $formdata->itemid : NULL;
+if (!$typ || !file_exists($CFG->dirroot.'/mod/individualfeedback/item/'.$typ.'/lib.php')) {
     throw new \moodle_exception('typemissing', 'individualfeedback', $editurl->out(false));
 }
+require_once($CFG->dirroot.'/mod/individualfeedback/item/'.$typ.'/lib.php');
+// --- NEW CODE
 
 $itemobj = individualfeedback_get_item_class($typ);
 $itemobj->build_editform($item, $feedback, $cm);
@@ -93,14 +97,14 @@ $strfeedback  = get_string("modulename", "individualfeedback");
 navigation_node::override_active_url(new moodle_url('/mod/individualfeedback/edit.php',
         array('id' => $cm->id, 'do_show' => 'edit')));
 if ($item->id) {
-    $PAGE->navbar->add(get_string('edit_item', 'mod_individualfeedback'));
+    $PAGE->navbar->add(get_string('edit_item', 'individualfeedback'));
 } else {
-    $PAGE->navbar->add(get_string('add_item', 'mod_individualfeedback'));
+    $PAGE->navbar->add(get_string('add_item', 'individualfeedback'));
 }
 $PAGE->set_heading($course->fullname);
 
 $renderer = $PAGE->get_renderer('mod_individualfeedback');
-$pagetitle = ($itemid) ? get_string('edit_item', 'mod_individualfeedback') : get_string('add_item', 'mod_individualfeedback');
+$pagetitle = ($itemid) ? get_string('edit_item', 'individualfeedback') : get_string('add_item', 'individualfeedback');
 $renderer->set_title(
     [format_string($feedback->name), format_string($course->fullname)],
     $pagetitle

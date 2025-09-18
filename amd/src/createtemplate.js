@@ -54,9 +54,9 @@ export const init = () => {
         // Show a toast notification when the form is submitted.
         modalForm.addEventListener(modalForm.events.FORM_SUBMITTED, event => {
             if (event.detail.result) {
-                getString('template_saved', 'feedback').then(addToast).catch();
+                getString('template_saved', 'individualfeedback').then(addToast).catch();
             } else {
-                getString('saving_failed', 'feedback').then(string => {
+                getString('saving_failed', 'individualfeedback').then(string => {
                     return Notification.addNotification({
                         type: 'error',
                         message: string

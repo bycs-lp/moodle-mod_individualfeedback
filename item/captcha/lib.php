@@ -15,6 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 defined('MOODLE_INTERNAL') OR die('not allowed');
+
+global $CFG;
 require_once($CFG->dirroot.'/mod/individualfeedback/item/individualfeedback_item_class.php');
 
 class individualfeedback_item_captcha extends individualfeedback_item_base {
@@ -27,25 +29,25 @@ class individualfeedback_item_captcha extends individualfeedback_item_base {
 
         // There are no settings for recaptcha.
         if (isset($item->id) AND $item->id > 0) {
-            notice(get_string('there_are_no_settings_for_recaptcha', 'mod_individualfeedback'), $editurl->out());
+            notice(get_string('there_are_no_settings_for_recaptcha', 'individualfeedback'), $editurl->out());
             exit;
         }
 
-        // Only one recaptcha can be in a feedback.
-        $params = array('individualfeedback' => $feedback->id, 'typ' => $this->type);
+        // Only one recaptcha can be in a individualfeedback.
+        $params = array('feedback' => $feedback->id, 'typ' => $this->type);
         if ($DB->record_exists('individualfeedback_item', $params)) {
-            notice(get_string('only_one_captcha_allowed', 'mod_individualfeedback'), $editurl->out());
+            notice(get_string('only_one_captcha_allowed', 'individualfeedback'), $editurl->out());
             exit;
         }
 
         $this->item = $item;
         $this->item_form = true; // Dummy.
 
-        $lastposition = $DB->count_records('individualfeedback_item', array('individualfeedback'=>$feedback->id));
+        $lastposition = $DB->count_records('individualfeedback_item', array('feedback'=>$feedback->id));
 
-        $this->item->individualfeedback = $feedback->id;
+        $this->item->feedback = $feedback->id;
         $this->item->template = 0;
-        $this->item->name = get_string('captcha', 'mod_individualfeedback');
+        $this->item->name = get_string('captcha', 'individualfeedback');
         $this->item->label = '';
         $this->item->presentation = '';
         $this->item->typ = $this->type;
@@ -106,7 +108,7 @@ class individualfeedback_item_captcha extends individualfeedback_item_base {
      * @return string
      */
     public function get_display_name($item, $withpostfix = true) {
-        return get_string('captcha', 'mod_individualfeedback');
+        return get_string('captcha', 'individualfeedback');
     }
 
     /**
@@ -122,7 +124,7 @@ class individualfeedback_item_captcha extends individualfeedback_item_base {
         if ($form->get_mode() != mod_individualfeedback_complete_form::MODE_COMPLETE) {
             // Span to hold the element id. The id is used for drag and drop reordering.
             $form->add_form_element($item,
-                    ['static', $inputname, $name, html_writer::span('', '', ['id' => 'individualfeedback_item_' . $item->id])],
+                    ['static', $inputname, $name, html_writer::span('', '', ['id' => 'feedback_item_' . $item->id])],
                     false,
                     false);
         } else {
@@ -141,7 +143,7 @@ class individualfeedback_item_captcha extends individualfeedback_item_base {
             $elementname = $item->typ . '_' . $item->id . 'recaptcha';
             $recaptchaelement = $form->get_form_element($elementname);
             if (empty($values['g-recaptcha-response'])) {
-                return array($elementname => get_string('required'));
+                return array($elementname => get_string('required', 'individualfeedback'));
             } else {
                 $response = $values['g-recaptcha-response'];
                 if (true !== ($result = $recaptchaelement->verify($response))) {

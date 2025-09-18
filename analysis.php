@@ -26,8 +26,10 @@ require_once("../../config.php");
 require_once("lib.php");
 
 $id = required_param('id', PARAM_INT);  // Course module id.
-
-$url = new moodle_url('/mod/individualfeedback/analysis.php', array('id'=>$id));
+// +++ NEW CODE
+$currentsubtab = optional_param('subtab', 'detail_questions', PARAM_TEXT);
+$url = new moodle_url('/mod/individualfeedback/analysis.php', array('id'=>$id, 'subtab' => $currentsubtab));
+// --- NEW CODE
 $PAGE->set_url($url);
 
 list($course, $cm) = get_course_and_cm_from_cmid($id, 'individualfeedback');
@@ -42,14 +44,18 @@ if (!$feedbackstructure->can_view_analysis()) {
     throw new \moodle_exception('error');
 }
 
-/// Print the page header
+// +++ NEW CODE
+$actionbar = new \mod_individualfeedback\output\compare_action_bar($cm->id, $url);
+// --- NEW CODE
+
+/// Print the page header.
 
 $PAGE->set_heading($course->fullname);
 
 $renderer = $PAGE->get_renderer('mod_individualfeedback');
 $renderer->set_title(
     [format_string($feedback->name), format_string($course->fullname)],
-    get_string('analysis', 'mod_individualfeedback')
+    get_string('analysis', 'individualfeedback')
 );
 
 $PAGE->activityheader->set_attrs([
@@ -58,7 +64,10 @@ $PAGE->activityheader->set_attrs([
 ]);
 $PAGE->add_body_class('limitedwidth');
 echo $OUTPUT->header();
-echo $OUTPUT->heading(get_string('analysis', 'mod_individualfeedback'), 3);
+echo $OUTPUT->heading(get_string('analysis', 'individualfeedback'), 3);
+// +++ NEW CODE 
+echo $renderer->main_action_bar($actionbar);
+// -- NEW CODE
 
 //get the groupid
 $mygroupid = groups_get_activity_group($cm, true);
@@ -68,7 +77,7 @@ groups_print_activity_menu($cm, $url);
 if (has_capability('mod/individualfeedback:viewreports', $context) && $feedbackstructure->get_items()) {
     echo $OUTPUT->container_start('form-buttons');
     $aurl = new moodle_url('/mod/individualfeedback/analysis_to_excel.php', ['sesskey' => sesskey(), 'id' => $id]);
-    echo $OUTPUT->single_button($aurl, get_string('export_to_excel', 'mod_individualfeedback'));
+    echo $OUTPUT->single_button($aurl, get_string('export_to_excel', 'individualfeedback'));
     echo $OUTPUT->container_end();
 }
 
@@ -80,26 +89,38 @@ echo $OUTPUT->render_from_template('mod_individualfeedback/summary', $summary->e
 $items = $feedbackstructure->get_items(true);
 
 $check_anonymously = true;
-if ($mygroupid > 0 AND $feedback->anonymous == INDIVIDUALFEEDBACK_ANONYMOUS_YES) {
+if ($mygroupid > 0 AND $feedback->anonymous == FEEDBACK_ANONYMOUS_YES) {
     $completedcount = $feedbackstructure->count_completed_responses($mygroupid);
-    if ($completedcount < INDIVIDUALFEEDBACK_MIN_ANONYMOUS_COUNT_IN_GROUP) {
+    if ($completedcount < FEEDBACK_MIN_ANONYMOUS_COUNT_IN_GROUP) {
         $check_anonymously = false;
     }
 }
 
+// If other reports will be implemented, delete next code section.
 echo '<div>';
+
 if ($check_anonymously) {
     // Print the items in an analysed form.
     foreach ($items as $item) {
         $itemobj = individualfeedback_get_item_class($item->typ);
         $printnr = ($feedback->autonumbering && $item->itemnr) ? ($item->itemnr . '.') : '';
         $itemobj->print_analysed($item, $printnr, $mygroupid);
+    
+        // +++ NEW CODE
+        if(str_contains($item->options, 'n')) {
+            echo "* " . get_string('negative_formulated', 'individualfeedback');
+        }
+        // --- NEW CODE
     }
 } else {
-    echo $OUTPUT->heading_with_help(get_string('insufficient_responses_for_this_group', 'mod_individualfeedback'),
-                                    'insufficient_responses',
-                                    'feedback', '', '', 3);
+    echo $OUTPUT->heading_with_help(get_string('insufficient_responses_for_this_group', 'individualfeedback'),
+        'insufficient_responses',
+        'individualfeedback', '', '', 3);
 }
+
+
+
 echo '</div>';
+// End of section.
 
 echo $OUTPUT->footer();

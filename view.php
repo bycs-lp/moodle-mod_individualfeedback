@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * the first page to view the feedback
+ * the first page to view the individualfeedback
  *
  * @author Andreas Grabs
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
@@ -89,14 +89,14 @@ echo $OUTPUT->header();
 // Show description.
 echo $OUTPUT->box_start('generalbox individualfeedback_description');
 $options = (object)array('noclean' => true);
-echo format_module_intro('feedback', $feedback, $cm->id);
+echo format_module_intro('individualfeedback', $feedback, $cm->id);
 echo $renderer->main_action_bar($actionbar);
 echo $OUTPUT->box_end();
 
 //show some infos to the feedback
 if (has_capability('mod/individualfeedback:edititems', $context)) {
 
-    echo $OUTPUT->heading(get_string('overview', 'mod_individualfeedback'), 3);
+    echo $OUTPUT->heading(get_string('overview', 'individualfeedback'), 3);
 
     //get the groupid
     $groupselect = groups_print_activity_menu($cm, $CFG->wwwroot.'/mod/individualfeedback/view.php?id='.$cm->id, true);
@@ -107,7 +107,7 @@ if (has_capability('mod/individualfeedback:edititems', $context)) {
     echo $OUTPUT->render_from_template('mod_individualfeedback/summary', $summary->export_for_template($OUTPUT));
 
     if ($pageaftersubmit = $feedbackcompletion->page_after_submit()) {
-        echo $OUTPUT->heading(get_string("page_after_submit", "feedback"), 3);
+        echo $OUTPUT->heading(get_string("page_after_submit", "individualfeedback"), 3);
         echo $OUTPUT->box($pageaftersubmit, 'generalbox individualfeedback_after_submit');
     }
 }
@@ -117,16 +117,16 @@ if (!$PAGE->has_secondary_navigation()) {
         $feedbackcompletion->can_view_analysis()) {
         $analysisurl = new moodle_url('/mod/individualfeedback/analysis.php', array('id' => $id));
         echo '<div class="mdl-align"><a href="' . $analysisurl->out() . '">';
-        echo get_string('completed_feedbacks', 'mod_individualfeedback') . '</a>';
+        echo get_string('completed_individualfeedbacks', 'individualfeedback') . '</a>';
         echo '</div>';
     }
 
     if (has_capability('mod/individualfeedback:mapcourse', $context) && $feedback->course == SITEID) {
         echo $OUTPUT->box_start('generalbox individualfeedback_mapped_courses');
-        echo $OUTPUT->heading(get_string("mappedcourses", "feedback"), 3);
-        echo '<p>' . get_string('mapcourse_help', 'mod_individualfeedback') . '</p>';
-        $mapurl = new moodle_url('/mod/individualfeedback/mapcourse.php', array('id' => $id));
-        echo '<p class="mdl-align">' . html_writer::link($mapurl, get_string('mapcourses', 'mod_individualfeedback')) . '</p>';
+        echo $OUTPUT->heading(get_string("mappedcourses", "individualfeedback"), 3);
+        echo '<p>' . get_string('mapcourse_help', 'individualfeedback') . '</p>';
+        $mapurl = new \moodle_url('/mod/individualfeedback/mapcourse.php', array('id' => $id));
+        echo '<p class="mdl-align">' . \html_writer::link($mapurl, get_string('mapcourses', 'individualfeedback')) . '</p>';
         echo $OUTPUT->box_end();
     }
 }
@@ -134,12 +134,12 @@ if (!$PAGE->has_secondary_navigation()) {
 if ($feedbackcompletion->can_complete()) {
     echo $OUTPUT->box_start('generalbox boxaligncenter');
     if (!$feedbackcompletion->is_open()) {
-        // Feedback is not yet open or is already closed.
-        echo $OUTPUT->notification(get_string('individualfeedback_is_not_open', 'mod_individualfeedback'));
+        // individualfeedback is not yet open or is already closed.
+        echo $OUTPUT->notification(get_string('individualfeedback_is_not_open', 'individualfeedback'));
         echo $OUTPUT->continue_button(course_get_url($courseid ?: $course->id));
     } else if (!$feedbackcompletion->can_submit()) {
-        // Feedback was already submitted.
-        echo $OUTPUT->notification(get_string('this_individualfeedback_is_already_submitted', 'mod_individualfeedback'));
+        // individualfeedback was already submitted.
+        echo $OUTPUT->notification(get_string('this_individualfeedback_is_already_submitted', 'individualfeedback'));
         $OUTPUT->continue_button(course_get_url($courseid ?: $course->id));
     }
     echo $OUTPUT->box_end();

@@ -41,90 +41,90 @@ class mod_individualfeedback_mod_form extends moodleform_mod {
         //-------------------------------------------------------------------------------
         $mform->addElement('header', 'general', get_string('general', 'form'));
 
-        $mform->addElement('text', 'name', get_string('name', 'mod_individualfeedback'), array('size'=>'64'));
+        $mform->addElement('text', 'name', get_string('name', 'individualfeedback'), array('size'=>'64'));
         $mform->setType('name', PARAM_TEXT);
         $mform->addRule('name', null, 'required', null, 'client');
         $mform->addRule('name', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
 
-        $this->standard_intro_elements(get_string('description', 'mod_individualfeedback'));
+        $this->standard_intro_elements(get_string('description', 'individualfeedback'));
 
         //-------------------------------------------------------------------------------
         $mform->addElement('header', 'timinghdr', get_string('availability'));
 
-        $mform->addElement('date_time_selector', 'timeopen', get_string('feedbackopen', 'mod_individualfeedback'),
+        $mform->addElement('date_time_selector', 'timeopen', get_string('individualfeedbackopen', 'individualfeedback'),
             array('optional' => true));
 
-        $mform->addElement('date_time_selector', 'timeclose', get_string('feedbackclose', 'mod_individualfeedback'),
+        $mform->addElement('date_time_selector', 'timeclose', get_string('individualfeedbackclose', 'individualfeedback'),
             array('optional' => true));
 
         //-------------------------------------------------------------------------------
-        $mform->addElement('header', 'feedbackhdr', get_string('questionandsubmission', 'mod_individualfeedback'));
+        $mform->addElement('header', 'feedbackhdr', get_string('questionandsubmission', 'individualfeedback'));
 
         $options=array();
-        $options[1]  = get_string('anonymous', 'mod_individualfeedback');
-        $options[2]  = get_string('non_anonymous', 'mod_individualfeedback');
+        $options[1]  = get_string('anonymous', 'individualfeedback');
+        $options[2]  = get_string('non_anonymous', 'individualfeedback');
         $mform->addElement('select',
-                           'anonymous',
-                           get_string('anonymous_edit', 'mod_individualfeedback'),
-                           $options);
+            'anonymous',
+            get_string('anonymous_edit', 'individualfeedback'),
+            $options);
 
         // check if there is existing responses to this feedback
         if (is_numeric($this->_instance) AND
-                    $this->_instance AND
-                    $feedback = $DB->get_record("feedback", array("id"=>$this->_instance))) {
+            $this->_instance AND
+            $feedback = $DB->get_record("individualfeedback", array("id"=>$this->_instance))) {
 
-            $completed_individualfeedback_count = individualfeedback_get_completeds_group_count($feedback);
+            $completed_feedback_count = individualfeedback_get_completeds_group_count($feedback);
         } else {
-            $completed_individualfeedback_count = false;
+            $completed_feedback_count = false;
         }
 
-        if ($completed_individualfeedback_count) {
+        if ($completed_feedback_count) {
             $multiple_submit_value = $feedback->multiple_submit ? get_string('yes') : get_string('no');
             $mform->addElement('text',
-                               'multiple_submit_static',
-                               get_string('multiplesubmit', 'mod_individualfeedback'),
-                               array('size'=>'4',
-                                    'disabled'=>'disabled',
-                                    'value'=>$multiple_submit_value));
+                'multiple_submit_static',
+                get_string('multiplesubmit', 'individualfeedback'),
+                array('size'=>'4',
+                    'disabled'=>'disabled',
+                    'value'=>$multiple_submit_value));
             $mform->setType('multiple_submit_static', PARAM_RAW);
 
             $mform->addElement('hidden', 'multiple_submit', '');
             $mform->setType('multiple_submit', PARAM_INT);
-            $mform->addHelpButton('multiple_submit_static', 'multiplesubmit', 'feedback');
+            $mform->addHelpButton('multiple_submit_static', 'multiplesubmit', 'individualfeedback');
         } else {
             $mform->addElement('selectyesno',
-                               'multiple_submit',
-                               get_string('multiplesubmit', 'mod_individualfeedback'));
+                'multiple_submit',
+                get_string('multiplesubmit', 'individualfeedback'));
 
-            $mform->addHelpButton('multiple_submit', 'multiplesubmit', 'feedback');
+            $mform->addHelpButton('multiple_submit', 'multiplesubmit', 'individualfeedback');
         }
 
-        $mform->addElement('selectyesno', 'email_notification', get_string('email_notification', 'mod_individualfeedback'));
-        $mform->addHelpButton('email_notification', 'email_notification', 'feedback');
+        $mform->addElement('selectyesno', 'email_notification', get_string('email_notification', 'individualfeedback'));
+        $mform->addHelpButton('email_notification', 'email_notification', 'individualfeedback');
 
-        $mform->addElement('selectyesno', 'autonumbering', get_string('autonumbering', 'mod_individualfeedback'));
-        $mform->addHelpButton('autonumbering', 'autonumbering', 'feedback');
+        $mform->addElement('selectyesno', 'autonumbering', get_string('autonumbering', 'individualfeedback'));
+        $mform->addHelpButton('autonumbering', 'autonumbering', 'individualfeedback');
 
         //-------------------------------------------------------------------------------
-        $mform->addElement('header', 'aftersubmithdr', get_string('after_submit', 'mod_individualfeedback'));
+        $mform->addElement('header', 'aftersubmithdr', get_string('after_submit', 'individualfeedback'));
 
-        $mform->addElement('selectyesno', 'publish_stats', get_string('show_analysepage_after_submit', 'mod_individualfeedback'));
+        $mform->addElement('selectyesno', 'publish_stats', get_string('show_analysepage_after_submit', 'individualfeedback'));
 
         $mform->addElement('editor',
-                           'page_after_submit_editor',
-                           get_string("page_after_submit", "feedback"),
-                           null,
-                           $editoroptions);
+            'page_after_submit_editor',
+            get_string("page_after_submit", "individualfeedback"),
+            null,
+            $editoroptions);
 
         $mform->setType('page_after_submit_editor', PARAM_RAW);
 
         $mform->addElement('text',
-                           'site_after_submit',
-                           get_string('url_for_continue', 'mod_individualfeedback'),
-                           array('size'=>'64', 'maxlength'=>'255'));
+            'site_after_submit',
+            get_string('url_for_continue', 'individualfeedback'),
+            array('size'=>'64', 'maxlength'=>'255'));
 
         $mform->setType('site_after_submit', PARAM_TEXT);
-        $mform->addHelpButton('site_after_submit', 'url_for_continue', 'feedback');
+        $mform->addHelpButton('site_after_submit', 'url_for_continue', 'individualfeedback');
         //-------------------------------------------------------------------------------
         $this->standard_coursemodule_elements();
         //-------------------------------------------------------------------------------
@@ -199,7 +199,7 @@ class mod_individualfeedback_mod_form extends moodleform_mod {
         // Check open and close times are consistent.
         if ($data['timeopen'] && $data['timeclose'] &&
                 $data['timeclose'] < $data['timeopen']) {
-            $errors['timeclose'] = get_string('closebeforeopen', 'mod_individualfeedback');
+            $errors['timeclose'] = get_string('closebeforeopen', 'individualfeedback');
         }
         return $errors;
     }
@@ -212,7 +212,7 @@ class mod_individualfeedback_mod_form extends moodleform_mod {
         $mform->addElement('checkbox',
             $completionsubmitel,
             '',
-            get_string('completionsubmit', 'mod_individualfeedback')
+            get_string('completionsubmit', 'individualfeedback')
         );
         // Enable this completion rule by default.
         $mform->setDefault($completionsubmitel, 1);
@@ -223,4 +223,10 @@ class mod_individualfeedback_mod_form extends moodleform_mod {
         $suffix = $this->get_suffix();
         return !empty($data['completionsubmit' . $suffix]);
     }
+
+    // +++ NEW CODE
+    public function get_return_url() {
+        return new moodle_url('/mod/individualfeedback/view.php', array('id' => $this->cm->id));
+    }
+    // --- NEW CODE
 }

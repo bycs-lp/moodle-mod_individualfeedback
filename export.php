@@ -35,7 +35,7 @@ if ($action !== false) {
 }
 $PAGE->set_url($url);
 
-if (! $cm = get_coursemodule_from_id('feedback', $id)) {
+if (! $cm = get_coursemodule_from_id('individualfeedback', $id)) {
     throw new \moodle_exception('invalidcoursemodule');
 }
 
@@ -43,7 +43,7 @@ if (! $course = $DB->get_record("course", array("id"=>$cm->course))) {
     throw new \moodle_exception('coursemisconf');
 }
 
-if (! $feedback = $DB->get_record("feedback", array("id"=>$cm->instance))) {
+if (! $feedback = $DB->get_record("individualfeedback", array("id"=>$cm->instance))) {
     throw new \moodle_exception('invalidcoursemodule');
 }
 
@@ -68,14 +68,14 @@ function individualfeedback_get_xml_data($feedbackid) {
     global $DB;
 
     $space = '     ';
-    //get all items of the feedback
-    if (!$items = $DB->get_records('individualfeedback_item', array('individualfeedback'=>$feedbackid), 'position')) {
+    //get all items of the individualfeedback
+    if (!$items = $DB->get_records('individualfeedback_item', array('feedback'=>$feedbackid), 'position')) {
         return false;
     }
 
     //writing the header of the xml file including the charset of the currrent used language
     $data = '<?xml version="1.0" encoding="UTF-8" ?>'."\n";
-    $data .= '<FEEDBACK VERSION="200701" COMMENT="XML-Importfile for mod/individualfeedback">'."\n";
+    $data .= '<INDIVIDUALFEEDBACK VERSION="200701" COMMENT="XML-Importfile for mod/individualfeedback">'."\n";
     $data .= $space.'<ITEMS>'."\n";
 
     //writing all the items
@@ -159,7 +159,7 @@ function individualfeedback_get_xml_data($feedbackid) {
 
     //writing the footer of the xml file
     $data .= $space.'</ITEMS>'."\n";
-    $data .= '</FEEDBACK>'."\n";
+    $data .= '</INDIVIDUALFEEDBACK>'."\n";
 
     return $data;
 }

@@ -24,7 +24,7 @@ use templatable;
 /**
  * Class base_action_bar
  *
- * Base class to be inherited by any other feedback action bar
+ * Base class to be inherited by any other individualfeedback action bar
  *
  * @package     mod_individualfeedback
  * @copyright   2021 onwards Peter Dias
@@ -39,8 +39,8 @@ abstract class base_action_bar implements renderable, templatable {
     protected $course;
     /** @var array $urlparams The default params to be used when creating urls */
     protected $urlparams;
-    /** @var object $feedback The activity record that is being viewed */
-    protected $feedback;
+    /** @var object $individualfeedback The activity record that is being viewed */
+    protected $individualfeedback;
 
     /**
      * base_action_bar constructor.
@@ -56,7 +56,7 @@ abstract class base_action_bar implements renderable, templatable {
         $this->urlparams = [
             'id' => $cmid
         ];
-        $this->feedback = $PAGE->activityrecord;
+        $this->individualfeedback = $PAGE->activityrecord;
     }
 
     /**

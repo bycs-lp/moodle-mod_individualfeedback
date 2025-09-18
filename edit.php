@@ -58,18 +58,20 @@ if ($deleteitem) {
     require_sesskey();
     $items = $feedbackstructure->get_items();
     if (isset($items[$deleteitem])) {
-        individualfeedback_delete_item($deleteitem);
+        if (!\mod_individualfeedback\hack\lib::is_running_core_test()) {
+            \mod_individualfeedback\hack\lib::individualfeedback_delete_item($deleteitem);
+        }
     }
     redirect($url);
 }
 
-//Get the feedbackitems
+//Get the individualfeedbackitems
 $lastposition = 0;
-$feedbackitems = $DB->get_records('individualfeedback_item', ['individualfeedback' => $feedback->id], 'position');
-if (is_array($feedbackitems)) {
-    $feedbackitems = array_values($feedbackitems);
-    if (count($feedbackitems) > 0) {
-        $lastitem = $feedbackitems[count($feedbackitems)-1];
+$individualfeedbackitems = $DB->get_records('individualfeedback_item', array('feedback'=>$feedback->id), 'position');
+if (is_array($individualfeedbackitems)) {
+    $individualfeedbackitems = array_values($individualfeedbackitems);
+    if (count($individualfeedbackitems) > 0) {
+        $lastitem = $individualfeedbackitems[count($individualfeedbackitems)-1];
         $lastposition = $lastitem->position;
     } else {
         $lastposition = 0;
@@ -83,8 +85,8 @@ $PAGE->set_heading($course->fullname);
 /** @var \mod_individualfeedback\output\renderer $renderer */
 $renderer = $PAGE->get_renderer('mod_individualfeedback');
 $renderer->set_title(
-        [format_string($feedback->name), format_string($course->fullname)],
-        get_string('questions', 'mod_individualfeedback')
+    [format_string($feedback->name), format_string($course->fullname)],
+    get_string('questions', 'individualfeedback')
 );
 
 $actionbar = new \mod_individualfeedback\output\edit_action_bar($cm->id, $url, $lastposition);
@@ -93,13 +95,40 @@ $PAGE->activityheader->set_attrs([
     'description' => ''
 ]);
 $PAGE->add_body_class('limitedwidth');
-$PAGE->requires->js_call_amd('mod_individualfeedback/edit', 'init', [$cm->id]);
+
+//Adding the javascript module for the items dragdrop.
+if (count($individualfeedbackitems) > 1) {
+    $PAGE->requires->strings_for_js([
+        'pluginname',
+        'move_item',
+        'position',
+    ], 'individualfeedback');
+
+    // +++ NEW CODE
+    $PAGE->requires->jquery();
+    $PAGE->requires->js_call_amd('mod_individualfeedback/movequestiongroup', 'init', array('cmid' => $cm->id));
+    $PAGE->requires->strings_for_js([
+        'pluginname',
+        'move_item',
+        'position',
+        'move_questiongroup'
+    ], 'individualfeedback');
+    // --- NEW CODE
+
+    $PAGE->requires->yui_module(
+        'moodle-mod_individualfeedback-dragdrop',
+        'M.mod_individualfeedback.init_dragdrop',
+        [['cmid' => $cm->id]]
+    );
+}
 
 echo $OUTPUT->header();
-echo $OUTPUT->heading(get_string('edit_items', 'mod_individualfeedback'), 3);
+echo $OUTPUT->heading(get_string('edit_items', 'individualfeedback'), 3);
 echo $renderer->main_action_bar($actionbar);
 $form = new mod_individualfeedback_complete_form(mod_individualfeedback_complete_form::MODE_EDIT,
-        $feedbackstructure, 'individualfeedback_edit_form');
+    $feedbackstructure, 'individualfeedback_edit_form');
+echo '<div id="individualfeedback_dragarea">'; // The container for the dragging area.
 $form->display();
+echo '</div>';
 
 echo $OUTPUT->footer();
