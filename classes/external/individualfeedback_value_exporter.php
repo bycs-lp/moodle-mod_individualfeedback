@@ -15,24 +15,24 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Class for exporting a feedback completion record.
+ * Class for exporting a feedback response.
  *
- * @package    mod_feedback
+ * @package    mod_individualfeedback
  * @copyright  2017 Juan Leyva <juan@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-namespace mod_feedback\external;
+namespace mod_individualfeedback\external;
 defined('MOODLE_INTERNAL') || die();
 
 use core\external\exporter;
 
 /**
- * Class for exporting a feedback completion record.
+ * Class for exporting a feedback response.
  *
  * @copyright  2017 Juan Leyva <juan@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class feedback_completed_exporter extends exporter {
+class individualfeedback_value_exporter extends exporter {
 
     /**
      * Return the list of properties.
@@ -45,29 +45,25 @@ class feedback_completed_exporter extends exporter {
                 'type' => PARAM_INT,
                 'description' => 'The record id.',
             ),
-            'feedback' => array(
+            'course_id' => array(
                 'type' => PARAM_INT,
-                'description' => 'The feedback instance id this records belongs to.',
+                'description' => 'The course id this record belongs to.',
             ),
-            'userid' => array(
+            'item' => array(
                 'type' => PARAM_INT,
-                'description' => 'The user who completed the feedback (0 for anonymous).',
+                'description' => 'The item id that was responded.',
             ),
-            'timemodified' => array(
+            'completed' => array(
                 'type' => PARAM_INT,
-                'description' => 'The last time the feedback was completed.',
+                'description' => 'Reference to the individualfeedback_completed table.',
             ),
-            'random_response' => array(
+            'tmp_completed' => array(
                 'type' => PARAM_INT,
-                'description' => 'The response number (used when shuffling anonymous responses).',
+                'description' => 'Old field - not used anymore.',
             ),
-            'anonymous_response' => array(
-                'type' => PARAM_INT,
-                'description' => 'Whether is an anonymous response.',
-            ),
-            'courseid' => array(
-                'type' => PARAM_INT,
-                'description' => 'The course id where the feedback was completed.',
+            'value' => array(
+                'type' => PARAM_RAW,
+                'description' => 'The response value.',
             ),
         );
     }

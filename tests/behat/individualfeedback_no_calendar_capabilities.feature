@@ -1,8 +1,8 @@
-@mod @mod_feedback
-Feature: Feedback with no calendar capabilites
+@mod @mod_individualfeedback
+Feature: Individualfeedback with no calendar capabilities
   In order to allow work effectively
   As a teacher
-  I need to be able to create feedbacks even when I cannot edit calendar events
+  I need to be able to create individualfeedbacks even when I cannot edit calendar events
 
   Background:
     Given the following "courses" exist:
@@ -21,13 +21,13 @@ Feature: Feedback with no calendar capabilites
       | moodle/calendar:manageentries | Prohibit |
     And I log out
 
-  Scenario: Editing a feedback
+  Scenario: Editing an individualfeedback
     Given the following "activities" exist:
-      | activity   | name                   | intro                         | course | idnumber    |
-      | feedback   | Test feedback name     | Test feedback description     | C1     | feedback1   |
+      | activity   | name                           | intro                               | course | idnumber    |
+      | individualfeedback   | Test individualfeedback name     | Test individualfeedback description     | C1     | feedback1   |
     And I log in as "admin"
     And I am on "Course 1" course homepage
-    And I follow "Test feedback name"
+    And I follow "Test individualfeedback name"
     And I navigate to "Settings" in current page administration
     And I set the following fields to these values:
       | id_timeopen_enabled | 1 |
@@ -42,10 +42,10 @@ Feature: Feedback with no calendar capabilites
     And I log out
     When I log in as "teacher1"
     And I am on "Course 1" course homepage with editing mode on
-    And I follow "Test feedback name"
+    And I follow "Test individualfeedback name"
     And I navigate to "Settings" in current page administration
     And I set the following fields to these values:
       | id_timeopen_year | 2018 |
       | id_timeclose_year | 2018 |
     And I press "Save and return to course"
-    Then I should see "Test feedback name"
+    Then I should see "Test individualfeedback name"

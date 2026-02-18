@@ -12,17 +12,17 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{!
-    @template mod_feedback/main_action_menu
-    Tertiary nav for the feedback module
+    @template mod_individualfeedback/main_action_menu
+    Tertiary nav for the individualfeedback module
     Classes required for JS:
         * none
     Data attributes required for JS:
         * data-region
     Context variables required for this template:
-        * see mod/feedback/classes/output/edit_action_bar.php
-        * see mod/feedback/classes/output/edit_template_action_bar.php
-        * see mod/feedback/classes/output/responses_action_bar.php
-        * see mod/feedback/classes/output/standard_action_bar.php
+        * see mod/individualfeedback/classes/output/edit_action_bar.php
+        * see mod/individualfeedback/classes/output/edit_template_action_bar.php
+        * see mod/individualfeedback/classes/output/responses_action_bar.php
+        * see mod/individualfeedback/classes/output/standard_action_bar.php
     Example context (json):
     {
         "left": {
@@ -176,7 +176,7 @@
         {{/addselect}}
         {{#usetemplate }}
             <div class="navitem">
-                {{> mod_feedback/use_template }}
+                {{> mod_individualfeedback/use_template }}
             </div>
         {{/usetemplate}}
         {{#actionsselect}}

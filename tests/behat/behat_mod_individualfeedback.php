@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Steps definitions related to mod_feedback.
+ * Steps definitions related to mod_individualfeedback.
  *
- * @package   mod_feedback
+ * @package   mod_individualfeedback
  * @category  test
  * @copyright 2016 Marina Glancy
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -31,26 +31,26 @@ use Behat\Gherkin\Node\TableNode as TableNode,
     Behat\Mink\Exception\ExpectationException as ExpectationException;
 
 /**
- * Steps definitions related to mod_feedback.
+ * Steps definitions related to mod_individualfeedback.
  *
  * @copyright 2016 Marina Glancy
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class behat_mod_feedback extends behat_base {
+class behat_mod_individualfeedback extends behat_base {
 
     /**
-     * Adds a question to the existing feedback with filling the form.
+     * Adds a question to the existing individualfeedback with filling the form.
      *
      * The form for creating a question should be on one page.
      *
-     * @When /^I add a "(?P<question_type_string>(?:[^"]|\\")*)" question to the feedback with:$/
+     * @When /^I add a "(?P<question_type_string>(?:[^"]|\\")*)" question to the individualfeedback with:$/
      * @param string $questiontype
      * @param TableNode $questiondata with data for filling the add question form
      */
-    public function i_add_question_to_the_feedback_with($questiontype, TableNode $questiondata) {
+    public function i_add_question_to_the_individualfeedback_with($questiontype, TableNode $questiondata) {
 
         $questiontype = $this->escape($questiontype);
-        $this->execute('behat_general::i_click_on', [get_string('add_item', 'mod_feedback'), 'link']);
+        $this->execute('behat_general::i_click_on', [get_string('add_item', 'mod_individualfeedback'), 'link']);
         $this->execute('behat_general::i_click_on', [$questiontype, 'link']);
 
         // Wait again, for page to reloaded.
@@ -73,16 +73,16 @@ class behat_mod_feedback extends behat_base {
     }
 
     /**
-     * Adds a question to the existing feedback with filling the form.
+     * Adds a question to the existing individualfeedback with filling the form.
      *
      * The form for creating a question should be on one page.
      *
-     * @When /^I add a page break to the feedback$/
+     * @When /^I add a page break to the individualfeedback$/
      */
-    public function i_add_a_page_break_to_the_feedback() {
+    public function i_add_a_page_break_to_the_individualfeedback() {
 
-        $questiontype = $this->escape(get_string('add_pagebreak', 'feedback'));
-        $this->execute('behat_general::i_click_on', [get_string('add_item', 'mod_feedback'), 'link']);
+        $questiontype = $this->escape(get_string('add_pagebreak', 'individualfeedback'));
+        $this->execute('behat_general::i_click_on', [get_string('add_item', 'mod_individualfeedback'), 'link']);
         $this->execute('behat_general::i_click_on', [$questiontype, 'link']);
 
         // Wait again, for page to reloaded.
@@ -90,23 +90,23 @@ class behat_mod_feedback extends behat_base {
     }
 
     /**
-     * Quick way to generate answers to a one-page feedback.
+     * Quick way to generate answers to a one-page individualfeedback.
      *
-     * @When /^I log in as "(?P<user_name_string>(?:[^"]|\\")*)" and complete feedback "(?P<feedback_name_string>(?:[^"]|\\")*)" in course "(?P<course_name_string>(?:[^"]|\\")*)" with:$/
+     * @When /^I log in as "(?P<user_name_string>(?:[^"]|\\")*)" and complete individualfeedback "(?P<individualfeedback_name_string>(?:[^"]|\\")*)" in course "(?P<course_name_string>(?:[^"]|\\")*)" with:$/
      * @param string $questiontype
      * @param TableNode $questiondata with data for filling the add question form
      */
-    public function i_log_in_as_and_complete_feedback_in_course($username, $feedbackname, $coursename, TableNode $answers) {
+    public function i_log_in_as_and_complete_individualfeedback_in_course($username, $individualfeedbackname, $coursename, TableNode $answers) {
         $username = $this->escape($username);
         $coursename = $this->escape($coursename);
-        $feedbackname = $this->escape($feedbackname);
-        $completeform = $this->escape(get_string('complete_the_form', 'feedback'));
+        $individualfeedbackname = $this->escape($individualfeedbackname);
+        $completeform = $this->escape(get_string('complete_the_form', 'individualfeedback'));
 
         // Log in as user.
         $this->execute('behat_auth::i_log_in_as', $username);
 
-        // Navigate to feedback complete form.
-        $this->execute('behat_navigation::i_am_on_page_instance', [$feedbackname, 'feedback activity']);
+        // Navigate to individualfeedback complete form.
+        $this->execute('behat_navigation::i_am_on_page_instance', [$individualfeedbackname, 'individualfeedback activity']);
         $this->execute('behat_general::click_link', $completeform);
 
         // Fill form and submit.
@@ -118,13 +118,13 @@ class behat_mod_feedback extends behat_base {
     }
 
     /**
-     * Exports feedback and makes sure the export file is the same as in the fixture
+     * Exports individualfeedback and makes sure the export file is the same as in the fixture
      *
-     * @Then /^following "(?P<link_string>(?:[^"]|\\")*)" should export feedback identical to "(?P<filename_string>(?:[^"]|\\")*)"$/
+     * @Then /^following "(?P<link_string>(?:[^"]|\\")*)" should export individualfeedback identical to "(?P<filename_string>(?:[^"]|\\")*)"$/
      * @param string $link
      * @param string $filename
      */
-    public function following_should_export_feedback_identical_to($link, $filename) {
+    public function following_should_export_individualfeedback_identical_to($link, $filename) {
         global $CFG;
         $exception = new ExpectationException('Error while downloading data from ' . $link, $this->getSession());
 
@@ -146,17 +146,17 @@ class behat_mod_feedback extends behat_base {
     /**
      * Clicks on Show chart data to display chart data if not visible.
      *
-     * @Then /^I show chart data for the "(?P<feedback_name_string>(?:[^"]|\\")*)" feedback$/
-     * @param string $feedbackname name of the feedback for which chart data needs to be shown.
+     * @Then /^I show chart data for the "(?P<individualfeedback_name_string>(?:[^"]|\\")*)" individualfeedback$/
+     * @param string $individualfeedbackname name of the individualfeedback for which chart data needs to be shown.
      */
-    public function i_show_chart_data_for_the_feedback($feedbackname) {
+    public function i_show_chart_data_for_the_feedback($individualfeedbackname) {
 
-        $feedbackxpath = "//th[contains(normalize-space(string(.)), \"" . $feedbackname . "\")]/ancestor::table//" .
+        $individualfeedbackxpath = "//th[contains(normalize-space(string(.)), \"" . $individualfeedbackname . "\")]/ancestor::table//" .
             "div[contains(concat(' ', normalize-space(@class), ' '), ' chart-table ')]" .
             "//p[contains(concat(' ', normalize-space(@class), ' '), ' chart-table-expand ') and ".
             "//a[contains(normalize-space(string(.)), '".get_string('showchartdata')."')]]";
 
-        $charttabledataxpath = $feedbackxpath .
+        $charttabledataxpath = $individualfeedbackxpath .
             "/following-sibling::div[contains(concat(' ', normalize-space(@class), ' '), ' chart-table-data ')][1]";
 
         // If chart data is not visible then expand.
@@ -166,7 +166,7 @@ class behat_mod_feedback extends behat_base {
                 $this->execute('behat_general::i_click_on_in_the', array(
                     get_string('showchartdata'),
                     'link',
-                    $feedbackxpath,
+                    $individualfeedbackxpath,
                     'xpath_element'
                 ));
             }
@@ -174,7 +174,7 @@ class behat_mod_feedback extends behat_base {
     }
 
     /**
-     * Ensures two feedback export files are identical
+     * Ensures two individualfeedback export files are identical
      *
      * Maps the itemids and converts DEPENDITEM if necessary
      *
@@ -237,7 +237,7 @@ class behat_mod_feedback extends behat_base {
     public static function get_partial_named_selectors(): array {
         return [
             new behat_component_named_selector('Question', [
-                ".//*[starts-with(@id, 'fitem_feedback_item_') or starts-with(@id, 'fgroup_feedback_item_')]" .
+                ".//*[starts-with(@id, 'fitem_individualfeedback_item_') or starts-with(@id, 'fgroup_individualfeedback_item_')]" .
                 "[.//*[contains(text(), %locator%)]]",
             ]),
         ];

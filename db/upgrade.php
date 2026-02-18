@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This file keeps track of upgrades to the feedback module.
+ * This file keeps track of upgrades to the individualfeedback module.
  *
  * Sometimes, changes between versions involve
  * alterations to database structures and other
@@ -34,12 +34,12 @@
  * Please do not forget to use upgrade_set_timeout()
  * before any action that may take longer time to finish.
  *
- * @package   mod_feedback
+ * @package   mod_individualfeedback
  * @copyright Andreas Grabs
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-function xmldb_feedback_upgrade($oldversion) {
+function xmldb_individualfeedback_upgrade($oldversion) {
     // Automatically generated Moodle v4.1.0 release upgrade line.
     // Put any upgrade step following this.
 

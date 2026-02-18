@@ -19,7 +19,7 @@
  *
  * @author Andreas Grabs
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
- * @package mod_feedback
+ * @package mod_individualfeedback
  */
 
 require_once("../../config.php");
@@ -29,13 +29,13 @@ require_once("lib.php");
 $id = required_param('id', PARAM_INT);
 $action = optional_param('action', false, PARAM_ALPHA);
 
-$url = new moodle_url('/mod/feedback/export.php', array('id'=>$id));
+$url = new moodle_url('/mod/individualfeedback/export.php', array('id'=>$id));
 if ($action !== false) {
     $url->param('action', $action);
 }
 $PAGE->set_url($url);
 
-if (! $cm = get_coursemodule_from_id('feedback', $id)) {
+if (! $cm = get_coursemodule_from_id('individualfeedback', $id)) {
     throw new \moodle_exception('invalidcoursemodule');
 }
 
@@ -43,7 +43,7 @@ if (! $course = $DB->get_record("course", array("id"=>$cm->course))) {
     throw new \moodle_exception('coursemisconf');
 }
 
-if (! $feedback = $DB->get_record("feedback", array("id"=>$cm->instance))) {
+if (! $individualfeedback = $DB->get_record("individualfeedback", array("id"=>$cm->instance))) {
     throw new \moodle_exception('invalidcoursemodule');
 }
 
@@ -51,31 +51,31 @@ $context = context_module::instance($cm->id);
 
 require_login($course, true, $cm);
 
-require_capability('mod/feedback:edititems', $context);
+require_capability('mod/individualfeedback:edititems', $context);
 
 if ($action == 'exportfile') {
-    if (!$exportdata = feedback_get_xml_data($feedback->id)) {
+    if (!$exportdata = individualfeedback_get_xml_data($individualfeedback->id)) {
         throw new \moodle_exception('nodata');
     }
-    @feedback_send_xml_data($exportdata, 'feedback_'.$feedback->id.'.xml');
+    @individualfeedback_send_xml_data($exportdata, 'individualfeedback_'.$individualfeedback->id.'.xml');
     exit;
 }
 
 redirect('view.php?id='.$id);
 exit;
 
-function feedback_get_xml_data($feedbackid) {
+function individualfeedback_get_xml_data($individualfeedbackid) {
     global $DB;
 
     $space = '     ';
-    //get all items of the feedback
-    if (!$items = $DB->get_records('feedback_item', array('feedback'=>$feedbackid), 'position')) {
+    // Get all items of the individualfeedback.
+    if (!$items = $DB->get_records('individualfeedback_item', array('individualfeedback'=>$individualfeedbackid), 'position')) {
         return false;
     }
 
     //writing the header of the xml file including the charset of the currrent used language
     $data = '<?xml version="1.0" encoding="UTF-8" ?>'."\n";
-    $data .= '<FEEDBACK VERSION="200701" COMMENT="XML-Importfile for mod/feedback">'."\n";
+    $data .= '<INDIVIDUALFEEDBACK VERSION="200701" COMMENT="XML-Importfile for mod/individualfeedback">'."\n";
     $data .= $space.'<ITEMS>'."\n";
 
     //writing all the items
@@ -159,12 +159,12 @@ function feedback_get_xml_data($feedbackid) {
 
     //writing the footer of the xml file
     $data .= $space.'</ITEMS>'."\n";
-    $data .= '</FEEDBACK>'."\n";
+    $data .= '</INDIVIDUALFEEDBACK>'."\n";
 
     return $data;
 }
 
-function feedback_send_xml_data($data, $filename) {
+function individualfeedback_send_xml_data($data, $filename) {
     @header('Content-Type: application/xml; charset=UTF-8');
     @header('Content-Disposition: attachment; filename="'.$filename.'"');
     print($data);

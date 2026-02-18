@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace mod_feedback\navigation\views;
+namespace mod_individualfeedback\navigation\views;
 
 use core\navigation\views\secondary as core_secondary;
 use settings_navigation;
@@ -25,7 +25,7 @@ use navigation_node;
  *
  * A custom construct of secondary nav for feedback. This rearranges the nodes for the secondary
  *
- * @package     mod_feedback
+ * @package     mod_individualfeedback
  * @category    navigation
  * @copyright   2021 onwards Peter Dias
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later

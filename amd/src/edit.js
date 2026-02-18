@@ -14,9 +14,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Edit items in feedback module
+ * Edit items in individualfeedback module
  *
- * @module     mod_feedback/edit
+ * @module     mod_individualfeedback/edit
  * @copyright  2016 Marina Glancy
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -31,26 +31,26 @@ import {prefetchStrings} from 'core/prefetch';
 import SortableList from 'core/sortable_list';
 import {getString, getStrings} from 'core/str';
 import {add as addToast} from 'core/toast';
-import {reorderQuestions} from 'mod_feedback/local/repository';
+import {reorderQuestions} from 'mod_individualfeedback/local/repository';
 import Templates from 'core/templates';
 
 const Selectors = {
     deleteQuestionButton: '[data-action="delete"]',
     sortableListRegion: '[data-region="questions-sortable-list"]',
-    sortableElement: '[data-region="questions-sortable-list"] .feedback_itemlist[id]',
+    sortableElement: '[data-region="questions-sortable-list"] .individualfeedback_itemlist[id]',
     sortableElementTitle: '[data-region="item-title"] span',
     questionLabel: '[data-region="questions-sortable-list"] .col-form-label',
     actionsMenuData: '[data-item-actions-menu]',
 };
 
 /**
- * Returns the Feedback question item id from the DOM id of an item.
+ * Returns the individualfeedback question item id from the DOM id of an item.
  *
- * @param {String} id The dom id, f.g.: feedback_item_22
+ * @param {String} id The dom id, f.g.: individualfeedback_item_22
  * @return int
  */
 const getItemId = (id) => {
-    return Number(id.replace(/^.*feedback_item_/i, ''));
+    return Number(id.replace(/^.*individualfeedback_item_/i, ''));
 };
 
 /**
@@ -92,7 +92,7 @@ export const init = async(cmId) => {
     prefetchStrings('admin', [
         'confirmation',
     ]);
-    prefetchStrings('mod_feedback', [
+    prefetchStrings('mod_individualfeedback', [
         'confirmdeleteitem',
         'questionmoved',
         'move_item',
@@ -109,7 +109,7 @@ export const init = async(cmId) => {
             event.preventDefault();
             const confirmationStrings = await getStrings([
                 {key: 'confirmation', component: 'admin'},
-                {key: 'confirmdeleteitem', component: 'mod_feedback'},
+                {key: 'confirmdeleteitem', component: 'mod_individualfeedback'},
                 {key: 'yes', component: 'core'},
                 {key: 'no', component: 'core'},
             ]);
@@ -128,11 +128,11 @@ export const init = async(cmId) => {
         if (!info.positionChanged) {
             return;
         }
-        const pendingPromise = new Pending('mod_feedback/questions:reorder');
+        const pendingPromise = new Pending('mod_individualfeedback/questions:reorder');
         const itemOrder = getItemOrder(info.element[0]);
         addIconToContainerRemoveOnCompletion(info.element[0], pendingPromise);
         reorderQuestions(moduleId, itemOrder)
-            .then(() => getString('questionmoved', 'mod_feedback'))
+            .then(() => getString('questionmoved', 'mod_individualfeedback'))
             .then(addToast)
             .then(() => pendingPromise.resolve())
             .catch(Notification.exception);
@@ -148,7 +148,7 @@ export const init = async(cmId) => {
  */
 const enhanceEditForm = async() => {
     const questionLabels = document.querySelectorAll(Selectors.questionLabel);
-    const movetitle = await getString('move_item', 'mod_feedback');
+    const movetitle = await getString('move_item', 'mod_individualfeedback');
 
     const updates = Array.from(questionLabels).map(async(container) => {
         const label = container.querySelector(Selectors.actionsMenuData);
@@ -162,7 +162,7 @@ const enhanceEditForm = async() => {
                 label: label.parentElement.outerHTML,
                 actionsmenu: JSON.parse(label.dataset.itemActionsMenu || '{}'),
             };
-            container.innerHTML = await Templates.render('mod_feedback/item_edit_enhanced_title', contextData);
+            container.innerHTML = await Templates.render('mod_individualfeedback/item_edit_enhanced_title', contextData);
         } catch (error) {
             await Notification.exception(error);
         }

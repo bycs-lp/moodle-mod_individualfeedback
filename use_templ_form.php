@@ -19,7 +19,7 @@
  *
  * @author Andreas Grabs
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
- * @package mod_feedback
+ * @package mod_individualfeedback
  */
 
 if (!defined('MOODLE_INTERNAL')) {
@@ -29,14 +29,14 @@ if (!defined('MOODLE_INTERNAL')) {
 require_once($CFG->libdir.'/formslib.php');
 
 /**
- * The mod_feedback_use_templ_form
+ * The mod_individualfeedback_use_templ_form
  *
  * @deprecated since 4.0. New dynamic forms have been created instead.
  */
-class mod_feedback_use_templ_form extends moodleform {
+class mod_individualfeedback_use_templ_form extends moodleform {
     public function __construct($action = null, $customdata = null, $method = 'post', $target = '',
             $attributes = null, $editable = true, $ajaxformdata = null) {
-        debugging('Class mod_feedback_use_templ_form is deprecated. Replaced with dynamic forms.', DEBUG_DEVELOPER);
+        debugging('Class mod_individualfeedback_use_templ_form is deprecated. Replaced with dynamic forms.', DEBUG_DEVELOPER);
         parent::__construct($action, $customdata, $method, $target, $attributes, $editable, $ajaxformdata);
     }
 
@@ -44,8 +44,8 @@ class mod_feedback_use_templ_form extends moodleform {
         $mform =& $this->_form;
 
         // visible elements
-        $mform->addElement('radio', 'deleteolditems', '', get_string('delete_old_items', 'feedback'), 1);
-        $mform->addElement('radio', 'deleteolditems', '', get_string('append_new_items', 'feedback'), 0);
+        $mform->addElement('radio', 'deleteolditems', '', get_string('delete_old_items', 'individualfeedback'), 1);
+        $mform->addElement('radio', 'deleteolditems', '', get_string('append_new_items', 'individualfeedback'), 0);
         $mform->setType('deleteolditems', PARAM_INT);
         $mform->setDefault('deleteolditems', 1);
 
@@ -71,7 +71,7 @@ class mod_feedback_use_templ_form extends moodleform {
      * @return array
      */
     public static function get_js_module() {
-        debugging('Class mod_feedback_use_templ_form is deprecated. Replaced with dynamic forms.', DEBUG_DEVELOPER);
+        debugging('Class mod_individualfeedback_use_templ_form is deprecated. Replaced with dynamic forms.', DEBUG_DEVELOPER);
         return parent::get_js_module();
     }
 
@@ -87,7 +87,7 @@ class mod_feedback_use_templ_form extends moodleform {
      */
     public static function mock_ajax_submit($simulatedsubmitteddata, $simulatedsubmittedfiles = array(),
             $method = 'post', $formidentifier = null) {
-        debugging('Class mod_feedback_use_templ_form is deprecated. Replaced with dynamic forms.', DEBUG_DEVELOPER);
+        debugging('Class mod_individualfeedback_use_templ_form is deprecated. Replaced with dynamic forms.', DEBUG_DEVELOPER);
         return parent::mock_ajax_submit($simulatedsubmitteddata, $simulatedsubmittedfiles, $method, $formidentifier);
     }
 
@@ -99,7 +99,7 @@ class mod_feedback_use_templ_form extends moodleform {
      * @return array
      */
     public static function mock_generate_submit_keys($data = []) {
-        debugging('Class mod_feedback_use_templ_form is deprecated. Replaced with dynamic forms.', DEBUG_DEVELOPER);
+        debugging('Class mod_individualfeedback_use_templ_form is deprecated. Replaced with dynamic forms.', DEBUG_DEVELOPER);
         return parent::mock_generate_submit_keys($data);
     }
 
@@ -114,7 +114,7 @@ class mod_feedback_use_templ_form extends moodleform {
      */
     public static function mock_submit($simulatedsubmitteddata, $simulatedsubmittedfiles = array(),
             $method = 'post', $formidentifier = null) {
-        debugging('Class mod_feedback_use_templ_form is deprecated. Replaced with dynamic forms.', DEBUG_DEVELOPER);
+        debugging('Class mod_individualfeedback_use_templ_form is deprecated. Replaced with dynamic forms.', DEBUG_DEVELOPER);
         parent::mock_submit($simulatedsubmitteddata, $simulatedsubmittedfiles, $method, $formidentifier);
     }
 }

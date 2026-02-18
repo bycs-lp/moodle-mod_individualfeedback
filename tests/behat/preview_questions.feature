@@ -1,6 +1,6 @@
-@mod @mod_feedback
-Feature: Preview feedback questions
-  In order to view the feedback questions
+@mod @mod_individualfeedback
+Feature: Preview individualfeedback questions
+  In order to view the individualfeedback questions
   As a teacher
   I need to be able to preview them
 
@@ -20,8 +20,8 @@ Feature: Preview feedback questions
       | teacher        | C1     | teacher        |
     And the following "activities" exist:
       | activity   | name           | course | idnumber    |
-      | feedback   | Music history  | C1     | feedback0   |
-    And the following "mod_feedback > question" exists:
+      | individualfeedback   | Music history  | C1     | feedback0   |
+    And the following "mod_individualfeedback > question" exists:
       | activity      | feedback0                         |
       | name          | What is your favourite instrument |
       | questiontype  | multichoice                       |
@@ -29,24 +29,24 @@ Feature: Preview feedback questions
       | values        | Drums\nGuitar\nHurdy-gurdy        |
 
   Scenario: Students cannot see the Preview questions button
-    When I am on the "Music history" "feedback activity" page logged in as student
+    When I am on the "Music history" "individualfeedback activity" page logged in as student
     Then I should not see "Preview questions"
 
   Scenario: Non-editing teachers can see the Preview questions button
-    When I am on the "Music history" "feedback activity" page logged in as teacher
+    When I am on the "Music history" "individualfeedback activity" page logged in as teacher
     Then I should see "Preview questions"
     And I follow "Preview questions"
     And I should see "What is your favourite instrument"
 
   Scenario: Editing teachers can see the Preview questions button
-    When I am on the "Music history" "feedback activity" page logged in as editingteacher
+    When I am on the "Music history" "individualfeedback activity" page logged in as editingteacher
     Then I should see "Preview questions"
     And I follow "Preview questions"
     And I should see "What is your favourite instrument"
 
   @javascript @accessibility
   Scenario: Feedback questionnaire pages should be accessible
-    Given the following "mod_feedback > question" exists:
+    Given the following "mod_individualfeedback > question" exists:
       | activity      | feedback0                               |
       | name          | What type of guitar is your favourite?  |
       | questiontype  | multichoice                             |
@@ -54,9 +54,9 @@ Feature: Preview feedback questions
       | dependitem    | instrument1                             |
       | dependvalue   | Guitar                                  |
       | values        | Electric\nAcoustic\nBass                |
-    When I am on the "Music history" "feedback activity" page logged in as editingteacher
+    When I am on the "Music history" "individualfeedback activity" page logged in as editingteacher
     And I navigate to "Questions" in current page administration
     Then the "region-main" "region" should meet accessibility standards with "best-practice" extra tests
-    And I am on the "Music history" "feedback activity" page logged in as student
+    And I am on the "Music history" "individualfeedback activity" page logged in as student
     And I follow "Answer the questions"
     And the "region-main" "region" should meet accessibility standards with "best-practice" extra tests

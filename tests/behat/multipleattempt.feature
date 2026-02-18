@@ -1,8 +1,8 @@
-@mod @mod_feedback
-Feature: Non anonymous feedback with multiple submissions
-  In order to modify feedback response
+@mod @mod_individualfeedback
+Feature: Non anonymous individualfeedback with multiple submissions
+  In order to modify individualfeedback response
   As a student
-  I need to be able to see previous response when I re-submit feedback
+  I need to be able to see previous response when I re-submit individualfeedback
 
   Background:
     Given the following "users" exist:
@@ -21,26 +21,26 @@ Feature: Non anonymous feedback with multiple submissions
       | teacher | C1   | editingteacher |
     And the following "activities" exist:
       | activity   | name            | course | idnumber  | anonymous | publish_stats | multiple_submit | section |
-      | feedback   | Course feedback | C1     | feedback1 | 2         | 1             | 1               | 0       |
+      | individualfeedback   | Course individualfeedback | C1     | feedback1 | 2         | 1             | 1               | 0       |
 
-  Scenario: Completing a feedback second time
+  Scenario: Completing an individualfeedback second time
     When I log in as "teacher"
     And I am on "Course 1" course homepage
-    And I follow "Course feedback"
+    And I follow "Course individualfeedback"
     And I navigate to "Questions" in current page administration
-    And I add a "Short text answer" question to the feedback with:
+    And I add a "Short text answer" question to the individualfeedback with:
       | Question                    | first      |
       | Label                       | shorttext1 |
       | Maximum characters accepted | 200        |
-    And I add a page break to the feedback
-    And I add a "Short text answer" question to the feedback with:
+    And I add a page break to the individualfeedback
+    And I add a "Short text answer" question to the individualfeedback with:
       | Question                    | second     |
       | Label                       | shorttext2 |
       | Maximum characters accepted | 200        |
     And I log out
     And I log in as "user1"
     And I am on "Course 1" course homepage
-    And I follow "Course feedback"
+    And I follow "Course individualfeedback"
     And I follow "Answer the questions"
     And I set the following fields to these values:
       | first | 111 |
@@ -51,7 +51,7 @@ Feature: Non anonymous feedback with multiple submissions
     And I log out
     And I log in as "user1"
     And I am on "Course 1" course homepage
-    And I follow "Course feedback"
+    And I follow "Course individualfeedback"
     And I follow "Answer the questions"
     Then the field "first" matches value "111"
     And I press "Next"

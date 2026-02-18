@@ -14,14 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace mod_feedback\output;
+namespace mod_individualfeedback\output;
 
 use plugin_renderer_base;
 
 /**
  * Class renderer
  *
- * @package   mod_feedback
+ * @package   mod_individualfeedback
  * @copyright 2021 Peter Dias
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -35,7 +35,7 @@ class renderer extends plugin_renderer_base {
     public function main_action_bar(base_action_bar $actionmenu) {
         $context = $actionmenu->export_for_template($this);
 
-        return $this->render_from_template('mod_feedback/main_action_menu', $context);
+        return $this->render_from_template('mod_individualfeedback/main_action_menu', $context);
     }
 
     /**
@@ -50,7 +50,7 @@ class renderer extends plugin_renderer_base {
     public function create_template_form(int $id) {
         \core\deprecation::emit_deprecation([self::class, __FUNCTION__]);
 
-        return $this->render_from_template('mod_feedback/create_template', ['id' => $id]);
+        return $this->render_from_template('mod_individualfeedback/create_template', ['id' => $id]);
     }
 
     /**

@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Contains class mod_feedback_structure
+ * Contains class mod_individualfeedback_structure
  *
- * @package   mod_feedback
+ * @package   mod_individualfeedback
  * @copyright 2016 Marina Glancy
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -27,16 +27,16 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * Stores and manipulates the structure of the feedback or template (items, pages, etc.)
  *
- * @package   mod_feedback
+ * @package   mod_individualfeedback
  * @copyright 2016 Marina Glancy
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_feedback_structure {
-    /** @var stdClass record from 'feedback' table.
+class mod_individualfeedback_structure {
+    /** @var stdClass record from 'individualfeedback' table.
      * Reliably has fields: id, course, timeopen, timeclose, anonymous, completionsubmit.
-     * For full object or to access any other field use $this->get_feedback()
+     * For full object or to access any other field use $this->get_individualfeedback()
      */
-    protected $feedback;
+    protected $individualfeedback;
     /** @var cm_info */
     protected $cm;
     /** @var int course where the feedback is filled. For feedbacks that are NOT on the front page this is 0 */
@@ -53,25 +53,25 @@ class mod_feedback_structure {
     /**
      * Constructor
      *
-     * @param stdClass $feedback feedback object, in case of the template
-     *     this is the current feedback the template is accessed from
-     * @param stdClass|cm_info $cm course module object corresponding to the $feedback
-     *     (at least one of $feedback or $cm is required)
+     * @param stdClass $individualfeedback individualfeedback instance object, in case of the template
+     *     this is the current individualfeedback the template is accessed from
+     * @param stdClass|cm_info $cm course module object corresponding to the $individualfeedback
+     *     (at least one of $individualfeedback or $cm is required)
      * @param int $courseid current course (for site feedbacks only)
      * @param int $templateid template id if this class represents the template structure
      * @param int $userid User id to use for all capability checks, etc. Set to 0 for current user (default).
      */
-    public function __construct($feedback, $cm, $courseid = 0, $templateid = null, $userid = 0) {
+    public function __construct($individualfeedback, $cm, $courseid = 0, $templateid = null, $userid = 0) {
         global $USER;
 
-        if ((empty($feedback->id) || empty($feedback->course)) && (empty($cm->instance) || empty($cm->course))) {
-            throw new coding_exception('Either $feedback or $cm must be passed to constructor');
+        if ((empty($individualfeedback->id) || empty($individualfeedback->course)) && (empty($cm->instance) || empty($cm->course))) {
+            throw new coding_exception('Either $individualfeedback or $cm must be passed to constructor');
         }
-        $this->feedback = $feedback ?: (object)['id' => $cm->instance, 'course' => $cm->course];
+        $this->individualfeedback = $individualfeedback ?: (object)['id' => $cm->instance, 'course' => $cm->course];
         $this->cm = ($cm && $cm instanceof cm_info) ? $cm :
-            get_fast_modinfo($this->feedback->course)->instances['feedback'][$this->feedback->id];
+            get_fast_modinfo($this->individualfeedback->course)->instances['individualfeedback'][$this->individualfeedback->id];
         $this->templateid = $templateid;
-        $this->courseid = ($this->feedback->course == SITEID) ? $courseid : 0;
+        $this->courseid = ($this->individualfeedback->course == SITEID) ? $courseid : 0;
 
         if (empty($userid)) {
             $this->userid = $USER->id;
@@ -79,29 +79,29 @@ class mod_feedback_structure {
             $this->userid = $userid;
         }
 
-        if (!$feedback) {
-            // If feedback object was not specified, populate object with fields required for the most of methods.
-            // These fields were added to course module cache in feedback_get_coursemodule_info().
-            // Full instance record can be retrieved by calling mod_feedback_structure::get_feedback().
+        if (!$individualfeedback) {
+            // If individualfeedback object was not specified, populate object with fields required for the most of methods.
+            // These fields were added to course module cache in individualfeedback_get_coursemodule_info().
+            // Full instance record can be retrieved by calling mod_individualfeedback_structure::get_individualfeedback().
             $customdata = ($this->cm->customdata ?: []) + ['timeopen' => 0, 'timeclose' => 0, 'anonymous' => 0];
-            $this->feedback->timeopen = $customdata['timeopen'];
-            $this->feedback->timeclose = $customdata['timeclose'];
-            $this->feedback->anonymous = $customdata['anonymous'];
-            $this->feedback->completionsubmit = empty($this->cm->customdata['customcompletionrules']['completionsubmit']) ? 0 : 1;
+            $this->individualfeedback->timeopen = $customdata['timeopen'];
+            $this->individualfeedback->timeclose = $customdata['timeclose'];
+            $this->individualfeedback->anonymous = $customdata['anonymous'];
+            $this->individualfeedback->completionsubmit = empty($this->cm->customdata['customcompletionrules']['completionsubmit']) ? 0 : 1;
         }
     }
 
     /**
-     * Current feedback
+     * Current individualfeedback instance
      * @return stdClass
      */
-    public function get_feedback() {
+    public function get_individualfeedback() {
         global $DB;
-        if (!isset($this->feedback->publish_stats) || !isset($this->feedback->name)) {
+        if (!isset($this->individualfeedback->publish_stats) || !isset($this->individualfeedback->name)) {
             // Make sure the full object is retrieved.
-            $this->feedback = $DB->get_record('feedback', ['id' => $this->feedback->id], '*', MUST_EXIST);
+            $this->individualfeedback = $DB->get_record('individualfeedback', ['id' => $this->individualfeedback->id], '*', MUST_EXIST);
         }
-        return $this->feedback;
+        return $this->individualfeedback;
     }
 
     /**
@@ -134,22 +134,22 @@ class mod_feedback_structure {
      */
     public function is_open() {
         $checktime = time();
-        return (!$this->feedback->timeopen || $this->feedback->timeopen <= $checktime) &&
-            (!$this->feedback->timeclose || $this->feedback->timeclose >= $checktime);
+        return (!$this->individualfeedback->timeopen || $this->individualfeedback->timeopen <= $checktime) &&
+            (!$this->individualfeedback->timeclose || $this->individualfeedback->timeclose >= $checktime);
     }
 
     /**
      * Get all items in this feedback or this template
      * @param bool $hasvalueonly only count items with a value.
-     * @return array of objects from feedback_item with an additional attribute 'itemnr'
+     * @return array of objects from individualfeedback_item with an additional attribute 'itemnr'
      */
     public function get_items($hasvalueonly = false) {
         global $DB;
         if ($this->allitems === null) {
             if ($this->templateid) {
-                $this->allitems = $DB->get_records('feedback_item', ['template' => $this->templateid], 'position');
+                $this->allitems = $DB->get_records('individualfeedback_item', ['template' => $this->templateid], 'position');
             } else {
-                $this->allitems = $DB->get_records('feedback_item', ['feedback' => $this->feedback->id], 'position');
+                $this->allitems = $DB->get_records('individualfeedback_item', ['individualfeedback' => $this->individualfeedback->id], 'position');
             }
             $idx = 1;
             foreach ($this->allitems as $id => $item) {
@@ -181,7 +181,7 @@ class mod_feedback_structure {
      * @return bool
      */
     public function is_anonymous() {
-        return $this->feedback->anonymous == FEEDBACK_ANONYMOUS_YES;
+        return $this->individualfeedback->anonymous == INDIVIDUALFEEDBACK_ANONYMOUS_YES;
     }
 
     /**
@@ -193,15 +193,15 @@ class mod_feedback_structure {
         global $CFG;
         require_once($CFG->libdir . '/filelib.php');
 
-        $pageaftersubmit = $this->get_feedback()->page_after_submit;
+        $pageaftersubmit = $this->get_individualfeedback()->page_after_submit;
         if (empty($pageaftersubmit)) {
             return null;
         }
-        $pageaftersubmitformat = $this->get_feedback()->page_after_submitformat;
+        $pageaftersubmitformat = $this->get_individualfeedback()->page_after_submitformat;
 
         $context = context_module::instance($this->get_cm()->id);
         $output = file_rewrite_pluginfile_urls($pageaftersubmit,
-                'pluginfile.php', $context->id, 'mod_feedback', 'page_after_submit', 0);
+                'pluginfile.php', $context->id, 'mod_individualfeedback', 'page_after_submit', 0);
 
         return format_text($output, $pageaftersubmitformat, array('overflowdiv' => true));
     }
@@ -215,18 +215,18 @@ class mod_feedback_structure {
         global $USER;
 
         $context = context_module::instance($this->cm->id);
-        if (has_capability('mod/feedback:viewreports', $context, $this->userid)) {
+        if (has_capability('mod/individualfeedback:viewreports', $context, $this->userid)) {
             return true;
         }
 
-        if (intval($this->get_feedback()->publish_stats) != 1 ||
-                !has_capability('mod/feedback:viewanalysepage', $context, $this->userid)) {
+        if (intval($this->get_individualfeedback()->publish_stats) != 1 ||
+                !has_capability('mod/individualfeedback:viewanalysepage', $context, $this->userid)) {
             return false;
         }
 
         if ((!isloggedin() && $USER->id == $this->userid) || isguestuser($this->userid)) {
             // There is no tracking for the guests, assume that they can view analysis if condition above is satisfied.
-            return $this->feedback->course == SITEID;
+            return $this->individualfeedback->course == SITEID;
         }
 
         return $this->is_already_submitted(true);
@@ -247,11 +247,11 @@ class mod_feedback_structure {
             return false;
         }
 
-        $params = array('userid' => $this->userid, 'feedback' => $this->feedback->id);
+        $params = array('userid' => $this->userid, 'individualfeedback' => $this->individualfeedback->id);
         if (!$anycourseid && $this->courseid) {
             $params['courseid'] = $this->courseid;
         }
-        return $DB->record_exists('feedback_completed', $params);
+        return $DB->record_exists('individualfeedback_completed', $params);
     }
 
     /**
@@ -259,12 +259,12 @@ class mod_feedback_structure {
      */
     public function check_course_is_mapped() {
         global $DB;
-        if ($this->feedback->course != SITEID) {
+        if ($this->individualfeedback->course != SITEID) {
             return true;
         }
-        if ($DB->get_records('feedback_sitecourse_map', array('feedbackid' => $this->feedback->id))) {
-            $params = array('feedbackid' => $this->feedback->id, 'courseid' => $this->courseid);
-            if (!$DB->get_record('feedback_sitecourse_map', $params)) {
+        if ($DB->get_records('individualfeedback_sitecourse_map', array('individualfeedbackid' => $this->individualfeedback->id))) {
+            $params = array('individualfeedbackid' => $this->individualfeedback->id, 'courseid' => $this->courseid);
+            if (!$DB->get_record('individualfeedback_sitecourse_map', $params)) {
                 return false;
             }
         }
@@ -278,25 +278,25 @@ class mod_feedback_structure {
      */
     public function shuffle_anonym_responses() {
         global $DB;
-        $params = array('feedback' => $this->feedback->id,
+        $params = array('individualfeedback' => $this->individualfeedback->id,
             'random_response' => 0,
-            'anonymous_response' => FEEDBACK_ANONYMOUS_YES);
+            'anonymous_response' => INDIVIDUALFEEDBACK_ANONYMOUS_YES);
 
-        if ($DB->count_records('feedback_completed', $params, 'random_response')) {
+        if ($DB->count_records('individualfeedback_completed', $params, 'random_response')) {
             // Get all of the anonymous records, go through them and assign a response id.
             unset($params['random_response']);
-            $feedbackcompleteds = $DB->get_records('feedback_completed', $params, 'id');
-            shuffle($feedbackcompleteds);
+            $individualfeedbackcompleteds = $DB->get_records('individualfeedback_completed', $params, 'id');
+            shuffle($individualfeedbackcompleteds);
             $num = 1;
-            foreach ($feedbackcompleteds as $compl) {
+            foreach ($individualfeedbackcompleteds as $compl) {
                 $compl->random_response = $num++;
-                $DB->update_record('feedback_completed', $compl);
+                $DB->update_record('individualfeedback_completed', $compl);
             }
         }
     }
 
     /**
-     * Counts records from {feedback_completed} table for a given feedback
+     * Counts records from {individualfeedback_completed} table for a given feedback
      *
      * If $groupid or $this->courseid is set, the records are filtered by the group/course
      *
@@ -307,19 +307,19 @@ class mod_feedback_structure {
         global $DB;
         if (intval($groupid) > 0) {
             $query = "SELECT COUNT(DISTINCT fbc.id)
-                        FROM {feedback_completed} fbc, {groups_members} gm
-                        WHERE fbc.feedback = :feedback
+                        FROM {individualfeedback_completed} fbc, {groups_members} gm
+                        WHERE fbc.individualfeedback = :individualfeedback
                             AND gm.groupid = :groupid
                             AND fbc.userid = gm.userid";
         } else if ($this->courseid) {
             $query = "SELECT COUNT(fbc.id)
-                        FROM {feedback_completed} fbc
-                        WHERE fbc.feedback = :feedback
+                        FROM {individualfeedback_completed} fbc
+                        WHERE fbc.individualfeedback = :individualfeedback
                             AND fbc.courseid = :courseid";
         } else {
-            $query = "SELECT COUNT(fbc.id) FROM {feedback_completed} fbc WHERE fbc.feedback = :feedback";
+            $query = "SELECT COUNT(fbc.id) FROM {individualfeedback_completed} fbc WHERE fbc.individualfeedback = :individualfeedback";
         }
-        $params = ['feedback' => $this->feedback->id, 'groupid' => $groupid, 'courseid' => $this->courseid];
+        $params = ['individualfeedback' => $this->individualfeedback->id, 'groupid' => $groupid, 'courseid' => $this->courseid];
         return $DB->get_field_sql($query, $params);
     }
 
@@ -331,7 +331,7 @@ class mod_feedback_structure {
     public function get_completed_courses() {
         global $DB;
 
-        if ($this->get_feedback()->course != SITEID) {
+        if ($this->get_individualfeedback()->course != SITEID) {
             return [];
         }
 
@@ -340,8 +340,8 @@ class mod_feedback_structure {
         }
 
         $courseselect = "SELECT fbc.courseid
-            FROM {feedback_completed} fbc
-            WHERE fbc.feedback = :feedbackid";
+            FROM {individualfeedback_completed} fbc
+            WHERE fbc.individualfeedback = :individualfeedbackid";
 
         $ctxselect = context_helper::get_preload_record_columns_sql('ctx');
 
@@ -349,7 +349,7 @@ class mod_feedback_structure {
                 FROM {course} c
                 JOIN {context} ctx ON c.id = ctx.instanceid AND ctx.contextlevel = :contextcourse
                 WHERE c.id IN ('. $courseselect.') ORDER BY c.sortorder';
-        $list = $DB->get_records_sql($sql, ['contextcourse' => CONTEXT_COURSE, 'feedbackid' => $this->get_feedback()->id]);
+        $list = $DB->get_records_sql($sql, ['contextcourse' => CONTEXT_COURSE, 'individualfeedbackid' => $this->get_individualfeedback()->id]);
 
         $this->allcourses = array();
         foreach ($list as $course) {

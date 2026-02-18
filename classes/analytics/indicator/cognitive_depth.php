@@ -17,19 +17,19 @@
 /**
  * Cognitive depth indicator - feedback.
  *
- * @package   mod_feedback
+ * @package   mod_individualfeedback
  * @copyright 2017 David Monllao {@link http://www.davidmonllao.com}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_feedback\analytics\indicator;
+namespace mod_individualfeedback\analytics\indicator;
 
 defined('MOODLE_INTERNAL') || die();
 
 /**
  * Cognitive depth indicator - feedback.
  *
- * @package   mod_feedback
+ * @package   mod_individualfeedback
  * @copyright 2017 David Monllao {@link http://www.davidmonllao.com}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -43,7 +43,7 @@ class cognitive_depth extends activity_base {
      * @return \lang_string
      */
     public static function get_name(): \lang_string {
-        return new \lang_string('indicator:cognitivedepth', 'mod_feedback');
+        return new \lang_string('indicator:cognitivedepth', 'mod_individualfeedback');
     }
 
     public function get_indicator_type() {

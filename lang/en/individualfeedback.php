@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Strings for component 'feedback', language 'en', branch 'MOODLE_20_STABLE'
+ * Strings for component 'individualfeedback', language 'en', branch 'MOODLE_20_STABLE'
  *
- * @package mod_feedback
+ * @package mod_individualfeedback
  * @copyright 1999 onwards Martin Dougiamas  {@link http://moodle.com}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -46,12 +46,12 @@ $string['cannotsavetempl'] = 'Saving templates is not allowed';
 $string['captcha'] = 'Captcha';
 $string['captchanotset'] = 'Captcha hasn\'t been set.';
 $string['closebeforeopen'] = 'You have specified an end date before the start date.';
-$string['completed_feedbacks'] = 'Submitted answers';
+$string['completed_individualfeedbacks'] = 'Submitted answers';
 $string['complete_the_form'] = 'Answer the questions';
 $string['completed'] = 'Completed';
 $string['completedon'] = 'Completed on {$a}';
-$string['completiondetail:submit'] = 'Submit feedback';
-$string['completionsubmit'] = 'Submit feedback';
+$string['completiondetail:submit'] = 'Submit individualfeedback';
+$string['completionsubmit'] = 'Submit individualfeedback';
 $string['configallowfullanonymous'] = 'If set to \'yes\', users can complete a feedback activity on the site home without being required to log in.';
 $string['confirmdeleteentry'] = 'Are you sure you want to delete this entry?';
 $string['confirmdeleteitem'] = 'Are you sure you want to delete this element?';
@@ -93,41 +93,41 @@ $string['dropdown'] = 'Multiple choice - single answer allowed (drop-down menu)'
 $string['dropdownlist'] = 'Multiple choice - single answer (drop-down menu)';
 $string['dropdownrated'] = 'Drop-down menu (rated)';
 $string['dropdown_values'] = 'Answers';
-$string['drop_feedback'] = 'Remove from this course';
+$string['drop_individualfeedback'] = 'Remove from this course';
 $string['edit_item'] = 'Edit question';
 $string['edit_items'] = 'Edit questions';
 $string['email_notification'] = 'Enable notification of submissions';
 $string['email_notification_help'] = 'If enabled, teachers will receive notification of feedback submissions.';
-$string['emailteachermail'] = '{$a->username} has completed feedback activity : \'{$a->feedback}\'
+$string['emailteachermail'] = '{$a->username} has completed feedback activity: \'{$a->individualfeedback}\'
 
 You can view it here:
 
 {$a->url}';
-$string['emailteachermailhtml'] = '<p>{$a->username} has completed feedback activity : <i>\'{$a->feedback}\'</i>.</p>
+$string['emailteachermailhtml'] = '<p>{$a->username} has completed feedback activity: <i>\'{$a->individualfeedback}\'</i>.</p>
 <p>It is <a href="{$a->url}">available on the site</a>.</p>';
 $string['entries_saved'] = 'Your answers have been saved. Thank you.';
 $string['export_questions'] = 'Export questions';
 $string['export_to_excel'] = 'Export to Excel';
 $string['eventresponsedeleted'] = 'Response deleted';
 $string['eventresponsesubmitted'] = 'Response submitted';
-$string['feedbackcompleted'] = '{$a->username} completed {$a->feedbackname}';
-$string['feedback:addinstance'] = 'Add a new feedback';
-$string['feedbackclose'] = 'Allow answers to';
-$string['feedback:complete'] = 'Complete a feedback';
-$string['feedback:createprivatetemplate'] = 'Create private template';
-$string['feedback:createpublictemplate'] = 'Create public template';
-$string['feedback:deletesubmissions'] = 'Delete completed submissions';
-$string['feedback:deletetemplate'] = 'Delete template';
-$string['feedback:edititems'] = 'Edit items';
-$string['feedback_is_not_for_anonymous'] = 'Feedback is not for anonymous';
-$string['feedback_is_not_open'] = 'The feedback is not open';
-$string['feedback:mapcourse'] = 'Map courses to global feedbacks';
-$string['feedbackopen'] = 'Allow answers from';
-$string['feedback:receivemail'] = 'Receive email notification';
-$string['feedback:view'] = 'View a feedback';
-$string['feedback:viewanalysepage'] = 'View the analysis page after submit';
-$string['feedback:viewreports'] = 'View reports';
-$string['feedbackupdated'] = 'Feedback updated.';
+$string['individualfeedbackcompleted'] = '{$a->username} completed {$a->feedbackname}';
+$string['individualfeedback:addinstance'] = 'Add a new feedback';
+$string['individualfeedbackclose'] = 'Allow answers to';
+$string['individualfeedback:complete'] = 'Complete a feedback';
+$string['individualfeedback:createprivatetemplate'] = 'Create private template';
+$string['individualfeedback:createpublictemplate'] = 'Create public template';
+$string['individualfeedback:deletesubmissions'] = 'Delete completed submissions';
+$string['individualfeedback:deletetemplate'] = 'Delete template';
+$string['individualfeedback:edititems'] = 'Edit items';
+$string['individualfeedback_is_not_for_anonymous'] = 'Feedback is not for anonymous';
+$string['individualfeedback_is_not_open'] = 'The feedback is not open';
+$string['individualfeedback:mapcourse'] = 'Map courses to global feedbacks';
+$string['individualfeedbackopen'] = 'Allow answers from';
+$string['individualfeedback:receivemail'] = 'Receive email notification';
+$string['individualfeedback:view'] = 'View a feedback';
+$string['individualfeedback:viewanalysepage'] = 'View the analysis page after submit';
+$string['individualfeedback:viewreports'] = 'View reports';
+$string['individualfeedbackupdated'] = 'Feedback updated.';
 $string['file'] = 'File';
 $string['filter_by_course'] = 'Filter by course';
 $string['handling_error'] = 'Error occurred in feedback module action handling';
@@ -137,7 +137,7 @@ $string['check'] = 'Multiple choice - multiple answers';
 $string['checkbox'] = 'Multiple choice - multiple answers allowed (check boxes)';
 $string['check_values'] = 'Possible responses';
 $string['choosefile'] = 'Choose a file';
-$string['chosen_feedback_response'] = 'Chosen feedback response';
+$string['chosen_individualfeedback_response'] = 'Chosen feedback response';
 $string['downloadresponseas'] = 'Download all responses as:';
 $string['importfromthisfile'] = 'Import from this file';
 $string['import_questions'] = 'Import questions';
@@ -175,8 +175,8 @@ $string['maximal'] = 'Maximum';
 $string['messageprovider:message'] = 'Feedback reminder';
 $string['messageprovider:submission'] = 'Feedback notifications';
 $string['mode'] = 'Mode';
-$string['modulename'] = 'Feedback';
-$string['modulename_help'] = 'The feedback activity enables a teacher to create a custom survey for collecting feedback from participants using a variety of question types including multiple choice, yes/no or text input.
+$string['modulename'] = 'individualfeedback';
+$string['modulename_help'] = 'The feedback activity enables a teacher to create a custom survey for collecting responses from participants using a variety of question types including multiple choice, yes/no or text input.
 
 Feedback responses may be anonymous if desired, and results may be shown to all participants or restricted to teachers only. Any feedback activities on the site home may also be completed by non-logged-in users.
 
@@ -186,8 +186,8 @@ Feedback activities may be used
 * To enable participants to sign up for course modules, events etc.
 * For guest surveys of course choices, school policies etc.
 * For anti-bullying surveys in which students can report incidents anonymously';
-$string['modulename_link'] = 'mod/feedback/view';
-$string['modulenameplural'] = 'Feedback';
+$string['modulename_link'] = 'mod/individualfeedback/view';
+$string['modulenameplural'] = 'individualfeedbacks';
 $string['move_item'] = 'Move this question';
 $string['multichoice'] = 'Multiple choice';
 $string['multichoiceoption'] = '<span class="weight">({$a->weight}) </span>{$a->name}';
@@ -225,11 +225,11 @@ $string['only_one_captcha_allowed'] = 'Only one captcha is allowed in a feedback
 $string['openafterclose'] = 'You have specified an open date after the close date';
 $string['overview'] = 'Overview';
 $string['page'] = 'Page';
-$string['page-mod-feedback-x'] = 'Any feedback module page';
+$string['page-mod-individualfeedback-x'] = 'Any feedback module page';
 $string['page_after_submit'] = 'Completion message';
 $string['pagebreak'] = 'Page break';
 $string['pluginadministration'] = 'Feedback administration';
-$string['pluginname'] = 'Feedback';
+$string['pluginname'] = 'individualfeedback';
 $string['position'] = 'Position';
 $string['previous_page'] = 'Previous page';
 $string['previewquestions'] = 'Preview questions';
@@ -249,11 +249,11 @@ $string['questions'] = 'Questions';
 $string['questionslimited'] = 'Showing only {$a} first questions, view individual answers or download table data to view all.';
 $string['radio'] = 'Multiple choice - single answer';
 $string['radio_values'] = 'Responses';
-$string['ready_feedbacks'] = 'Ready feedbacks';
+$string['ready_individualfeedbacks'] = 'Ready feedbacks';
 $string['required'] = 'Required';
 $string['resetting_data'] = 'Responses';
 $string['resetting_delete'] = 'Delete responses';
-$string['resetting_feedbacks'] = 'Resetting feedbacks';
+$string['resetting_individualfeedbacks'] = 'Resetting feedbacks';
 $string['response_nr'] = 'Response number';
 $string['responses'] = 'Responses';
 $string['responsetime'] = 'Responses time';
@@ -292,7 +292,7 @@ $string['textfield'] = 'Short text answer';
 $string['textfield_maxlength'] = 'Maximum characters accepted';
 $string['textfield_size'] = 'Textfield width';
 $string['there_are_no_settings_for_recaptcha'] = 'There are no settings for captcha';
-$string['this_feedback_is_already_submitted'] = 'You\'ve already completed this activity.';
+$string['this_individualfeedback_is_already_submitted'] = 'You\'ve already completed this activity.';
 $string['typemissing'] = 'Missing value "type"';
 $string['update_item'] = 'Save changes to question';
 $string['url_for_continue'] = 'Link to next activity';

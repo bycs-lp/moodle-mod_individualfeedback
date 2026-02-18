@@ -15,18 +15,18 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 defined('MOODLE_INTERNAL') OR die('not allowed');
-require_once($CFG->dirroot.'/mod/feedback/item/feedback_item_class.php');
+require_once($CFG->dirroot.'/mod/individualfeedback/item/individualfeedback_item_class.php');
 
-class feedback_item_textarea extends feedback_item_base {
+class individualfeedback_item_textarea extends individualfeedback_item_base {
     protected $type = "textarea";
 
-    public function build_editform($item, $feedback, $cm) {
+    public function build_editform($item, $individualfeedback, $cm) {
         global $DB, $CFG;
         require_once('textarea_form.php');
 
-        //get the lastposition number of the feedback_items
+        //get the lastposition number of the individualfeedback_items
         $position = $item->position;
-        $lastposition = $DB->count_records('feedback_item', array('feedback'=>$feedback->id));
+        $lastposition = $DB->count_records('individualfeedback_item', array('individualfeedback'=>$individualfeedback->id));
         if ($position == -1) {
             $i_formselect_last = $lastposition + 1;
             $i_formselect_value = $lastposition + 1;
@@ -57,12 +57,12 @@ class feedback_item_textarea extends feedback_item_base {
         $item->itemheight = $itemheight;
 
         //all items for dependitem
-        $feedbackitems = feedback_get_depend_candidates_for_item($feedback, $item);
+        $individualfeedbackitems = individualfeedback_get_depend_candidates_for_item($individualfeedback, $item);
         $commonparams = array('cmid'=>$cm->id,
                              'id'=>isset($item->id) ? $item->id : null,
                              'typ'=>$item->typ,
-                             'items'=>$feedbackitems,
-                             'feedback'=>$feedback->id);
+                             'items'=>$individualfeedbackitems,
+                             'individualfeedback'=>$individualfeedback->id);
 
         //build the form
         $customdata = array('item' => $item,
@@ -70,7 +70,7 @@ class feedback_item_textarea extends feedback_item_base {
                             'positionlist' => $positionlist,
                             'position' => $position);
 
-        $this->item_form = new feedback_textarea_form('edit_item.php', $customdata);
+        $this->item_form = new individualfeedback_textarea_form('edit_item.php', $customdata);
     }
 
     public function save_item() {
@@ -88,18 +88,18 @@ class feedback_item_textarea extends feedback_item_base {
 
         $item->hasvalue = $this->get_hasvalue();
         if (!$item->id) {
-            $item->id = $DB->insert_record('feedback_item', $item);
+            $item->id = $DB->insert_record('individualfeedback_item', $item);
         } else {
-            $DB->update_record('feedback_item', $item);
+            $DB->update_record('individualfeedback_item', $item);
         }
 
-        return $DB->get_record('feedback_item', array('id'=>$item->id));
+        return $DB->get_record('individualfeedback_item', array('id'=>$item->id));
     }
 
     /**
      * Helper function for collected data for exporting to excel
      *
-     * @param stdClass $item the db-object from feedback_item
+     * @param stdClass $item the db-object from individualfeedback_item
      * @param int $groupid
      * @param int $courseid
      * @param bool $excel Indicate if being used for Excel
@@ -112,7 +112,7 @@ class feedback_item_textarea extends feedback_item_base {
         $analysed_val->data = array();
         $analysed_val->name = $item->name;
 
-        $values = feedback_get_group_values($item, $groupid, $courseid);
+        $values = individualfeedback_get_group_values($item, $groupid, $courseid);
         if ($values) {
             $data = array();
             foreach ($values as $value) {
@@ -134,7 +134,7 @@ class feedback_item_textarea extends feedback_item_base {
     }
 
     public function print_analysed($item, $itemnr = '', $groupid = false, $courseid = false) {
-        $values = feedback_get_group_values($item, $groupid, $courseid);
+        $values = individualfeedback_get_group_values($item, $groupid, $courseid);
         if ($values) {
             echo "<table class=\"analysis itemtype_{$item->typ}\">";
             echo '<tr><th class="text-start">';
@@ -184,7 +184,7 @@ class feedback_item_textarea extends feedback_item_base {
      * Adds an input element to the complete form
      *
      * @param stdClass $item
-     * @param mod_feedback_complete_form $form
+     * @param mod_individualfeedback_complete_form $form
      */
     public function complete_form_element($item, $form) {
         $name = $this->get_display_name($item);

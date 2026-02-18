@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Contains class mod_feedback_responses_anon_table
+ * Contains class mod_individualfeedback_responses_anon_table
  *
- * @package   mod_feedback
+ * @package   mod_individualfeedback
  * @copyright 2016 Marina Glancy
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -25,13 +25,13 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Class mod_feedback_responses_anon_table
+ * Class mod_individualfeedback_responses_anon_table
  *
- * @package   mod_feedback
+ * @package   mod_individualfeedback
  * @copyright 2016 Marina Glancy
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_feedback_responses_anon_table extends mod_feedback_responses_table {
+class mod_individualfeedback_responses_anon_table extends mod_individualfeedback_responses_table {
 
     /** @var string */
     protected $showallparamname = 'ashowall';
@@ -46,17 +46,17 @@ class mod_feedback_responses_anon_table extends mod_feedback_responses_table {
     public function init($group = 0) {
 
         $cm = $this->feedbackstructure->get_cm();
-        $this->uniqueid = 'feedback-showentry-anon-list-' . $cm->instance;
+        $this->uniqueid = 'individualfeedback-showentry-anon-list-' . $cm->instance;
 
         // There potentially can be both tables with anonymouns and non-anonymous responses on
-        // the same page (for example when feedback anonymity was changed after some people
+        // the same page (for example when individualfeedback anonymity was changed after some people
         // already responded). In this case we need to distinguish tables' pagination parameters.
         $this->request[TABLE_VAR_PAGE] = 'apage';
 
         $tablecolumns = ['random_response'];
-        $tableheaders = [get_string('response_nr', 'feedback')];
+        $tableheaders = [get_string('response_nr', 'individualfeedback')];
 
-        if ($this->feedbackstructure->get_feedback()->course == SITEID && !$this->feedbackstructure->get_courseid()) {
+        if ($this->feedbackstructure->get_individualfeedback()->course == SITEID && !$this->feedbackstructure->get_courseid()) {
             $tablecolumns[] = 'courseid';
             $tableheaders[] = get_string('course');
         }
@@ -69,12 +69,12 @@ class mod_feedback_responses_anon_table extends mod_feedback_responses_table {
         $this->set_attribute('id', 'showentryanontable');
 
         $params = ['instance' => $cm->instance,
-            'anon' => FEEDBACK_ANONYMOUS_YES,
+            'anon' => INDIVIDUALFEEDBACK_ANONYMOUS_YES,
             'courseid' => $this->feedbackstructure->get_courseid()];
 
         $fields = 'c.id, c.random_response, c.courseid';
-        $from = '{feedback_completed} c';
-        $where = 'c.anonymous_response = :anon AND c.feedback = :instance';
+        $from = '{individualfeedback_completed} c';
+        $where = 'c.anonymous_response = :anon AND c.individualfeedback = :instance';
         if ($this->feedbackstructure->get_courseid()) {
             $where .= ' AND c.courseid = :courseid';
         }
@@ -108,7 +108,7 @@ class mod_feedback_responses_anon_table extends mod_feedback_responses_table {
             return $row->random_response;
         } else {
             return html_writer::link($this->get_link_single_entry($row),
-                    get_string('response_nr', 'feedback').': '. $row->random_response);
+                    get_string('response_nr', 'individualfeedback').': '. $row->random_response);
         }
     }
 

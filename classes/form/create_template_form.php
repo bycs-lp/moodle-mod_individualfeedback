@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace mod_feedback\form;
+namespace mod_individualfeedback\form;
 
 use core_form\dynamic_form;
 use moodle_url;
@@ -27,7 +27,7 @@ use context_system;
  *
  * @copyright 2021 Peter Dias
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
- * @package mod_feedback
+ * @package mod_individualfeedback
  */
 class create_template_form extends dynamic_form {
     /**
@@ -41,14 +41,14 @@ class create_template_form extends dynamic_form {
 
         $mform->addElement('text',
             'templatename',
-            get_string('name', 'feedback'),
+            get_string('name', 'individualfeedback'),
             ['maxlength' => '200', 'size' => '50']);
         $mform->setType('templatename', PARAM_TEXT);
 
-        if (has_capability('mod/feedback:createpublictemplate', context_system::instance())) {
+        if (has_capability('mod/individualfeedback:createpublictemplate', context_system::instance())) {
             $mform->addElement('checkbox',
                 'ispublic', '',
-                get_string('public', 'feedback'));
+                get_string('public', 'individualfeedback'));
         }
     }
 
@@ -59,7 +59,7 @@ class create_template_form extends dynamic_form {
      */
     protected function get_context_for_dynamic_submission(): context {
         $id = $this->optional_param('id', null, PARAM_INT);
-        list($course, $cm) = get_course_and_cm_from_cmid($id, 'feedback');
+        list($course, $cm) = get_course_and_cm_from_cmid($id, 'individualfeedback');
         return context_module::instance($cm->id);
     }
 
@@ -70,9 +70,9 @@ class create_template_form extends dynamic_form {
      */
     protected function check_access_for_dynamic_submission(): void {
         $context = $this->get_context_for_dynamic_submission();
-        if (!has_capability('mod/feedback:edititems', $context) ||
-            !(has_capability('mod/feedback:createprivatetemplate', $context) ||
-            has_capability('mod/feedback:createpublictemplate', $context))) {
+        if (!has_capability('mod/individualfeedback:edititems', $context) ||
+            !(has_capability('mod/individualfeedback:createprivatetemplate', $context) ||
+            has_capability('mod/individualfeedback:createpublictemplate', $context))) {
             throw new \moodle_exception('nocapabilitytousethisservice');
         }
     }
@@ -86,7 +86,7 @@ class create_template_form extends dynamic_form {
         global $PAGE;
         $formdata = $this->get_data();
         $ispublic = !empty($formdata->ispublic) ? 1 : 0;
-        $result = feedback_save_as_template($PAGE->activityrecord, $formdata->templatename, $ispublic);
+        $result = individualfeedback_save_as_template($PAGE->activityrecord, $formdata->templatename, $ispublic);
         return [
             'result' => $result,
         ];
@@ -110,6 +110,6 @@ class create_template_form extends dynamic_form {
         $params = [
             'id' => $this->optional_param('id', null, PARAM_INT),
         ];
-        return new moodle_url('/mod/feedback/edit.php', $params);
+        return new moodle_url('/mod/individualfeedback/edit.php', $params);
     }
 }

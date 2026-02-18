@@ -17,11 +17,11 @@
 /**
  * Class for exporting a feedback item (question).
  *
- * @package    mod_feedback
+ * @package    mod_individualfeedback
  * @copyright  2017 Juan Leyva <juan@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-namespace mod_feedback\external;
+namespace mod_individualfeedback\external;
 defined('MOODLE_INTERNAL') || die();
 
 use core\external\exporter;
@@ -34,7 +34,7 @@ use core_files\external\stored_file_exporter;
  * @copyright  2017 Juan Leyva <juan@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class feedback_item_exporter extends exporter {
+class individualfeedback_item_exporter extends exporter {
 
     protected static function define_properties() {
         return array(
@@ -42,7 +42,7 @@ class feedback_item_exporter extends exporter {
                 'type' => PARAM_INT,
                 'description' => 'The record id.',
             ),
-            'feedback' => array(
+            'individualfeedback' => array(
                 'type' => PARAM_INT,
                 'description' => 'The feedback instance id this records belongs to.',
                 'default' => 0,
@@ -140,7 +140,7 @@ class feedback_item_exporter extends exporter {
     protected function get_other_values(renderer_base $output) {
         $context = $this->related['context'];
 
-        $itemobj = feedback_get_item_class($this->data->typ);
+        $itemobj = individualfeedback_get_item_class($this->data->typ);
         $values = array(
             'itemfiles' => array(),
             'itemnumber' => $this->related['itemnumber'],
@@ -149,7 +149,7 @@ class feedback_item_exporter extends exporter {
 
         $fs = get_file_storage();
         $files = array();
-        $itemfiles = $fs->get_area_files($context->id, 'mod_feedback', 'item', $this->data->id, 'filename', false);
+        $itemfiles = $fs->get_area_files($context->id, 'mod_individualfeedback', 'item', $this->data->id, 'filename', false);
         if (!empty($itemfiles)) {
             foreach ($itemfiles as $storedfile) {
                 $fileexporter = new stored_file_exporter($storedfile, array('context' => $context));
@@ -168,7 +168,7 @@ class feedback_item_exporter extends exporter {
      */
     protected function get_format_parameters_for_name() {
         return [
-            'component' => 'mod_feedback',
+            'component' => 'mod_individualfeedback',
             'filearea' => 'item',
             'itemid' => $this->data->id,
             'options' => ['noclean' => true, 'para' => false],
@@ -182,7 +182,7 @@ class feedback_item_exporter extends exporter {
      */
     protected function get_format_parameters_for_presentation() {
         return [
-            'component' => 'mod_feedback',
+            'component' => 'mod_individualfeedback',
             'filearea' => 'item',
             'itemid' => $this->data->id,
             'options' => ['noclean' => true, 'para' => false],

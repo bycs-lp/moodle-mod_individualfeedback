@@ -12,24 +12,24 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{!
-    @template mod_feedback/create_template
+    @template mod_individualfeedback/create_template
     Trigger button for the create template modal form.
     Classes required for JS:
     * none
     Data attributes required for JS:
     * All data attributes are required
     Context variables required for this template:
-    * id - The feedback id.
+    * id - The individualfeedback instance id.
     Example context (json):
     {
         "id": 1
     }
 }}
 <button type="button" class="btn btn-secondary" data-action="createtemplate" data-dataid={{id}}>
-    {{#str}}save_as_new_template, mod_feedback{{/str}}
+    {{#str}}save_as_new_template, mod_individualfeedback{{/str}}
 </button>
 {{#js}}
-    require(['mod_feedback/createtemplate'], function(createtemplate) {
+    require(['mod_individualfeedback/createtemplate'], function(createtemplate) {
     createtemplate.init();
     });
 {{/js}}

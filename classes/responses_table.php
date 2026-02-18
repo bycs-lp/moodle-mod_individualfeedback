@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Contains class mod_feedback_responses_table
+ * Contains class mod_individualfeedback_responses_table
  *
- * @package   mod_feedback
+ * @package   mod_individualfeedback
  * @copyright 2016 Marina Glancy
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -28,21 +28,21 @@ global $CFG;
 require_once($CFG->libdir . '/tablelib.php');
 
 /**
- * Class mod_feedback_responses_table
+ * Class mod_individualfeedback_responses_table
  *
- * @package   mod_feedback
+ * @package   mod_individualfeedback
  * @copyright 2016 Marina Glancy
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_feedback_responses_table extends table_sql {
+class mod_individualfeedback_responses_table extends table_sql {
 
     /**
-     * Maximum number of feedback questions to display in the "Show responses" table
+     * Maximum number of individualfeedback questions to display in the "Show responses" table
      */
     const PREVIEWCOLUMNSLIMIT = 10;
 
     /**
-     * Maximum number of feedback questions answers to retrieve in one SQL query.
+     * Maximum number of individualfeedback questions answers to retrieve in one SQL query.
      * Mysql has a limit of 60, we leave 1 for joining with users table.
      */
     const TABLEJOINLIMIT = 59;
@@ -53,8 +53,8 @@ class mod_feedback_responses_table extends table_sql {
      */
     const ROWCHUNKSIZE = 100;
 
-    /** @var mod_feedback_structure */
-    protected $feedbackstructure;
+    /** @var mod_individualfeedback_structure */
+    protected $individualfeedbackstructure;
 
     /** @var int */
     protected $grandtotal = null;
@@ -84,16 +84,16 @@ class mod_feedback_responses_table extends table_sql {
     /**
      * Constructor
      *
-     * @param mod_feedback_structure $feedbackstructure
+     * @param mod_individualfeedback_structure $individualfeedbackstructure
      * @param int $group retrieve only users from this group (optional)
      */
-    public function __construct(mod_feedback_structure $feedbackstructure, $group = 0) {
-        $this->feedbackstructure = $feedbackstructure;
+    public function __construct(mod_individualfeedback_structure $individualfeedbackstructure, $group = 0) {
+        $this->feedbackstructure = $individualfeedbackstructure;
 
-        parent::__construct('feedback-showentry-list-' . $feedbackstructure->get_cm()->instance);
+        parent::__construct('individualfeedback-showentry-list-' . $individualfeedbackstructure->get_cm()->instance);
 
         $this->showall = optional_param($this->showallparamname, 0, PARAM_BOOL);
-        $this->define_baseurl(new moodle_url('/mod/feedback/show_entries.php',
+        $this->define_baseurl(new moodle_url('/mod/individualfeedback/show_entries.php',
             ['id' => $this->feedbackstructure->get_cm()->id]));
         if ($courseid = $this->feedbackstructure->get_courseid()) {
             $this->baseurl->param('courseid', $courseid);
@@ -102,10 +102,10 @@ class mod_feedback_responses_table extends table_sql {
             $this->baseurl->param($this->showallparamname, $this->showall);
         }
 
-        $name = format_string($feedbackstructure->get_feedback()->name);
+        $name = format_string($individualfeedbackstructure->get_individualfeedback()->name);
         $this->is_downloadable(true);
         $this->is_downloading(optional_param($this->downloadparamname, 0, PARAM_ALPHA),
-                $name, get_string('responses', 'feedback'));
+                $name, get_string('responses', 'individualfeedback'));
         $this->useridfield = 'userid';
         $this->init($group);
     }
@@ -128,10 +128,10 @@ class mod_feedback_responses_table extends table_sql {
         $ufields = $userfieldsapi->get_sql('u', false, '', $this->useridfield, false)->selects;
         $extrafields = $userfieldsapi->get_required_fields([\core_user\fields::PURPOSE_IDENTITY]);
         $fields = 'c.id, c.timemodified as completed_timemodified, c.courseid, '.$ufields;
-        $from = '{feedback_completed} c '
+        $from = '{individualfeedback_completed} c '
                 . 'JOIN {user} u ON u.id = c.userid AND u.deleted = :notdeleted';
         $where = 'c.anonymous_response = :anon
-                AND c.feedback = :instance';
+                AND c.individualfeedback = :instance';
         if ($this->feedbackstructure->get_courseid()) {
             $where .= ' AND c.courseid = :courseid';
         }
@@ -150,7 +150,7 @@ class mod_feedback_responses_table extends table_sql {
             }
         }
 
-        if ($this->feedbackstructure->get_feedback()->course == SITEID && !$this->feedbackstructure->get_courseid()) {
+        if ($this->feedbackstructure->get_individualfeedback()->course == SITEID && !$this->feedbackstructure->get_courseid()) {
             $tablecolumns[] = 'courseid';
             $tableheaders[] = get_string('course');
         }
@@ -167,8 +167,8 @@ class mod_feedback_responses_table extends table_sql {
         $this->set_attribute('id', 'showentrytable');
 
         $params = array();
-        $params['anon'] = FEEDBACK_ANONYMOUS_NO;
-        $params['instance'] = $this->feedbackstructure->get_feedback()->id;
+        $params['anon'] = INDIVIDUALFEEDBACK_ANONYMOUS_NO;
+        $params['instance'] = $this->feedbackstructure->get_individualfeedback()->id;
         $params['notdeleted'] = 0;
         $params['courseid'] = $this->feedbackstructure->get_courseid();
 
@@ -198,7 +198,7 @@ class mod_feedback_responses_table extends table_sql {
     public function other_cols($column, $row) {
         if (preg_match('/^val(\d+)$/', $column, $matches)) {
             $items = $this->feedbackstructure->get_items();
-            $itemobj = feedback_get_item_class($items[$matches[1]]->typ);
+            $itemobj = individualfeedback_get_item_class($items[$matches[1]]->typ);
             $printval = $itemobj->get_printval($items[$matches[1]], (object) ['value' => $row->$column]);
             if ($this->is_downloading()) {
                 $printval = s($printval);
@@ -227,9 +227,9 @@ class mod_feedback_responses_table extends table_sql {
     public function col_deleteentry($row) {
         global $OUTPUT;
         $deleteentryurl = new moodle_url($this->baseurl, ['delete' => $row->id, 'sesskey' => sesskey()]);
-        $deleteaction = new confirm_action(get_string('confirmdeleteentry', 'feedback'));
+        $deleteaction = new confirm_action(get_string('confirmdeleteentry', 'individualfeedback'));
         return $OUTPUT->action_icon($deleteentryurl,
-            new pix_icon('t/delete', get_string('delete_entry', 'feedback')), $deleteaction);
+            new pix_icon('t/delete', get_string('delete_entry', 'individualfeedback')), $deleteaction);
     }
 
     /**
@@ -308,32 +308,32 @@ class mod_feedback_responses_table extends table_sql {
         $this->hasmorecolumns = max(0, count($items) - self::TABLEJOINLIMIT);
 
         $headernamepostfix = !$this->is_downloading();
-        // Add feedback response values.
+        // Add individualfeedback response values.
         foreach ($items as $nr => $item) {
             if ($columnscount++ < self::TABLEJOINLIMIT) {
                 // Mysql has a limit on the number of tables in the join, so we only add limited number of columns here,
                 // the rest will be added in {@link self::build_table()} and {@link self::build_table_chunk()} functions.
                 $this->sql->fields .= ", " . $DB->sql_cast_to_char("v{$nr}.value") . " AS val{$nr}";
-                $this->sql->from .= " LEFT OUTER JOIN {feedback_value} v{$nr} " .
+                $this->sql->from .= " LEFT OUTER JOIN {individualfeedback_value} v{$nr} " .
                     "ON v{$nr}.completed = c.id AND v{$nr}.item = :itemid{$nr}";
                 $this->sql->params["itemid{$nr}"] = $item->id;
             }
 
             $tablecolumns[] = "val{$nr}";
-            $itemobj = feedback_get_item_class($item->typ);
+            $itemobj = individualfeedback_get_item_class($item->typ);
             $columnheader = $itemobj->get_display_name($item, $headernamepostfix);
             if (!$this->is_downloading()) {
                 $columnheader = shorten_text($columnheader);
             }
             if (strval($item->label) !== '') {
-                $columnheader = get_string('nameandlabelformat', 'mod_feedback',
+                $columnheader = get_string('nameandlabelformat', 'mod_individualfeedback',
                     (object)['label' => format_string($item->label), 'name' => $columnheader]);
             }
             $tableheaders[] = $columnheader;
         }
 
         // Add 'Delete entry' column.
-        if (!$this->is_downloading() && has_capability('mod/feedback:deletesubmissions', $this->get_context())) {
+        if (!$this->is_downloading() && has_capability('mod/individualfeedback:deletesubmissions', $this->get_context())) {
             $tablecolumns[] = 'deleteentry';
             $tableheaders[] = '';
         }
@@ -437,17 +437,17 @@ class mod_feedback_responses_table extends table_sql {
         }
 
         if (count($this->feedbackstructure->get_items(true)) > self::PREVIEWCOLUMNSLIMIT) {
-            echo $OUTPUT->notification(get_string('questionslimited', 'feedback', self::PREVIEWCOLUMNSLIMIT), 'info');
+            echo $OUTPUT->notification(get_string('questionslimited', 'mod_individualfeedback', self::PREVIEWCOLUMNSLIMIT), 'info');
         }
 
-        $this->out($this->showall ? $grandtotal : FEEDBACK_DEFAULT_PAGE_COUNT,
-                $grandtotal > FEEDBACK_DEFAULT_PAGE_COUNT);
+        $this->out($this->showall ? $grandtotal : INDIVIDUALFEEDBACK_DEFAULT_PAGE_COUNT,
+                $grandtotal > INDIVIDUALFEEDBACK_DEFAULT_PAGE_COUNT);
 
         // Toggle 'Show all' link.
-        if ($this->totalrows > FEEDBACK_DEFAULT_PAGE_COUNT) {
+        if ($this->totalrows > INDIVIDUALFEEDBACK_DEFAULT_PAGE_COUNT) {
             if (!$this->use_pages) {
                 echo html_writer::div(html_writer::link(new moodle_url($this->baseurl, [$this->showallparamname => 0]),
-                        get_string('showperpage', '', FEEDBACK_DEFAULT_PAGE_COUNT)), 'showall');
+                        get_string('showperpage', '', INDIVIDUALFEEDBACK_DEFAULT_PAGE_COUNT)), 'showall');
             } else {
                 echo html_writer::div(html_writer::link(new moodle_url($this->baseurl, [$this->showallparamname => 1]),
                         get_string('showall', '', $this->totalrows)), 'showall');
@@ -470,7 +470,7 @@ class mod_feedback_responses_table extends table_sql {
         while ($this->rawdata->valid()) {
             $row = $this->rawdata->current();
             if ($row->id == $record->id) {
-                $page = $this->showall ? 0 : floor($counter / FEEDBACK_DEFAULT_PAGE_COUNT);
+                $page = $this->showall ? 0 : floor($counter / INDIVIDUALFEEDBACK_DEFAULT_PAGE_COUNT);
                 $thisrow = $row;
                 $this->rawdata->next();
                 $nextrow = $this->rawdata->valid() ? $this->rawdata->current() : null;
@@ -562,11 +562,11 @@ class mod_feedback_responses_table extends table_sql {
 
         foreach ($columnsgroups as $columnsgroup) {
             $fields = 'c.id';
-            $from = '{feedback_completed} c';
+            $from = '{individualfeedback_completed} c';
             $params = [];
             foreach ($columnsgroup as $nr => $item) {
                 $fields .= ", " . $DB->sql_cast_to_char("v{$nr}.value") . " AS val{$nr}";
-                $from .= " LEFT OUTER JOIN {feedback_value} v{$nr} " .
+                $from .= " LEFT OUTER JOIN {individualfeedback_value} v{$nr} " .
                     "ON v{$nr}.completed = c.id AND v{$nr}.item = :itemid{$nr}";
                 $params["itemid{$nr}"] = $item->id;
             }

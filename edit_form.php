@@ -19,7 +19,7 @@
  *
  * @author Andreas Grabs
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
- * @package mod_feedback
+ * @package mod_individualfeedback
  */
 
 //It must be included from a Moodle page
@@ -30,14 +30,14 @@ if (!defined('MOODLE_INTERNAL')) {
 require_once($CFG->libdir.'/formslib.php');
 
 /**
- * The feedback_edit_use_template_form
+ * The individualfeedback_edit_use_template_form
  *
  * @deprecated since 4.0 new dynamic forms created
  */
-class feedback_edit_use_template_form extends moodleform {
+class individualfeedback_edit_use_template_form extends moodleform {
     public function __construct($action = null, $customdata = null, $method = 'post', $target = '',
             $attributes = null, $editable = true, $ajaxformdata = null) {
-        debugging('Class feedback_edit_use_template_form is deprecated. Replaced with dynamic forms.', DEBUG_DEVELOPER);
+        debugging('Class individualfeedback_edit_use_template_form is deprecated. Replaced with dynamic forms.', DEBUG_DEVELOPER);
         parent::__construct($action, $customdata, $method, $target, $attributes, $editable, $ajaxformdata);
     }
 
@@ -48,7 +48,7 @@ class feedback_edit_use_template_form extends moodleform {
      * @return array
      */
     public static function get_js_module() {
-        debugging('Class feedback_edit_use_template_form is deprecated. Replaced with dynamic forms.', DEBUG_DEVELOPER);
+        debugging('Class individualfeedback_edit_use_template_form is deprecated. Replaced with dynamic forms.', DEBUG_DEVELOPER);
         return parent::get_js_module();
     }
 
@@ -64,7 +64,7 @@ class feedback_edit_use_template_form extends moodleform {
      */
     public static function mock_ajax_submit($simulatedsubmitteddata, $simulatedsubmittedfiles = array(),
             $method = 'post', $formidentifier = null) {
-        debugging('Class feedback_edit_use_template_form is deprecated. Replaced with dynamic forms.', DEBUG_DEVELOPER);
+        debugging('Class individualfeedback_edit_use_template_form is deprecated. Replaced with dynamic forms.', DEBUG_DEVELOPER);
         return parent::mock_ajax_submit($simulatedsubmitteddata, $simulatedsubmittedfiles, $method, $formidentifier);
     }
 
@@ -76,7 +76,7 @@ class feedback_edit_use_template_form extends moodleform {
      * @return array
      */
     public static function mock_generate_submit_keys($data = []) {
-        debugging('Class feedback_edit_use_template_form is deprecated. Replaced with dynamic forms.', DEBUG_DEVELOPER);
+        debugging('Class individualfeedback_edit_use_template_form is deprecated. Replaced with dynamic forms.', DEBUG_DEVELOPER);
         return parent::mock_generate_submit_keys($data);
     }
 
@@ -91,7 +91,7 @@ class feedback_edit_use_template_form extends moodleform {
      */
     public static function mock_submit($simulatedsubmitteddata, $simulatedsubmittedfiles = array(),
             $method = 'post', $formidentifier = null) {
-        debugging('Class feedback_edit_use_template_form is deprecated. Replaced with dynamic forms.', DEBUG_DEVELOPER);
+        debugging('Class individualfeedback_edit_use_template_form is deprecated. Replaced with dynamic forms.', DEBUG_DEVELOPER);
         parent::mock_submit($simulatedsubmitteddata, $simulatedsubmittedfiles, $method, $formidentifier);
     }
 
@@ -105,15 +105,15 @@ class feedback_edit_use_template_form extends moodleform {
 
         $elementgroup = array();
         //headline
-        $mform->addElement('header', 'using_templates', get_string('using_templates', 'feedback'));
+        $mform->addElement('header', 'using_templates', get_string('using_templates', 'individualfeedback'));
         // hidden elements
         $mform->addElement('hidden', 'id');
         $mform->setType('id', PARAM_INT);
 
         // visible elements
         $templates_options = array();
-        $owntemplates = feedback_get_template_list($course, 'own');
-        $publictemplates = feedback_get_template_list($course, 'public');
+        $owntemplates = individualfeedback_get_template_list($course, 'own');
+        $publictemplates = individualfeedback_get_template_list($course, 'public');
 
         $options = array();
         if ($owntemplates or $publictemplates) {
@@ -132,7 +132,7 @@ class feedback_edit_use_template_form extends moodleform {
                 foreach ($publictemplates as $template) {
                     $publicoptions[$template->id] = format_string($template->name);
                 }
-                $options[get_string('public', 'feedback')] = $publicoptions;
+                $options[get_string('public', 'individualfeedback')] = $publicoptions;
             }
 
             $attributes = [
@@ -142,19 +142,19 @@ class feedback_edit_use_template_form extends moodleform {
             $elementgroup[] = $mform->createElement(
                 'selectgroups',
                 'templateid',
-                get_string('using_templates', 'feedback'),
+                get_string('using_templates', 'individualfeedback'),
                 $options,
                 implode(' ', $attributes)
             );
 
             $elementgroup[] = $mform->createElement('submit',
                                                      'use_template',
-                                                     get_string('use_this_template', 'feedback'),
+                                                     get_string('use_this_template', 'individualfeedback'),
                                                      array('class' => 'hiddenifjs'));
 
             $mform->addGroup($elementgroup, 'elementgroup', '', array(' '), false);
         } else {
-            $mform->addElement('static', 'info', get_string('no_templates_available_yet', 'feedback'));
+            $mform->addElement('static', 'info', get_string('no_templates_available_yet', 'individualfeedback'));
         }
 
         $this->set_data(array('id' => $this->_customdata['id']));
@@ -162,14 +162,14 @@ class feedback_edit_use_template_form extends moodleform {
 }
 
 /**
- * The feedback_edit_create_template_form
+ * The individualfeedback_edit_create_template_form
  *
  * @deprecated since 4.0, new dynamic forms have been created instead.
  */
-class feedback_edit_create_template_form extends moodleform {
+class individualfeedback_edit_create_template_form extends moodleform {
     public function __construct($action = null, $customdata = null, $method = 'post',
             $target = '', $attributes = null, $editable = true, $ajaxformdata = null) {
-        debugging('Class feedback_edit_create_template_form is deprecated. Replaced with dynamic forms.', DEBUG_DEVELOPER);
+        debugging('Class individualfeedback_edit_create_template_form is deprecated. Replaced with dynamic forms.', DEBUG_DEVELOPER);
         parent::__construct($action, $customdata, $method, $target, $attributes, $editable, $ajaxformdata);
     }
 
@@ -180,7 +180,7 @@ class feedback_edit_create_template_form extends moodleform {
      * @return array
      */
     public static function get_js_module() {
-        debugging('Class feedback_edit_create_template_form is deprecated. Replaced with dynamic forms.', DEBUG_DEVELOPER);
+        debugging('Class individualfeedback_edit_create_template_form is deprecated. Replaced with dynamic forms.', DEBUG_DEVELOPER);
         return parent::get_js_module();
     }
 
@@ -196,7 +196,7 @@ class feedback_edit_create_template_form extends moodleform {
      */
     public static function mock_ajax_submit($simulatedsubmitteddata, $simulatedsubmittedfiles = array(),
             $method = 'post', $formidentifier = null) {
-        debugging('Class feedback_edit_create_template_form is deprecated. Replaced with dynamic forms.', DEBUG_DEVELOPER);
+        debugging('Class individualfeedback_edit_create_template_form is deprecated. Replaced with dynamic forms.', DEBUG_DEVELOPER);
         return parent::mock_ajax_submit($simulatedsubmitteddata, $simulatedsubmittedfiles, $method, $formidentifier);
     }
 
@@ -208,7 +208,7 @@ class feedback_edit_create_template_form extends moodleform {
      * @return array
      */
     public static function mock_generate_submit_keys($data = []) {
-        debugging('Class feedback_edit_create_template_form is deprecated. Replaced with dynamic forms.', DEBUG_DEVELOPER);
+        debugging('Class individualfeedback_edit_create_template_form is deprecated. Replaced with dynamic forms.', DEBUG_DEVELOPER);
         return parent::mock_generate_submit_keys($data);
     }
 
@@ -223,7 +223,7 @@ class feedback_edit_create_template_form extends moodleform {
      */
     public static function mock_submit($simulatedsubmitteddata, $simulatedsubmittedfiles = array(),
             $method = 'post', $formidentifier = null) {
-        debugging('Class feedback_edit_create_template_form is deprecated. Replaced with dynamic forms.', DEBUG_DEVELOPER);
+        debugging('Class individualfeedback_edit_create_template_form is deprecated. Replaced with dynamic forms.', DEBUG_DEVELOPER);
         parent::mock_submit($simulatedsubmitteddata, $simulatedsubmittedfiles, $method, $formidentifier);
     }
 
@@ -245,24 +245,24 @@ class feedback_edit_create_template_form extends moodleform {
 
         $elementgroup[] = $mform->createElement('text',
                                                  'templatename',
-                                                 get_string('name', 'feedback'),
+                                                 get_string('name', 'individualfeedback'),
                                                  ['maxlength' => '200']);
 
-        if (has_capability('mod/feedback:createpublictemplate', context_system::instance())) {
+        if (has_capability('mod/individualfeedback:createpublictemplate', context_system::instance())) {
             $elementgroup[] = $mform->createElement('checkbox',
                                                      'ispublic', '',
-                                                     get_string('public', 'feedback'));
+                                                     get_string('public', 'individualfeedback'));
         }
 
 
         $mform->addGroup($elementgroup,
                          'elementgroup',
-                         get_string('name', 'feedback'),
+                         get_string('name', 'individualfeedback'),
                          array(' '),
                          false);
 
         // Buttons.
-        $mform->addElement('submit', 'create_template', get_string('save_as_new_template', 'feedback'));
+        $mform->addElement('submit', 'create_template', get_string('save_as_new_template', 'individualfeedback'));
 
         $mform->setType('templatename', PARAM_TEXT);
 
@@ -280,7 +280,7 @@ class feedback_edit_create_template_form extends moodleform {
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
         if (!isset($data['templatename']) || trim(strval($data['templatename'])) === '') {
-            $errors['elementgroup'] = get_string('name_required', 'feedback');
+            $errors['elementgroup'] = get_string('name_required', 'individualfeedback');
         }
         return $errors;
     }
