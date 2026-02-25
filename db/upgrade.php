@@ -52,8 +52,10 @@ function xmldb_feedback_upgrade($oldversion) {
     // Automatically generated Moodle v5.0.0 release upgrade line.
     // Put any upgrade step following this.
 
-    if ($oldversion < 2025041401) {
+    // Automatically generated Moodle v5.1.0 release upgrade line.
+    // Put any upgrade step following this.
 
+    if ($oldversion < 2026022300) {
         // Changing precision of field name on table feedback to (1333).
         $table = new xmldb_table('feedback');
         $field = new xmldb_field('name', XMLDB_TYPE_CHAR, '1333', null, XMLDB_NOTNULL, null, null, 'course');
@@ -69,11 +71,8 @@ function xmldb_feedback_upgrade($oldversion) {
         $dbman->change_field_precision($table, $field);
 
         // Feedback savepoint reached.
-        upgrade_mod_savepoint(true, 2025041401, 'feedback');
+        upgrade_mod_savepoint(true, 2026022300, 'feedback');
     }
-
-    // Automatically generated Moodle v5.1.0 release upgrade line.
-    // Put any upgrade step following this.
 
     return true;
 }
