@@ -63,10 +63,16 @@ if ($templateid) {
     require_capability('mod/individualfeedback:deletetemplate', $context);
     $template = $DB->get_record('individualfeedback_template', ['id' => $templateid], '*', MUST_EXIST);
 
-    if ($template->ispublic) {
+    // +++ MBS-Hack (nersesov) check capability for deleting public and private templates
+    if ($template->ispublic == 1) {
         require_capability('mod/individualfeedback:createpublictemplate', $systemcontext);
         require_capability('mod/individualfeedback:deletetemplate', $systemcontext);
     }
+
+    if ($template->ispublic == 2 && $template->userid != $USER->id) {
+        redirect($url, get_string('nopermission', 'core'), null, \core\output\notification::NOTIFY_ERROR);
+    }
+    // --- MBS-Hack
 
     individualfeedback_delete_template($template);
     $successurl = new moodle_url('/mod/individualfeedback/manage_templates.php', ['id' => $id]);
@@ -80,7 +86,7 @@ echo $OUTPUT->header();
 if (!$mode) {
     echo $renderer->main_action_bar($actionbar);
 }
-echo $OUTPUT->heading(get_string('templates', 'mod_individualfeedback'), 2);
+echo $OUTPUT->heading(get_string('templates', 'individualfeedback'), 2);
 
 // First we get the course templates.
 $templates = individualfeedback_get_template_list($course, 'own');
@@ -91,6 +97,17 @@ $baseurl = new moodle_url('/mod/individualfeedback/use_templ.php', $params);
 $tablecourse = new mod_individualfeedback_templates_table('individualfeedback_template_course_table', $baseurl, $mode);
 $tablecourse->display($templates);
 echo $OUTPUT->box_end();
+
+// +++ MBS-HACK (nersesov) private template section
+$templates = individualfeedback_get_template_list($course, 'private');
+echo $OUTPUT->box_start('coursetemplates');
+echo $OUTPUT->heading(get_string('user'), 4);
+
+$baseurl = new moodle_url('/mod/individualfeedback/use_templ.php', $params);
+$tablecourse = new mod_individualfeedback_templates_table('individualfeedback_template_course_table', $baseurl, $mode);
+$tablecourse->display($templates);
+echo $OUTPUT->box_end();
+// --- MBS-HACK
 
 $templates = individualfeedback_get_template_list($course, 'public');
 echo $OUTPUT->box_start('publictemplates');

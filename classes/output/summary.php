@@ -53,7 +53,7 @@ class summary implements renderable, templatable {
      * @param int $mygroupid currently selected group
      */
     public function __construct($individualfeedbackstructure, $mygroupid = false) {
-        $this->feedbackstructure = $individualfeedbackstructure;
+        $this->individualfeedbackstructure = $individualfeedbackstructure;
         $this->mygroupid = $mygroupid;
     }
 
@@ -65,8 +65,8 @@ class summary implements renderable, templatable {
      */
     public function export_for_template(renderer_base $output) {
         $r = new stdClass();
-        $r->completedcount = $this->feedbackstructure->count_completed_responses($this->mygroupid);
-        $r->itemscount = count($this->feedbackstructure->get_items(true));
+        $r->completedcount = $this->individualfeedbackstructure->count_completed_responses($this->mygroupid);
+        $r->itemscount = count($this->individualfeedbackstructure->get_items(true));
 
         return $r;
     }

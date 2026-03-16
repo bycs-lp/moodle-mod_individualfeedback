@@ -64,6 +64,7 @@ class provider implements
             'userid' => 'privacy:metadata:completed:userid',
             'timemodified' => 'privacy:metadata:completed:timemodified',
             'anonymous_response' => 'privacy:metadata:completed:anonymousresponse',
+            'selfassessment' => 'privacy:metadata:completed:selfassessment',
         ];
 
         $collection->add_database_table('individualfeedback_completed', $completedfields, 'privacy:metadata:completed');
@@ -192,6 +193,7 @@ class provider implements
                     'inprogress' => transform::yesno($record->istmp),
                     'anonymousresponse' => transform::yesno($record->anonymousresponse == INDIVIDUALFEEDBACK_ANONYMOUS_YES),
                     'timemodified' => transform::datetime($record->timemodified),
+                    'selfassessment' => transform::yesno($record->selfassessment),
                     'answers' => []
                 ];
             }
@@ -420,6 +422,7 @@ class provider implements
                        fc.id AS submissionid,
                        fc.anonymous_response AS anonymousresponse,
                        fc.timemodified AS timemodified,
+                       fc.selfassessment AS selfassessment,
 
                        fv.id AS valueid,
                        fv.course_id AS valuecourse_id,

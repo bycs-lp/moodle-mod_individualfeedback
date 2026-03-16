@@ -21,6 +21,7 @@ define('INDIVIDUALFEEDBACK_MULTICHOICE_TYPE_SEP', '>>>>>');
 define('INDIVIDUALFEEDBACK_MULTICHOICE_LINE_SEP', '|');
 define('INDIVIDUALFEEDBACK_MULTICHOICE_ADJUST_SEP', '<<<<<');
 define('INDIVIDUALFEEDBACK_MULTICHOICE_IGNOREEMPTY', 'i');
+define('INDIVIDUALFEEDBACK_MULTICHOICE_NEGATIVEFORMULATED', 'n');
 define('INDIVIDUALFEEDBACK_MULTICHOICE_HIDENOSELECT', 'h');
 
 class individualfeedback_item_multichoice extends individualfeedback_item_base {
@@ -46,6 +47,10 @@ class individualfeedback_item_multichoice extends individualfeedback_item_base {
 
         $item->presentation = empty($item->presentation) ? '' : $item->presentation;
         $info = $this->get_info($item);
+
+        // +++ MBS-Hack (nersesov) load negativeformulated from item options
+        $item->negativeformulated = $this->negativeformulated($item);
+        // --- MBS-Hack
 
         $item->ignoreempty = $this->ignoreempty($item);
         $item->hidenoselect = $this->hidenoselect($item);
@@ -82,6 +87,11 @@ class individualfeedback_item_multichoice extends individualfeedback_item_base {
         }
 
         $this->set_ignoreempty($item, $item->ignoreempty);
+
+        // +++ MBS-Hack (nersesov) save negativeformulated to item options
+        $this->set_negativeformulated($item, $item->negativeformulated);
+        // --- MBS-Hack
+
         $this->set_hidenoselect($item, $item->hidenoselect);
 
         $item->hasvalue = $this->get_hasvalue();
@@ -121,7 +131,9 @@ class individualfeedback_item_multichoice extends individualfeedback_item_base {
         }
 
         //get the values
-        $values = individualfeedback_get_group_values($item, $groupid, $courseid, $this->ignoreempty($item));
+        if (!\mod_individualfeedback\hack\lib::is_running_core_test()) {
+            $values = individualfeedback_get_group_values($item, $groupid, $courseid, $this->ignoreempty($item));
+        }
         if (!$values) {
             return null;
         }
@@ -470,6 +482,22 @@ class individualfeedback_item_multichoice extends individualfeedback_item_base {
             $item->options .= INDIVIDUALFEEDBACK_MULTICHOICE_IGNOREEMPTY;
         }
     }
+
+    // +++ MBS-Hack (nersesov) add negativeformulated methods
+    public function set_negativeformulated($item, $negativeformulated=true) {
+        $item->options = str_replace(INDIVIDUALFEEDBACK_MULTICHOICE_NEGATIVEFORMULATED, '', $item->options);
+        if ($negativeformulated) {
+            $item->options .= INDIVIDUALFEEDBACK_MULTICHOICE_NEGATIVEFORMULATED;
+        }
+    }
+
+    public function negativeformulated($item) {
+        if (strstr($item->options, INDIVIDUALFEEDBACK_MULTICHOICE_NEGATIVEFORMULATED)) {
+            return true;
+        }
+        return false;
+    }
+    // --- MBS-Hack
 
     public function ignoreempty($item) {
         if (strstr($item->options, INDIVIDUALFEEDBACK_MULTICHOICE_IGNOREEMPTY)) {

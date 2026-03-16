@@ -55,6 +55,9 @@ class mod_individualfeedback_complete_form extends moodleform {
     /** @var bool */
     protected $hasrequired = false;
 
+    /** @var array|null item_id => 'start'|'inside'|'end' for question group zones (null until built) */
+    protected $item_group_zone = null;
+
     /**
      * Constructor
      *
@@ -170,11 +173,43 @@ class mod_individualfeedback_complete_form extends moodleform {
      */
     protected function definition_preview() {
         $this->_form->addElement('html', html_writer::start_div('', ['data-region' => 'questions-sortable-list']));
-        foreach ($this->structure->get_items() as $individualfeedbackitem) {
+        $items = $this->structure->get_items();
+        $this->build_item_group_zones($items);
+        foreach ($items as $individualfeedbackitem) {
             $itemobj = individualfeedback_get_item_class($individualfeedbackitem->typ);
             $itemobj->complete_form_element($individualfeedbackitem, $this);
         }
         $this->_form->addElement('html', html_writer::end_div());
+    }
+
+    /**
+     * Builds item_group_zone map so we can add CSS classes for question group layout (flat list, no wrapping div).
+     * Enables sortable to reorder any row and drag questions inside a group.
+     */
+    protected function build_item_group_zones(array $items) {
+        $this->item_group_zone = [];
+        $in_group = false;
+        foreach ($items as $item) {
+            if ($item->typ === 'questiongroup') {
+                $this->item_group_zone[$item->id] = 'start';
+                $in_group = true;
+            } else if ($item->typ === 'questiongroupend') {
+                $this->item_group_zone[$item->id] = 'end';
+                $in_group = false;
+            } else if ($in_group) {
+                $this->item_group_zone[$item->id] = 'inside';
+            }
+        }
+    }
+
+    /**
+     * Adds raw HTML to the form without making it a sortable list item.
+     * Use for question group structure (div bar, move icon) so only one row per item is sortable and drag/drop works.
+     *
+     * @param string $html HTML string to output
+     */
+    public function add_html_element($html) {
+        $this->_form->addElement('html', $html);
     }
 
     /**
@@ -281,7 +316,12 @@ class mod_individualfeedback_complete_form extends moodleform {
      * @return string
      */
     protected function get_suggested_class($item) {
-        $class = "individualfeedback_itemlist individualfeedback-item-{$item->typ}";
+        $class = "individualfeedback_itemlist individualfeedback-item-{$item->typ} questiongroupmoveitem";
+        if ($item->dependitem) {
+            if ($item->typ != 'questiongroupend') {
+                $class .= " individualfeedback_is_dependent";
+            }
+        }
         if ($item->typ !== 'pagebreak') {
             $itemobj = individualfeedback_get_item_class($item->typ);
             if ($itemobj->get_hasvalue()) {
@@ -320,12 +360,14 @@ class mod_individualfeedback_complete_form extends moodleform {
         $attributes = $element->getAttributes();
         $class = !empty($attributes['class']) ? ' ' . $attributes['class'] : '';
         $attributes['class'] = $this->get_suggested_class($item) . $class;
-
+        if ($this->item_group_zone !== null && isset($this->item_group_zone[$item->id])) {
+            $attributes['class'] .= ' individualfeedback_qgroup_zone_' . $this->item_group_zone[$item->id];
+        }
         $element->setAttributes($attributes);
 
         // Add required rule.
         if ($item->required && $addrequiredrule) {
-            $this->_form->addRule($element->getName(), get_string('required'), 'required', null, 'client');
+            $this->_form->addRule($element->getName(), get_string('required', 'individualfeedback'), 'required', null, 'client');
         }
 
         // Set default value.
@@ -363,6 +405,40 @@ class mod_individualfeedback_complete_form extends moodleform {
 
         if ($this->mode == self::MODE_EDIT) {
             $this->enhance_name_for_edit($item, $element);
+        }
+
+        return $element;
+    }
+
+    /**
+     * Adds a dummy element to this form - to be used by items in their complete_form_element() method
+     *
+     * @param stdClass $item
+     * @param HTML_QuickForm_element|array $element either completed form element or an array that
+     *      can be passed as arguments to $this->_form->createElement() function
+     * @return HTML_QuickForm_element
+     */
+    public function add_dumy_form_element($item, $element) {
+        global $OUTPUT;
+        // Add element to the form.
+        if (is_array($element)) {
+            if ($this->is_frozen() && $element[0] === 'text') {
+                // Convert 'text' element to 'static' when freezing for better display.
+                $element = ['static', $element[1], $element[2]];
+            }
+            $element = call_user_func_array(array($this->_form, 'createElement'), $element);
+        }
+        $element = $this->_form->addElement($element);
+
+        // Prepend standard CSS classes to the element classes.
+        $attributes = $element->getAttributes();
+        $class = !empty($attributes['class']) ? ' ' . $attributes['class'] : '';
+        $attributes['class'] = 'dummy hidden' . $class;
+        $element->setAttributes($attributes);
+
+        // Freeze if needed.
+        if ($this->is_frozen()) {
+            $element->freeze();
         }
 
         return $element;
@@ -433,10 +509,14 @@ class mod_individualfeedback_complete_form extends moodleform {
         if ($item->dependitem && ($this->mode == self::MODE_EDIT || $this->mode == self::MODE_VIEW_TEMPLATE)) {
             if (isset($allitems[$item->dependitem])) {
                 $dependitem = $allitems[$item->dependitem];
-                $name = $element->getLabel();
-                $name .= html_writer::span(' ('.format_string($dependitem->label).'-&gt;'.$item->dependvalue.')',
-                        'individualfeedback_depend');
-                $element->setLabel($name);
+                if ($dependitem->typ == 'questiongroup' && $item->typ !== 'questiongroupend') {
+                    $element->setLabel('');
+                } else if ($dependitem->typ != 'questiongroup') {
+                    $name = $element->getLabel();
+                    $name .= html_writer::span(' ('.format_string($dependitem->label).'-&gt;'.$item->dependvalue.')',
+                            'individualfeedback_depend');
+                    $element->setLabel($name);
+                }
             }
         }
     }
@@ -582,7 +662,6 @@ class mod_individualfeedback_complete_form extends moodleform {
             $mform->insertElementBefore($buttons, '__dummyelement');
             $mform->removeElement('__dummyelement');
         }
-
         $this->_form->display();
     }
 }

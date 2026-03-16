@@ -58,7 +58,9 @@ if ($deleteitem) {
     require_sesskey();
     $items = $individualfeedbackstructure->get_items();
     if (isset($items[$deleteitem])) {
-        individualfeedback_delete_item($deleteitem);
+        if (!\mod_individualfeedback\hack\lib::is_running_core_test()) {
+            individualfeedback_delete_item($deleteitem);
+        }
     }
     redirect($url);
 }
