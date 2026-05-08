@@ -37,12 +37,14 @@
         <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="ispublic" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="User who created the template; used for private (user) templates."/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="Primary key for individualfeedback_template"/>
       </KEYS>
       <INDEXES>
         <INDEX NAME="course" UNIQUE="false" FIELDS="course"/>
+        <INDEX NAME="userid" UNIQUE="false" FIELDS="userid"/>
       </INDEXES>
     </TABLE>
     <TABLE NAME="individualfeedback_item" COMMENT="individualfeedback items">

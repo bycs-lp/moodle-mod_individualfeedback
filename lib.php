@@ -1446,6 +1446,11 @@ function individualfeedback_get_template_list($course, $onlyownorpublic = '') {
             $templates = $DB->get_records('individualfeedback_template', array('ispublic'=>1), 'name');
             break;
     }
+
+    // +++ MBS-Hack (awagner) : add private templates to the list.
+    $templates = \mod_individualfeedback\hack\lib::add_private_template_list($templates ?? [], $onlyownorpublic);
+    // --- MBS-Hack (awagner) : add private templates to the list.
+
     return $templates;
 }
 
