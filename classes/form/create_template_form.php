@@ -86,9 +86,14 @@ class create_template_form extends dynamic_form {
      * @return array Returns whether a new template was created.
      */
     public function process_dynamic_submission(): array {
-        global $PAGE, $USER;
+        global $PAGE;
         $formdata = $this->get_data();
         $ispublic = !empty($formdata->ispublic) ? $formdata->ispublic : 0;
+        // +++ MBS-Hack (nersesov) enforce createpublictemplate capability for public templates
+        if ($ispublic == 1 && !has_capability('mod/individualfeedback:createpublictemplate', context_system::instance())) {
+            $ispublic = 0;
+        }
+        // --- MBS-Hack
         $result = individualfeedback_save_as_template($PAGE->activityrecord, $formdata->templatename, $ispublic);
         return [
             'result' => $result,

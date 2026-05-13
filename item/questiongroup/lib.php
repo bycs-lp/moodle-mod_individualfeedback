@@ -1118,7 +1118,7 @@ class individualfeedback_item_questiongroup extends individualfeedback_item_base
      * @return string
      */
     public function create_value($value) {
-        return s($value);
+        return '';
     }
 
     /**

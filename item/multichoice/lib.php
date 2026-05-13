@@ -89,7 +89,7 @@ class individualfeedback_item_multichoice extends individualfeedback_item_base {
         $this->set_ignoreempty($item, $item->ignoreempty);
 
         // +++ MBS-Hack (nersesov) save negativeformulated to item options
-        $this->set_negativeformulated($item, $item->negativeformulated);
+        $this->set_negativeformulated($item, $item->negativeformulated ?? 0);
         // --- MBS-Hack
 
         $this->set_hidenoselect($item, $item->hidenoselect);
@@ -131,9 +131,7 @@ class individualfeedback_item_multichoice extends individualfeedback_item_base {
         }
 
         //get the values
-        if (!\mod_individualfeedback\hack\lib::is_running_core_test()) {
-            $values = individualfeedback_get_group_values($item, $groupid, $courseid, $this->ignoreempty($item));
-        }
+        $values = individualfeedback_get_group_values($item, $groupid, $courseid, $this->ignoreempty($item));
         if (!$values) {
             return null;
         }

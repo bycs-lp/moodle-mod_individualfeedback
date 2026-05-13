@@ -127,9 +127,7 @@ class individualfeedback_item_multichoicerated extends individualfeedback_item_b
         }
 
         //die Werte holen
-        if (!\mod_individualfeedback\hack\lib::is_running_core_test()) {
-            $values = individualfeedback_get_group_values($item, $groupid, $courseid, $this->ignoreempty($item));
-        }
+        $values = individualfeedback_get_group_values($item, $groupid, $courseid, $this->ignoreempty($item));
         if (!$values) {
             return null;
         }

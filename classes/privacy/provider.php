@@ -77,6 +77,13 @@ class provider implements
         $collection->add_database_table('individualfeedback_value', $valuefields, 'privacy:metadata:value');
         $collection->add_database_table('individualfeedback_valuetmp', $valuefields, 'privacy:metadata:valuetmp');
 
+        // +++ MBS-Hack (nersesov) individualfeedback_template stores userid for private user templates
+        $templatefields = [
+            'userid' => 'privacy:metadata:template:userid',
+        ];
+        $collection->add_database_table('individualfeedback_template', $templatefields, 'privacy:metadata:template');
+        // --- MBS-Hack
+
         return $collection;
     }
 

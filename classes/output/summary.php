@@ -60,10 +60,10 @@ class summary implements renderable, templatable {
     /**
      * Export this data so it can be used as the context for a mustache template.
      *
-     * @param renderer_base $output
+     * @param \renderer_base $output
      * @return stdClass
      */
-    public function export_for_template(renderer_base $output) {
+    public function export_for_template($output) {
         $r = new stdClass();
         $r->completedcount = $this->individualfeedbackstructure->count_completed_responses($this->mygroupid);
         $r->itemscount = count($this->individualfeedbackstructure->get_items(true));

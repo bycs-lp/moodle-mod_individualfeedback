@@ -108,9 +108,7 @@ class individualfeedback_item_textfield extends individualfeedback_item_base {
         $analysed_val->data = null;
         $analysed_val->name = $item->name;
 
-        if (!\mod_individualfeedback\hack\lib::is_running_core_test()) {
-            $values = individualfeedback_get_group_values($item, $groupid, $courseid);
-        }
+        $values = individualfeedback_get_group_values($item, $groupid, $courseid);
         if ($values) {
             $data = array();
             foreach ($values as $value) {
@@ -130,9 +128,7 @@ class individualfeedback_item_textfield extends individualfeedback_item_base {
     }
 
     public function print_analysed($item, $itemnr = '', $groupid = false, $courseid = false) {
-        if (!\mod_individualfeedback\hack\lib::is_running_core_test()) {
-            $values = individualfeedback_get_group_values($item, $groupid, $courseid);
-        }
+        $values = individualfeedback_get_group_values($item, $groupid, $courseid);
         if ($values) {
             echo "<table class=\"analysis itemtype_{$item->typ}\">";
             echo '<tr><th class="text-start">';

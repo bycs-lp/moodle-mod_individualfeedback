@@ -142,9 +142,7 @@ class individualfeedback_item_fivelevelapproval extends individualfeedback_item_
         }
 
         //get the values
-        if (!\mod_individualfeedback\hack\lib::is_running_core_test()) {
-            $values = individualfeedback_get_group_values($item, $groupid, $courseid, $this->ignoreempty($item));
-        }
+        $values = individualfeedback_get_group_values($item, $groupid, $courseid, $this->ignoreempty($item));
         if (!$values) {
             return null;
         }

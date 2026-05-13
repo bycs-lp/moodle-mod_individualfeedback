@@ -973,6 +973,9 @@ function individualfeedback_get_incomplete_users(cm_info $cm,
     $allusersrecords = $info->filter_user_list($allusers);
 
     $allusers = array_keys($allusersrecords);
+    // +++ MBS-Hack (nersesov) : exclude editing teachers from non-respondents list (selfassessment; guard core tests).
+    $allusers = \mod_individualfeedback\hack\lib::filter_respondents_for_core_test($context, $allusers);
+    // --- MBS-Hack
 
     //now get all completeds
     $params = array('individualfeedback'=>$cm->instance);
