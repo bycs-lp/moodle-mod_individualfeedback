@@ -88,14 +88,14 @@ class mod_individualfeedback_responses_table extends table_sql {
      * @param int $group retrieve only users from this group (optional)
      */
     public function __construct(mod_individualfeedback_structure $individualfeedbackstructure, $group = 0) {
-        $this->feedbackstructure = $individualfeedbackstructure;
+        $this->individualfeedbackstructure = $individualfeedbackstructure;
 
         parent::__construct('individualfeedback-showentry-list-' . $individualfeedbackstructure->get_cm()->instance);
 
         $this->showall = optional_param($this->showallparamname, 0, PARAM_BOOL);
         $this->define_baseurl(new moodle_url('/mod/individualfeedback/show_entries.php',
-            ['id' => $this->feedbackstructure->get_cm()->id]));
-        if ($courseid = $this->feedbackstructure->get_courseid()) {
+            ['id' => $this->individualfeedbackstructure->get_cm()->id]));
+        if ($courseid = $this->individualfeedbackstructure->get_courseid()) {
             $this->baseurl->param('courseid', $courseid);
         }
         if ($this->showall) {
@@ -132,7 +132,7 @@ class mod_individualfeedback_responses_table extends table_sql {
                 . 'JOIN {user} u ON u.id = c.userid AND u.deleted = :notdeleted';
         $where = 'c.anonymous_response = :anon
                 AND c.individualfeedback = :instance';
-        if ($this->feedbackstructure->get_courseid()) {
+        if ($this->individualfeedbackstructure->get_courseid()) {
             $where .= ' AND c.courseid = :courseid';
         }
 
@@ -150,7 +150,7 @@ class mod_individualfeedback_responses_table extends table_sql {
             }
         }
 
-        if ($this->feedbackstructure->get_individualfeedback()->course == SITEID && !$this->feedbackstructure->get_courseid()) {
+        if ($this->individualfeedbackstructure->get_individualfeedback()->course == SITEID && !$this->individualfeedbackstructure->get_courseid()) {
             $tablecolumns[] = 'courseid';
             $tableheaders[] = get_string('course');
         }
@@ -168,11 +168,11 @@ class mod_individualfeedback_responses_table extends table_sql {
 
         $params = array();
         $params['anon'] = INDIVIDUALFEEDBACK_ANONYMOUS_NO;
-        $params['instance'] = $this->feedbackstructure->get_individualfeedback()->id;
+        $params['instance'] = $this->individualfeedbackstructure->get_individualfeedback()->id;
         $params['notdeleted'] = 0;
-        $params['courseid'] = $this->feedbackstructure->get_courseid();
+        $params['courseid'] = $this->individualfeedbackstructure->get_courseid();
 
-        $group = (empty($group)) ? groups_get_activity_group($this->feedbackstructure->get_cm(), true) : $group;
+        $group = (empty($group)) ? groups_get_activity_group($this->individualfeedbackstructure->get_cm(), true) : $group;
         if ($group) {
             $where .= ' AND c.userid IN (SELECT g.userid FROM {groups_members} g WHERE g.groupid = :group)';
             $params['group'] = $group;
@@ -187,7 +187,7 @@ class mod_individualfeedback_responses_table extends table_sql {
      * @return context_module
      */
     public function get_context(): context {
-        return context_module::instance($this->feedbackstructure->get_cm()->id);
+        return context_module::instance($this->individualfeedbackstructure->get_cm()->id);
     }
 
     /**
@@ -197,7 +197,7 @@ class mod_individualfeedback_responses_table extends table_sql {
      */
     public function other_cols($column, $row) {
         if (preg_match('/^val(\d+)$/', $column, $matches)) {
-            $items = $this->feedbackstructure->get_items();
+            $items = $this->individualfeedbackstructure->get_items();
             $itemobj = individualfeedback_get_item_class($items[$matches[1]]->typ);
             $printval = $itemobj->get_printval($items[$matches[1]], (object) ['value' => $row->$column]);
             if ($this->is_downloading()) {
@@ -216,7 +216,7 @@ class mod_individualfeedback_responses_table extends table_sql {
     public function col_userpic($row) {
         global $OUTPUT;
         $user = user_picture::unalias($row, [], $this->useridfield);
-        return $OUTPUT->user_picture($user, array('courseid' => $this->feedbackstructure->get_cm()->course));
+        return $OUTPUT->user_picture($user, array('courseid' => $this->individualfeedbackstructure->get_cm()->course));
     }
 
     /**
@@ -261,7 +261,7 @@ class mod_individualfeedback_responses_table extends table_sql {
      * @return string
      */
     public function col_courseid($row) {
-        $courses = $this->feedbackstructure->get_completed_courses();
+        $courses = $this->individualfeedbackstructure->get_completed_courses();
         $name = '';
         if (isset($courses[$row->courseid])) {
             $name = $courses[$row->courseid];
@@ -279,7 +279,7 @@ class mod_individualfeedback_responses_table extends table_sql {
      */
     public function col_groups($row) {
         $groups = '';
-        if ($usergrps = groups_get_all_groups($this->feedbackstructure->get_cm()->course, $row->userid, 0, 'name')) {
+        if ($usergrps = groups_get_all_groups($this->individualfeedbackstructure->get_cm()->course, $row->userid, 0, 'name')) {
             foreach ($usergrps as $group) {
                 $groups .= format_string($group->name). ' ';
             }
@@ -297,7 +297,7 @@ class mod_individualfeedback_responses_table extends table_sql {
         $tablecolumns = array_keys($this->columns);
         $tableheaders = $this->headers;
 
-        $items = $this->feedbackstructure->get_items(true);
+        $items = $this->individualfeedbackstructure->get_items(true);
         if (!$this->is_downloading() && !$this->buildforexternal) {
             // In preview mode do not show all columns or the page becomes unreadable.
             // The information message will be displayed to the teacher that the rest of the data can be viewed when downloading.
@@ -429,14 +429,14 @@ class mod_individualfeedback_responses_table extends table_sql {
      */
     public function display() {
         global $OUTPUT;
-        groups_print_activity_menu($this->feedbackstructure->get_cm(), $this->baseurl->out());
+        groups_print_activity_menu($this->individualfeedbackstructure->get_cm(), $this->baseurl->out());
         $grandtotal = $this->get_total_responses_count();
         if (!$grandtotal) {
             echo $OUTPUT->notification(get_string('nothingtodisplay'), 'info', false);
             return;
         }
 
-        if (count($this->feedbackstructure->get_items(true)) > self::PREVIEWCOLUMNSLIMIT) {
+        if (count($this->individualfeedbackstructure->get_items(true)) > self::PREVIEWCOLUMNSLIMIT) {
             echo $OUTPUT->notification(get_string('questionslimited', 'mod_individualfeedback', self::PREVIEWCOLUMNSLIMIT), 'info');
         }
 
@@ -522,7 +522,7 @@ class mod_individualfeedback_responses_table extends table_sql {
 
         $columnsgroups = [];
         if ($this->hasmorecolumns) {
-            $items = $this->feedbackstructure->get_items(true);
+            $items = $this->individualfeedbackstructure->get_items(true);
             $notretrieveditems = array_slice($items, self::TABLEJOINLIMIT, $this->hasmorecolumns, true);
             $columnsgroups = array_chunk($notretrieveditems, self::TABLEJOINLIMIT, true);
         }

@@ -45,7 +45,7 @@ class mod_individualfeedback_course_select_form extends moodleform {
      */
     public function __construct($action, mod_individualfeedback_structure $individualfeedbackstructure, $editable = true) {
         $this->action = new moodle_url($action, ['courseid' => null]);
-        $this->feedbackstructure = $individualfeedbackstructure;
+        $this->individualfeedbackstructure = $individualfeedbackstructure;
         parent::__construct($action, null, 'post', '', ['id' => 'individualfeedback_course_filter', 'class' => 'individualfeedback_form'], $editable);
     }
 
@@ -54,7 +54,7 @@ class mod_individualfeedback_course_select_form extends moodleform {
      */
     public function definition() {
         $mform = $this->_form;
-        $individualfeedbackstructure = $this->feedbackstructure;
+        $individualfeedbackstructure = $this->individualfeedbackstructure;
 
         $mform->addElement('hidden', 'id');
         $mform->setType('id', PARAM_INT);

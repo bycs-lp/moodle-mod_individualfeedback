@@ -45,11 +45,14 @@ class create_template_form extends dynamic_form {
             ['maxlength' => '200', 'size' => '50']);
         $mform->setType('templatename', PARAM_TEXT);
 
-        if (has_capability('mod/individualfeedback:createpublictemplate', context_system::instance())) {
-            $mform->addElement('checkbox',
-                'ispublic', '',
-                get_string('public', 'individualfeedback'));
-        }
+        // +++ MBS-Hack (nersesov) add ispublic radio buttons to template creation form
+        // Add private template checkbox.
+         $mform->addElement('radio', 'ispublic', '', get_string('course'),0);
+         $mform->addElement('radio', 'ispublic', '', get_string('user'),2);
+         if (has_capability('mod/individualfeedback:createpublictemplate', context_system::instance())) {
+             $mform->addElement('radio', 'ispublic', '', get_string('public', 'individualfeedback'),1);
+         }
+         // --- MBS-Hack
     }
 
     /**
@@ -85,7 +88,12 @@ class create_template_form extends dynamic_form {
     public function process_dynamic_submission(): array {
         global $PAGE;
         $formdata = $this->get_data();
-        $ispublic = !empty($formdata->ispublic) ? 1 : 0;
+        $ispublic = !empty($formdata->ispublic) ? $formdata->ispublic : 0;
+        // +++ MBS-Hack (nersesov) enforce createpublictemplate capability for public templates
+        if ($ispublic == 1 && !has_capability('mod/individualfeedback:createpublictemplate', context_system::instance())) {
+            $ispublic = 0;
+        }
+        // --- MBS-Hack
         $result = individualfeedback_save_as_template($PAGE->activityrecord, $formdata->templatename, $ispublic);
         return [
             'result' => $result,

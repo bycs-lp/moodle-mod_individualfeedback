@@ -47,6 +47,8 @@ class mod_individualfeedback_structure {
     protected $allitems;
     /** @var array */
     protected $allcourses;
+    /** @var array */
+    protected $groupeditems;
     /** @var int */
     protected $userid;
 
@@ -363,5 +365,38 @@ class mod_individualfeedback_structure {
             $this->allcourses[$course->id] = $label;
         }
         return $this->allcourses;
+    }
+
+    /**
+     * Get all groups and items in this individualfeedback or this template
+     * @return array of objects from individualfeedback_item with an additional attribute 'itemnr'
+     */
+    public function get_groups_and_items() {
+        global $DB;
+        if (!isset($this->groupeditems) || $this->groupeditems === null) {
+            $this->groupeditems = array();
+            if ($this->allitems === null) {
+                $this->allitems = $this->get_items();
+            }
+
+            $ingroup = false;
+            $idx = 1;
+            foreach ($this->allitems as $id => $item) {
+                if ($item->typ == 'questiongroup') {
+                    $ingroup = true;
+                }
+
+                if ($ingroup) {
+                    $this->groupeditems[$id] = $item;
+                    $this->groupeditems[$id]->itemnr = $item->hasvalue ? ($idx++) : null;
+                }
+
+                if ($item->typ == 'questiongroupend') {
+                    $ingroup = false;
+                }
+            }
+        }
+
+        return $this->groupeditems;
     }
 }

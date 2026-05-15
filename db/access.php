@@ -60,7 +60,9 @@ $capabilities = array(
         'contextlevel' => CONTEXT_MODULE,
         'archetypes' => array(
             'frontpage' => CAP_ALLOW,
-            'student' => CAP_ALLOW
+            'student' => CAP_ALLOW,
+            'teacher' => CAP_ALLOW,
+            'editingteacher' => CAP_ALLOW
         )
     ),
 
@@ -127,7 +129,6 @@ $capabilities = array(
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
         'archetypes' => array(
-            'editingteacher' => CAP_ALLOW,
             'manager' => CAP_ALLOW
         )
     ),
@@ -141,6 +142,27 @@ $capabilities = array(
             'manager' => CAP_ALLOW
         )
     ),
+
+    // +++ MBS-Hack (nersesov) add delete capabilities for private and public templates
+    'mod/individualfeedback:deleteprivatetemplate' => array(
+
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => array(
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_ALLOW
+        )
+    ),
+
+    'mod/individualfeedback:deletepublictemplate' => array(
+
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => array(
+            'manager' => CAP_ALLOW
+        )
+    ),
+    // --- MBS-Hack
 
     'mod/individualfeedback:viewreports' => array(
 
@@ -160,6 +182,18 @@ $capabilities = array(
         'riskbitmask' => RISK_PERSONAL,
 
         'captype' => 'read',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => array(
+            'teacher' => CAP_ALLOW,
+            'editingteacher' => CAP_ALLOW
+        )
+    ),
+
+    'mod/individualfeedback:selfassessment' => array(
+
+        'riskbitmask' => RISK_PERSONAL,
+
+        'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
         'archetypes' => array(
             'teacher' => CAP_ALLOW,

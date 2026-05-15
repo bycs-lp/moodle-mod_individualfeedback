@@ -60,6 +60,11 @@ $PAGE->add_body_class('limitedwidth');
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('analysis', 'mod_individualfeedback'), 3);
 
+// +++ MBS-Hack (nersesov) add compare action bar
+$actionbar = new \mod_individualfeedback\output\compare_action_bar($cm->id, $url);
+echo $renderer->main_action_bar($actionbar);
+// --- MBS-Hack
+
 //get the groupid
 $mygroupid = groups_get_activity_group($cm, true);
 groups_print_activity_menu($cm, $url);

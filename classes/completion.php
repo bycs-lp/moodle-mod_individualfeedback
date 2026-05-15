@@ -614,7 +614,9 @@ class mod_individualfeedback_completion extends mod_individualfeedback_structure
 
         $context = context_module::instance($this->cm->id);
         if (has_capability('mod/individualfeedback:complete', $context, $this->userid)) {
-            return true;
+            // +++ MBS-Hack (nersesov) editingteacher has complete for selfassessment; guard core tests
+            return \mod_individualfeedback\hack\lib::can_complete_for_selfassessment($context, $this->userid);
+            // --- MBS-Hack
         }
 
         if (!empty($CFG->individualfeedback_allowfullanonymous)

@@ -40,6 +40,10 @@
  */
 
 function xmldb_individualfeedback_upgrade($oldversion) {
+    global $DB;
+
+    $dbman = $DB->get_manager();
+
     // Automatically generated Moodle v4.1.0 release upgrade line.
     // Put any upgrade step following this.
 
@@ -54,6 +58,45 @@ function xmldb_individualfeedback_upgrade($oldversion) {
 
     // Automatically generated Moodle v4.5.0 release upgrade line.
     // Put any upgrade step following this.
+
+    // All DB changes in one step when upgrading from before 2024100702.
+    if ($oldversion < 2026031401) {
+        // Add userid to individualfeedback_template for private (user) templates.
+        $table = new xmldb_table('individualfeedback_template');
+        $field = new xmldb_field('userid', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'name');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        $index = new xmldb_index('userid', XMLDB_INDEX_NOTUNIQUE, ['userid']);
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+
+        // Add selfassessment to individualfeedback_completed and individualfeedback_completedtmp.
+        $table = new xmldb_table('individualfeedback_completed');
+        $field = new xmldb_field('selfassessment', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'courseid');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        $table = new xmldb_table('individualfeedback_completedtmp');
+        $field = new xmldb_field('selfassessment', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'courseid');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Create individualfeedback_linked table for comparison reports.
+        $table = new xmldb_table('individualfeedback_linked');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('linkedid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('individualfeedbackid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+        $table->add_key('individualfeedbackid', XMLDB_KEY_FOREIGN, array('individualfeedbackid'), 'individualfeedback', array('id'));
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        upgrade_mod_savepoint(true, 2026031401, 'individualfeedback');
+    }
 
     return true;
 }

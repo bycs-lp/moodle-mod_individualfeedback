@@ -48,7 +48,10 @@ $string['captchanotset'] = 'Captcha hasn\'t been set.';
 $string['closebeforeopen'] = 'You have specified an end date before the start date.';
 $string['completed_individualfeedbacks'] = 'Submitted answers';
 $string['complete_the_form'] = 'Answer the questions';
+$string['comparison_questions'] = 'Comparison (Questions)';
 $string['completed'] = 'Completed';
+$string['detail_groups'] = 'Detail (Groups)';
+$string['detail_questions'] = 'Detail (Questions)';
 $string['completedon'] = 'Completed on {$a}';
 $string['completiondetail:submit'] = 'Submit individualfeedback';
 $string['completionsubmit'] = 'Submit individualfeedback';
@@ -118,12 +121,15 @@ $string['individualfeedback:createprivatetemplate'] = 'Create private template';
 $string['individualfeedback:createpublictemplate'] = 'Create public template';
 $string['individualfeedback:deletesubmissions'] = 'Delete completed submissions';
 $string['individualfeedback:deletetemplate'] = 'Delete template';
+$string['individualfeedback:deleteprivatetemplate'] = 'Delete private template';
+$string['individualfeedback:deletepublictemplate'] = 'Delete public template';
 $string['individualfeedback:edititems'] = 'Edit items';
 $string['individualfeedback_is_not_for_anonymous'] = 'Feedback is not for anonymous';
 $string['individualfeedback_is_not_open'] = 'The feedback is not open';
 $string['individualfeedback:mapcourse'] = 'Map courses to global feedbacks';
 $string['individualfeedbackopen'] = 'Allow answers from';
 $string['individualfeedback:receivemail'] = 'Receive email notification';
+$string['individualfeedback:selfassessment'] = 'Self assessment';
 $string['individualfeedback:view'] = 'View a feedback';
 $string['individualfeedback:viewanalysepage'] = 'View the analysis page after submit';
 $string['individualfeedback:viewreports'] = 'View reports';
@@ -194,6 +200,8 @@ $string['multichoiceoption'] = '<span class="weight">({$a->weight}) </span>{$a->
 $string['multichoicerated'] = 'Multiple choice (rated)';
 $string['multichoicetype'] = 'Multiple choice type';
 $string['multichoice_values'] = 'Multiple choice values';
+$string['negative_formulated'] = 'Control question';
+$string['negative_formulated_help'] = 'Control questions are semantically inverted question, i. e. negatively formulated. In the calculation of averages (in case of question groups) the answer values are inverted.';
 $string['multiplesubmit'] = 'Allow multiple submissions';
 $string['multiplesubmit_help'] = 'If set to Yes:
 
@@ -237,10 +245,13 @@ $string['privacy:metadata:completed'] = 'A record of the submissions to the feed
 $string['privacy:metadata:completed:anonymousresponse'] = 'Whether the submission is to be used anonymously.';
 $string['privacy:metadata:completed:timemodified'] = 'The time when the submission was last modified.';
 $string['privacy:metadata:completed:userid'] = 'The ID of the user who completed the feedback activity.';
+$string['privacy:metadata:completed:selfassessment'] = 'Whether the submission is a self-assessment response.';
 $string['privacy:metadata:completedtmp'] = 'A record of the submissions which are still in progress.';
 $string['privacy:metadata:value'] = 'A record of the answer to a question.';
 $string['privacy:metadata:value:value'] = 'The chosen answer.';
 $string['privacy:metadata:valuetmp'] = 'A record of the answer to a question in a submission in progress.';
+$string['privacy:metadata:template'] = 'A record of feedback templates, which may be linked to the user who created them.';
+$string['privacy:metadata:template:userid'] = 'The ID of the user who created the private template.';
 $string['public'] = 'Public';
 $string['question'] = 'Question';
 $string['questionandsubmission'] = 'Question and submission settings';
@@ -267,6 +278,7 @@ $string['search_course'] = 'Search course';
 $string['searchcourses'] = 'Search courses';
 $string['searchcourses_help'] = 'Search for the code or name of the course(s) that you wish to associate with this feedback.';
 $string['selected_dump'] = 'Selected indexes of $SESSION variable are dumped below:';
+$string['selfassessment'] = 'Self assessment';
 $string['send'] = 'Send';
 $string['send_message'] = 'Send notification';
 $string['show_all'] = 'Show all';
@@ -302,3 +314,45 @@ $string['use_this_template'] = 'Use this template';
 $string['using_templates'] = 'Use a template';
 $string['vertical'] = 'Vertical';
 $string['whatfor'] = 'What do you want to do?';
+
+$string['fourlevelapproval'] = '4 level approval';
+$string['fourlevelapprovaltype'] = '4 level approval type';
+$string['fourlevelapproval_options'] = 'Strongly disagree
+Disagree
+Agree
+Strongly agree';
+$string['fourlevelfrequency'] = '4 level frequency';
+$string['fourlevelfrequencytype'] = '4 level frequency type';
+$string['fourlevelfrequency_options'] = 'Never
+Sometimes
+Often
+Always';
+$string['fivelevelapproval'] = '5 level approval';
+$string['fivelevelapprovaltype'] = '5 level approval type';
+$string['fivelevelapproval_options'] = 'Strongly disagree
+Disagree
+Neither agree nor disagree
+Agree
+Strongly agree';
+$string['end_of_questiongroup'] = 'End of question group';
+$string['questiongroup'] = 'Question group';
+$string['questiongroup_name'] = 'Question group name';
+$string['edit_questiongroup'] = 'Edit question group';
+$string['delete_questiongroup'] = 'Delete question group';
+$string['confirmdeleteitem_questiongroup'] = 'Are you sure you want to delete this element?
+Please note: all questions within this group will be deleted.';
+$string['move_questiongroup'] = 'Move this question group';
+$string['no_questions_in_group'] = 'No questions in this group';
+$string['error_calculating_averages'] = 'There are questions with varying numbers of answers in this group. No averages could be calculated.';
+$string['analysis_questiongroup'] = 'Question group with {$a} questions.';
+$string['filter_questiongroups'] = 'Filter question group:';
+$string['average_given_answer'] = 'Average given answer';
+$string['individualfeedback_not_linked'] = 'This individual feedback is not linked to other activities.';
+$string['individualfeedback_questions_not_equal'] = 'The questions of the linked individual feedback activities are not equal and can therefore not be compared.';
+$string['evaluations'] = 'Evaluations';
+$string['overview_questions'] = 'Overview (Questions)';
+$string['overview_groups'] = 'Overview (Groups)';
+$string['comparison_groups'] = 'Comparison (Groups)';
+$string['error_subtab'] = 'No valid subtab selected, can\'t load this page.';
+$string['all_results'] = 'All results';
+$string['privacy:metadata'] = 'The plugin "individual feedback" anonymizes data and does not allow to assign responses to a single user.';

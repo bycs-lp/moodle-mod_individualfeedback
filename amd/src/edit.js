@@ -38,9 +38,11 @@ const Selectors = {
     deleteQuestionButton: '[data-action="delete"]',
     sortableListRegion: '[data-region="questions-sortable-list"]',
     sortableElement: '[data-region="questions-sortable-list"] .individualfeedback_itemlist[id]',
-    sortableElementTitle: '[data-region="item-title"] span',
+    sortableElementTitle: '[data-region="item-title"]',
     questionLabel: '[data-region="questions-sortable-list"] .col-form-label',
     actionsMenuData: '[data-item-actions-menu]',
+    questionGroupName: '.individualfeedback_questiongroup',
+    questionGroupEnd: '.individualfeedback_questiongroupend',
 };
 
 /**
@@ -96,6 +98,7 @@ export const init = async(cmId) => {
         'confirmdeleteitem',
         'questionmoved',
         'move_item',
+        'end_of_questiongroup',
     ]);
 
     await enhanceEditForm();
@@ -122,7 +125,27 @@ export const init = async(cmId) => {
 
     // Initialize sortable list to handle active conditions moving.
     const sortableList = new SortableList(document.querySelector(Selectors.sortableListRegion));
-    sortableList.getElementName = element => Promise.resolve(element[0].querySelector(Selectors.sortableElementTitle)?.textContent);
+    sortableList.getElementName = (element) => {
+        const el = element[0];
+        const titleRegion = el.querySelector(Selectors.sortableElementTitle);
+        let name = titleRegion?.textContent?.trim() || '';
+        if (!name && titleRegion) {
+            const groupName = titleRegion.querySelector(Selectors.questionGroupName);
+            if (groupName) {
+                name = groupName.textContent?.trim() || '';
+            }
+            if (!name) {
+                const groupEnd = titleRegion.querySelector(Selectors.questionGroupEnd);
+                if (groupEnd) {
+                    name = groupEnd.textContent?.trim() || '';
+                }
+            }
+        }
+        if (!name && el.querySelector(Selectors.questionGroupEnd)) {
+            return getString('end_of_questiongroup', 'mod_individualfeedback');
+        }
+        return Promise.resolve(name);
+    };
 
     $(Selectors.sortableListRegion).on(SortableList.EVENTS.DROP, (event, info) => {
         if (!info.positionChanged) {

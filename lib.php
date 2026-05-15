@@ -973,6 +973,9 @@ function individualfeedback_get_incomplete_users(cm_info $cm,
     $allusersrecords = $info->filter_user_list($allusers);
 
     $allusers = array_keys($allusersrecords);
+    // +++ MBS-Hack (nersesov) : exclude editing teachers from non-respondents list (selfassessment; guard core tests).
+    $allusers = \mod_individualfeedback\hack\lib::filter_respondents_for_core_test($context, $allusers);
+    // --- MBS-Hack
 
     //now get all completeds
     $params = array('individualfeedback'=>$cm->instance);
@@ -1194,6 +1197,10 @@ function individualfeedback_create_template($courseid, $name, $ispublic = 0) {
     $templ->course   = ($ispublic ? 0 : $courseid);
     $templ->name     = $name;
     $templ->ispublic = $ispublic;
+
+    // +++ MBS-Hack (nersesov) : store creator's user ID on template.
+    $templ = \mod_individualfeedback\hack\lib::set_template_userid($templ);
+    // --- MBS-Hack
 
     $templid = $DB->insert_record('individualfeedback_template', $templ);
     return $DB->get_record('individualfeedback_template', array('id'=>$templid));
@@ -1446,6 +1453,11 @@ function individualfeedback_get_template_list($course, $onlyownorpublic = '') {
             $templates = $DB->get_records('individualfeedback_template', array('ispublic'=>1), 'name');
             break;
     }
+
+    // +++ MBS-Hack (nersesov) : add private templates to the list.
+    $templates = \mod_individualfeedback\hack\lib::add_private_template_list($templates ?? [], $onlyownorpublic);
+    // --- MBS-Hack
+
     return $templates;
 }
 
@@ -1516,6 +1528,10 @@ function individualfeedback_load_individualfeedback_items_options() {
     global $CFG;
 
     $individualfeedback_options = array("pagebreak" => get_string('add_pagebreak', 'individualfeedback'));
+
+    // +++ MBS-Hack (nersesov) : add question group to available item types.
+    $individualfeedback_options = \mod_individualfeedback\hack\lib::add_questiongroup_option($individualfeedback_options);
+    // --- MBS-Hack
 
     if (!$individualfeedback_names = individualfeedback_load_individualfeedback_items('mod/individualfeedback/item')) {
         return array();
@@ -1597,6 +1613,16 @@ function individualfeedback_delete_item($itemid, $renumber = true, $template = f
     global $DB;
 
     $item = $DB->get_record('individualfeedback_item', array('id'=>$itemid));
+
+    // +++ MBS-Hack (nersesov) : skip silently if item was already removed (e.g. by question group deletion).
+    if (\mod_individualfeedback\hack\lib::is_item_already_deleted($item)) {
+        return;
+    }
+    // --- MBS-Hack
+
+    // +++ MBS-Hack (nersesov) : delete child items when a question group is removed.
+    \mod_individualfeedback\hack\lib::delete_group_items_for_item($item);
+    // --- MBS-Hack
 
     //deleting the files from the item
     $fs = get_file_storage();
@@ -2152,14 +2178,25 @@ function individualfeedback_update_values() {
  * @param int $groupid
  * @param int $courseid
  * @param bool $ignore_empty if this is set true so empty values are not delivered
+ * @param bool $selfassessment if true return only self-assessment values; if false return peer values
  * @return array the value-records
  */
 function individualfeedback_get_group_values($item,
                                    $groupid = false,
                                    $courseid = false,
-                                   $ignore_empty = false) {
+                                   $ignore_empty = false,
+                                   $selfassessment = false) {
 
     global $CFG, $DB;
+
+    // +++ MBS-Hack (nersesov) : filter values by selfassessment flag.
+    $hackedvalues = \mod_individualfeedback\hack\lib::get_values_by_selfassessment(
+        $item, $groupid, $courseid, $ignore_empty, $selfassessment
+    );
+    if ($hackedvalues !== null) {
+        return $hackedvalues;
+    }
+    // --- MBS-Hack
 
     //if the groupid is given?
     if (intval($groupid) > 0) {
@@ -3276,4 +3313,172 @@ function mod_individualfeedback_core_calendar_get_event_action_string(string $ev
     }
 
     return get_string($identifier, 'mod_individualfeedback', $modulename);
+}
+
+/**
+ * @return string[]
+ */
+function individualfeedback_get_statistic_question_types() {
+    return ['multichoice', 'fourlevelapproval', 'fourlevelfrequency', 'fivelevelapproval'];
+}
+
+/**
+ * @param $individualfeedbackid
+ * @return false|mixed
+ * @throws dml_exception
+ */
+function individualfeedback_get_linkedid($individualfeedbackid) {
+    global $DB;
+
+    return $DB->get_field('individualfeedback_linked', 'linkedid', ['individualfeedbackid' => $individualfeedbackid]);
+}
+
+/**
+ * @param $oldindividualfeedbackid
+ * @param $newindividualfeedbackid
+ * @return void
+ * @throws dml_exception
+ */
+function individualfeedback_create_linked_record($oldindividualfeedbackid, $newindividualfeedbackid) {
+    global $DB;
+
+    $linkedid = individualfeedback_get_linkedid($oldindividualfeedbackid);
+
+    // No linked instances yet.
+    if (!$linkedid) {
+        $sql = "SELECT MAX(linkedid) FROM {individualfeedback_linked}";
+        if (!$highestid = $DB->get_field_sql($sql)) {
+            $highestid = 0;
+        }
+
+        // Raise the highestid.
+        $highestid++;
+
+        $record = new stdClass();
+        $record->linkedid = $highestid;
+        $record->individualfeedbackid = $oldindividualfeedbackid;
+        $DB->insert_record('individualfeedback_linked', $record);
+
+        $record = new stdClass();
+        $record->linkedid = $highestid;
+        $record->individualfeedbackid = $newindividualfeedbackid;
+        $DB->insert_record('individualfeedback_linked', $record);
+    } else {
+        $record = new stdClass();
+        $record->linkedid = $linkedid;
+        $record->individualfeedbackid = $newindividualfeedbackid;
+        $DB->insert_record('individualfeedback_linked', $record);
+    }
+}
+
+/**
+ * @param $individualfeedbackid
+ * @return bool
+ * @throws dml_exception
+ */
+function individualfeedback_check_linked_questions($individualfeedbackid) {
+    global $DB;
+
+    $allindividualfeedbacks = individualfeedback_get_linked_individualfeedbacks($individualfeedbackid);
+    if (count($allindividualfeedbacks) < 2) {
+        return false;
+    }
+
+    $countitems = 0;
+    $firsttime = true;
+    foreach ($allindividualfeedbacks as $individualfeedback) {
+        $items = $DB->get_records('individualfeedback_item', ['individualfeedback' => $individualfeedback->id]);
+        $allindividualfeedbacks[$individualfeedback->id]->items = $items;
+        if (!$firsttime) {
+            if ($countitems != count($items)) {
+                return false;
+            }
+        }
+
+        $firsttime = false;
+        $countitems = count($items);
+    }
+
+    $base = reset($allindividualfeedbacks);
+    $baseitemkeys = array_keys($base->items);
+
+    $firsttime = true;
+    $checkfields = ['name', 'label', 'typ', 'position'];
+    foreach ($allindividualfeedbacks as $individualfeedback) {
+        // Skip the first run, because you don't need to compare with itself.
+        if ($firsttime) {
+            $firsttime = false;
+            continue;
+        }
+
+        $counter = 0;
+        foreach ($individualfeedback->items as $key => $item) {
+            $checkitemkey = $baseitemkeys[$counter];
+            $checkitem = $base->items[$checkitemkey];
+            foreach ($checkfields as $field) {
+                if ($item->$field != $checkitem->$field) {
+                    return false;
+                }
+            }
+            $counter++;
+        }
+    }
+
+    return true;
+}
+
+/**
+ * @param $individualfeedbackid
+ * @return array
+ * @throws dml_exception
+ */
+function individualfeedback_get_linked_individualfeedbacks($individualfeedbackid) {
+    global $DB;
+
+    if (!$linkedid = individualfeedback_get_linkedid($individualfeedbackid)) {
+        return [];
+    }
+
+    $sql = "SELECT ifb.*
+        FROM {individualfeedback} ifb
+        JOIN {individualfeedback_linked} ifbl ON ifb.id = ifbl.individualfeedbackid
+        WHERE ifbl.linkedid = :linkedid
+        ORDER BY ifb.timemodified DESC";
+
+    return $DB->get_records_sql($sql, ['linkedid' => $linkedid]);
+}
+
+/**
+ * @param int $userid
+ * @return string
+ */
+function individualfeedback_hash_userid($userid) {
+    $salt = 'IeJ8GI6CD06UDU0y3lUVMQ8D7slxBlZm0LVRZRZV';
+    return sha1($salt . $userid);
+}
+
+/**
+ * deletes all items of the given group, before groups get's deleted.
+ *
+ * @global object
+ * @param \stdClass $groupitem
+ * @return void
+ */
+function individualfeedback_delete_group_items($groupitem) {
+    global $DB;
+
+    if (!$endgroupitem = $DB->get_record('individualfeedback_item', ['dependitem' => $groupitem->id, 'typ' => 'questiongroupend'])) {
+        return;
+    }
+
+    $where = 'individualfeedback = :individualfeedback AND template = :template
+                AND position > :startposition AND position <= :endposition';
+    $params = ['individualfeedback' => $groupitem->individualfeedback, 'template' => $groupitem->template,
+                        'startposition' => $groupitem->position, 'endposition' => $endgroupitem->position];
+
+    if ($groupitems = $DB->get_records_select('individualfeedback_item', $where, $params)) {
+        foreach ($groupitems as $item) {
+            individualfeedback_delete_item($item->id);
+        }
+    }
 }
