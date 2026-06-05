@@ -16,7 +16,7 @@
 
 declare(strict_types=1);
 
-namespace mod_feedback\external\questions;
+namespace mod_individualfeedback\external\questions;
 
 use core_external\external_api;
 use core_external\external_value;
@@ -24,9 +24,9 @@ use core_external\external_function_parameters;
 use context_module;
 
 /**
- * External method for reordering feedback questions.
+ * External method for reordering individualfeedback questions.
  *
- * @package     mod_feedback
+ * @package     mod_individualfeedback
  * @copyright   2024 Mikel Martín <mikel@moodle.com>
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -40,14 +40,14 @@ class reorder extends external_api {
     public static function execute_parameters(): external_function_parameters {
         return new external_function_parameters(
             [
-                'cmid' => new external_value(PARAM_INT, 'Feedback course module id'),
-                'itemorder' => new external_value(PARAM_SEQUENCE, 'Feedback order by sequence of question item ids'),
+                'cmid' => new external_value(PARAM_INT, 'Individualfeedback course module id'),
+                'itemorder' => new external_value(PARAM_SEQUENCE, 'Individualfeedback order by sequence of question item ids'),
             ]
         );
     }
 
     /**
-     * External function to reorder feedback questions.
+     * External function to reorder individualfeedback questions.
      *
      * @param int $cmid
      * @param string $itemorder
@@ -63,16 +63,16 @@ class reorder extends external_api {
             'itemorder' => $itemorder,
         ]);
 
-        $cm = get_coursemodule_from_id('feedback', $cmid, 0, false, MUST_EXIST);
-        $feedback = $DB->get_record('feedback', ['id' => $cm->instance], '*', MUST_EXIST);
+        $cm = get_coursemodule_from_id('individualfeedback', $cmid, 0, false, MUST_EXIST);
+        $individualfeedback = $DB->get_record('individualfeedback', ['id' => $cm->instance], '*', MUST_EXIST);
         $context = context_module::instance($cm->id);
 
         self::validate_context($context);
-        require_capability('mod/feedback:edititems', $context);
+        require_capability('mod/individualfeedback:edititems', $context);
 
         $itemlist = explode(',', trim($itemorder, ',')) ?: [];
         if (count($itemlist) > 0) {
-            return feedback_ajax_saveitemorder($itemlist, $feedback);
+            return individualfeedback_ajax_saveitemorder($itemlist, $individualfeedback);
         }
 
         return false;

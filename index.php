@@ -15,15 +15,15 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * prints the overview of all feedbacks included into the current course
+ * prints the overview of all individualfeedbacks included into the current course
  *
  * @author Andreas Grabs
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
- * @package mod_feedback
+ * @package mod_individualfeedback
  */
 
 require_once("../../config.php");
 
 $courseid = required_param('id', PARAM_INT);
 
-\core_courseformat\activityoverviewbase::redirect_to_overview_page($courseid, 'feedback');
+\core_courseformat\activityoverviewbase::redirect_to_overview_page($courseid, 'individualfeedback');

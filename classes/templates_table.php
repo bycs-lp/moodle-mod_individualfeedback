@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Contains class mod_feedback_templates_table
+ * Contains class mod_individualfeedback_templates_table
  *
- * @package   mod_feedback
+ * @package   mod_individualfeedback
  * @copyright 2016 Marina Glancy
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -34,13 +34,13 @@ global $CFG;
 require_once($CFG->libdir . '/tablelib.php');
 
 /**
- * Class mod_feedback_templates_table
+ * Class mod_individualfeedback_templates_table
  *
- * @package   mod_feedback
+ * @package   mod_individualfeedback
  * @copyright 2016 Marina Glancy
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_feedback_templates_table extends core_table\flexible_table {
+class mod_individualfeedback_templates_table extends core_table\flexible_table {
     /** @var int|null The module id. */
     private $cmid;
 
@@ -61,7 +61,7 @@ class mod_feedback_templates_table extends core_table\flexible_table {
         parent::__construct($uniqueid);
         $this->cmid = $baseurl->param('id');
         $tablecolumns = [
-            'template' => get_string('template', 'feedback'),
+            'template' => get_string('template', 'individualfeedback'),
             'actions' => html_writer::span(get_string('actions'), 'visually-hidden'),
         ];
 
@@ -82,7 +82,7 @@ class mod_feedback_templates_table extends core_table\flexible_table {
         global $OUTPUT;
         if (empty($templates)) {
             echo $OUTPUT->notification(
-                get_string('no_templates_available_yet', 'feedback'),
+                get_string('no_templates_available_yet', 'individualfeedback'),
                 notification::NOTIFY_INFO,
                 false,
             );
@@ -93,7 +93,7 @@ class mod_feedback_templates_table extends core_table\flexible_table {
 
         foreach ($templates as $template) {
             $showactions = has_any_capability(
-                ['mod/feedback:deletetemplate', 'mod/feedback:edititems', 'mod/feedback:createpublictemplate'],
+                ['mod/individualfeedback:deletetemplate', 'mod/individualfeedback:edititems', 'mod/individualfeedback:createpublictemplate'],
                 $this->get_context()
             );
             $data = [
@@ -131,33 +131,33 @@ class mod_feedback_templates_table extends core_table\flexible_table {
         ));
 
         // Use template.
-        if (has_capability('mod/feedback:edititems', context_module::instance($this->cmid))) {
-            $PAGE->requires->js_call_amd('mod_feedback/usetemplate', 'init');
+        if (has_capability('mod/individualfeedback:edititems', context_module::instance($this->cmid))) {
+            $PAGE->requires->js_call_amd('mod_individualfeedback/usetemplate', 'init');
             $actions->add(new link_secondary(
                 new moodle_url('#'),
                 new pix_icon('i/files', ''),
-                get_string('use_this_template', 'mod_feedback'),
+                get_string('use_this_template', 'mod_individualfeedback'),
                 ['data-action' => 'usetemplate', 'data-dataid' => $this->cmid, 'data-templateid' => $template->id],
             ));
         }
 
         // Delete.
-        $showdelete = has_capability('mod/feedback:deletetemplate', context_module::instance($this->cmid));
+        $showdelete = has_capability('mod/individualfeedback:deletetemplate', context_module::instance($this->cmid));
         if ($template->ispublic) {
             $showdelete = has_all_capabilities(
-                ['mod/feedback:createpublictemplate', 'mod/feedback:deletetemplate'],
+                ['mod/individualfeedback:createpublictemplate', 'mod/individualfeedback:deletetemplate'],
                 context_system::instance()
             );
         }
         if ($showdelete) {
             $exporturl = new moodle_url(
-                '/mod/feedback/manage_templates.php',
+                '/mod/individualfeedback/manage_templates.php',
                 $url->params() + ['deletetemplate' => $template->id]
             );
             $deleteaction = new action_link(
                 $exporturl,
                 get_string('delete'),
-                new confirm_action(get_string('confirmdeletetemplate', 'feedback')),
+                new confirm_action(get_string('confirmdeletetemplate', 'individualfeedback')),
                 ['class' => 'text-danger'],
                 new pix_icon('t/delete', ''),
             );

@@ -15,18 +15,18 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 defined('MOODLE_INTERNAL') OR die('not allowed');
-require_once($CFG->dirroot.'/mod/feedback/item/feedback_item_class.php');
+require_once($CFG->dirroot.'/mod/individualfeedback/item/individualfeedback_item_class.php');
 
-class feedback_item_numeric extends feedback_item_base {
+class individualfeedback_item_numeric extends individualfeedback_item_base {
     protected $type = "numeric";
 
-    public function build_editform($item, $feedback, $cm) {
+    public function build_editform($item, $individualfeedback, $cm) {
         global $DB, $CFG;
         require_once('numeric_form.php');
 
-        //get the lastposition number of the feedback_items
+        //get the lastposition number of the individualfeedback_items
         $position = $item->position;
-        $lastposition = $DB->count_records('feedback_item', array('feedback'=>$feedback->id));
+        $lastposition = $DB->count_records('individualfeedback_item', array('individualfeedback'=>$individualfeedback->id));
         if ($position == -1) {
             $i_formselect_last = $lastposition + 1;
             $i_formselect_value = $lastposition + 1;
@@ -57,12 +57,12 @@ class feedback_item_numeric extends feedback_item_base {
         $item->rangeto = $range_to;
 
         //all items for dependitem
-        $feedbackitems = feedback_get_depend_candidates_for_item($feedback, $item);
+        $individualfeedbackitems = individualfeedback_get_depend_candidates_for_item($individualfeedback, $item);
         $commonparams = array('cmid'=>$cm->id,
                              'id'=>isset($item->id) ? $item->id : null,
                              'typ'=>$item->typ,
-                             'items'=>$feedbackitems,
-                             'feedback'=>$feedback->id);
+                             'items'=>$individualfeedbackitems,
+                             'individualfeedback'=>$individualfeedback->id);
 
         //build the form
         $customdata = array('item' => $item,
@@ -70,7 +70,7 @@ class feedback_item_numeric extends feedback_item_base {
                             'positionlist' => $positionlist,
                             'position' => $position);
 
-        $this->item_form = new feedback_numeric_form('edit_item.php', $customdata);
+        $this->item_form = new individualfeedback_numeric_form('edit_item.php', $customdata);
     }
 
     public function save_item() {
@@ -88,18 +88,18 @@ class feedback_item_numeric extends feedback_item_base {
 
         $item->hasvalue = $this->get_hasvalue();
         if (!$item->id) {
-            $item->id = $DB->insert_record('feedback_item', $item);
+            $item->id = $DB->insert_record('individualfeedback_item', $item);
         } else {
-            $DB->update_record('feedback_item', $item);
+            $DB->update_record('individualfeedback_item', $item);
         }
 
-        return $DB->get_record('feedback_item', array('id'=>$item->id));
+        return $DB->get_record('individualfeedback_item', array('id'=>$item->id));
     }
 
     /**
      * Helper function for collected data, both for analysis page and export to excel
      *
-     * @param stdClass $item the db-object from feedback_item
+     * @param stdClass $item the db-object from individualfeedback_item
      * @param int $groupid
      * @param int $courseid
      * @return stdClass
@@ -110,7 +110,7 @@ class feedback_item_numeric extends feedback_item_base {
         $analysed = new stdClass();
         $analysed->data = array();
         $analysed->name = $item->name;
-        $values = feedback_get_group_values($item, $groupid, $courseid);
+        $values = individualfeedback_get_group_values($item, $groupid, $courseid);
 
         $avg = 0.0;
         $counter = 0;
@@ -164,7 +164,7 @@ class feedback_item_numeric extends feedback_item_base {
                 $avg = '-';
             }
             echo '<tr><td><b>';
-            echo get_string('average', 'feedback').': '.$avg;
+            echo get_string('average', 'individualfeedback').': '.$avg;
             echo '</b></td></tr>';
             echo '</table>';
         }
@@ -184,7 +184,7 @@ class feedback_item_numeric extends feedback_item_base {
             // Export average.
             $worksheet->write_string($row_offset,
                                      2,
-                                     get_string('average', 'feedback'),
+                                     get_string('average', 'individualfeedback'),
                                      $xls_formats->value_bold);
 
             if (isset($analysed_item->avg)) {
@@ -235,11 +235,11 @@ class feedback_item_numeric extends feedback_item_base {
         }
 
         if (is_null($rangefrom) && is_numeric($rangeto)) {
-            return ' (' . get_string('maximal', 'feedback') .
+            return ' (' . get_string('maximal', 'individualfeedback') .
                         ': ' . $this->format_float($rangeto) . ')';
         }
         if (is_numeric($rangefrom) && is_null($rangeto)) {
-            return ' (' . get_string('minimal', 'feedback') .
+            return ' (' . get_string('minimal', 'individualfeedback') .
                         ': ' . $this->format_float($rangefrom) . ')';
         }
         if (is_null($rangefrom) && is_null($rangeto)) {
@@ -263,7 +263,7 @@ class feedback_item_numeric extends feedback_item_base {
      * Adds an input element to the complete form
      *
      * @param stdClass $item
-     * @param mod_feedback_complete_form $form
+     * @param mod_individualfeedback_complete_form $form
      */
     public function complete_form_element($item, $form) {
         $name = $this->get_display_name($item);
@@ -290,7 +290,7 @@ class feedback_item_numeric extends feedback_item_base {
             }
             if ((is_numeric($rangefrom) && $value < floatval($rangefrom)) ||
                     (is_numeric($rangeto) && $value > floatval($rangeto))) {
-                return array($inputname => get_string('numberoutofrange', 'feedback'));
+                return array($inputname => get_string('numberoutofrange', 'individualfeedback'));
             }
             return true;
         });

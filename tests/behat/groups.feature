@@ -1,8 +1,8 @@
-@mod @mod_feedback
-Feature: Feedbacks in courses with groups
-  In order to collect feedbacks per group
+@mod @mod_individualfeedback
+Feature: Individualfeedbacks in courses with groups
+  In order to collect individualfeedbacks per group
   As an teacher
-  I need to be able to filter feedback replies by groups
+  I need to be able to filter individualfeedback replies by groups
 
   Background:
     Given the following "users" exist:
@@ -51,96 +51,96 @@ Feature: Feedbacks in courses with groups
       | manager | Acceptance test site | manager |
     And the following "activities" exist:
       | activity   | name            | course               | idnumber  | anonymous | publish_stats | groupmode | section |
-      | feedback   | Site feedback   | Acceptance test site | feedback0 | 2         | 1             | 1         | 1       |
-      | feedback   | Course feedback | C1                   | feedback1 | 2         | 1             | 1         | 0       |
-      | feedback   | Course anon feedback | C1              | feedback2 | 1         | 1             | 1         | 0       |
+      | individualfeedback   | Site individualfeedback   | Acceptance test site | individualfeedback0 | 2         | 1             | 1         | 1       |
+      | individualfeedback   | Course individualfeedback | C1                   | individualfeedback1 | 2         | 1             | 1         | 0       |
+      | individualfeedback   | Course anon individualfeedback | C1              | individualfeedback2 | 1         | 1             | 1         | 0       |
 
   @javascript
-  Scenario: Non anonymous feedback with groups in a course
-    Given the following "mod_feedback > question" exists:
-      | activity        | feedback1                               |
+  Scenario: Non anonymous individualfeedback with groups in a course
+    Given the following "mod_individualfeedback > question" exists:
+      | activity        | individualfeedback1                               |
       | name            | Do you like this course?                |
       | questiontype    | multichoice                             |
       | label           | multichoice1                            |
       | subtype         | r                                       |
       | hidenoselect    | 1                                       |
       | values          | Yes of course\nNot at all\nI don't know |
-    And the following "mod_feedback > responses" exist:
+    And the following "mod_individualfeedback > responses" exist:
       | activity  | user  | Do you like this course? |
-      | feedback1 | user1 | Not at all               |
-      | feedback1 | user2 | I don't know             |
-      | feedback1 | user3 | Not at all               |
-      | feedback1 | user4 | Yes of course            |
-      | feedback1 | user5 | Yes of course            |
-      | feedback1 | user6 | Not at all               |
-      | feedback1 | user7 | I don't know             |
-      | feedback1 | user8 | Yes of course            |
+      | individualfeedback1 | user1 | Not at all               |
+      | individualfeedback1 | user2 | I don't know             |
+      | individualfeedback1 | user3 | Not at all               |
+      | individualfeedback1 | user4 | Yes of course            |
+      | individualfeedback1 | user5 | Yes of course            |
+      | individualfeedback1 | user6 | Not at all               |
+      | individualfeedback1 | user7 | I don't know             |
+      | individualfeedback1 | user8 | Yes of course            |
     # View analysis, user1 should only see one group - group 1
-    When I am on the "Course feedback" "feedback activity" page logged in as user1
+    When I am on the "Course individualfeedback" "individualfeedback activity" page logged in as user1
     And I follow "Analysis"
     And I should see "Separate groups: Group 1"
-    And I show chart data for the "multichoice1" feedback
+    And I show chart data for the "multichoice1" individualfeedback
     And I should see "2 (50.00 %)" in the "Yes of course" "table_row"
     And I should see "1 (25.00 %)" in the "Not at all" "table_row"
     And I log out
     # View analysis, user3 should only see one group - group 2
-    And I am on the "Course feedback" "feedback activity" page logged in as user3
+    And I am on the "Course individualfeedback" "individualfeedback activity" page logged in as user3
     And I follow "Analysis"
     And I should see "Separate groups: Group 2"
-    And I show chart data for the "multichoice1" feedback
+    And I show chart data for the "multichoice1" individualfeedback
     And I should see "0" in the "Yes of course" "table_row"
     And I should see "2 (66.67 %)" in the "Not at all" "table_row"
     And I log out
     # View analysis, user2 should see a group selector and be able to change the group but not view all.
-    And I am on the "Course feedback" "feedback activity" page logged in as user2
+    And I am on the "Course individualfeedback" "individualfeedback activity" page logged in as user2
     And I follow "Analysis"
     And the field "Separate groups" matches value "Group 1"
     And I should not see "Group 3" in the "Separate groups" "select"
-    And I show chart data for the "multichoice1" feedback
+    And I show chart data for the "multichoice1" individualfeedback
     And I should see "2 (50.00 %)" in the "Yes of course" "table_row"
     And I should see "1 (25.00 %)" in the "Not at all" "table_row"
     And I select "Group 2" from the "Separate groups" singleselect
-    And I show chart data for the "multichoice1" feedback
+    And I show chart data for the "multichoice1" individualfeedback
     And I should see "0" in the "Yes of course" "table_row"
     And I should see "2 (66.67 %)" in the "Not at all" "table_row"
     And the "Separate groups" select box should not contain "All participants"
     And I log out
     # User without group can see all participants only
-    And I am on the "Course feedback" "feedback activity" page logged in as user7
+    And I am on the "Course individualfeedback" "individualfeedback activity" page logged in as user7
     And I follow "Analysis"
     And I should see "Separate groups: All participants"
-    And I show chart data for the "multichoice1" feedback
+    And I show chart data for the "multichoice1" individualfeedback
     And I should see "3 (37.50 %)" in the "Yes of course" "table_row"
     And I should see "3 (37.50 %)" in the "Not at all" "table_row"
     And I should see "2 (25.00 %)" in the "I don't know" "table_row"
     And I log out
     # User in non-participation group sees the same as no groups
-    And I am on the "Course feedback" "feedback activity" page logged in as user8
+    And I am on the "Course individualfeedback" "individualfeedback activity" page logged in as user8
     And I follow "Analysis"
     And I should see "Separate groups: All participants"
-    And I show chart data for the "multichoice1" feedback
+    And I show chart data for the "multichoice1" individualfeedback
     And I should see "3 (37.50 %)" in the "Yes of course" "table_row"
     And I should see "3 (37.50 %)" in the "Not at all" "table_row"
     And I should see "2 (25.00 %)" in the "I don't know" "table_row"
     And I log out
     # Teacher can browse everybody
-    And I am on the "Course feedback" "feedback activity" page logged in as teacher
+    And I am on the "Course individualfeedback" "individualfeedback activity" page logged in as teacher
     And I navigate to "Analysis" in current page administration
     And the field "Separate groups" matches value "All participants"
     And I should not see "Group 3" in the "Separate groups" "select"
-    And I show chart data for the "multichoice1" feedback
+    And I show chart data for the "multichoice1" individualfeedback
     And I should see "3 (37.50 %)" in the "Yes of course" "table_row"
     And I should see "3 (37.50 %)" in the "Not at all" "table_row"
     And I should see "2 (25.00 %)" in the "I don't know" "table_row"
     And I select "Group 1" from the "Separate groups" singleselect
-    And I show chart data for the "multichoice1" feedback
+    And I show chart data for the "multichoice1" individualfeedback
     And I should see "2 (50.00 %)" in the "Yes of course" "table_row"
     And I should see "1 (25.00 %)" in the "Not at all" "table_row"
     And I select "Group 2" from the "Separate groups" singleselect
-    And I show chart data for the "multichoice1" feedback
+    And I show chart data for the "multichoice1" individualfeedback
     And I should see "0" in the "Yes of course" "table_row"
     And I should see "2 (66.67 %)" in the "Not at all" "table_row"
-    And I am on the "Course feedback" "feedback activity" page
+    And I am on the "Course individualfeedback" "individualfeedback activity" page
     And I navigate to "Responses" in current page administration
     And the field "Separate groups" matches value "Group 2"
     And I should not see "Username 1"
@@ -153,107 +153,107 @@ Feature: Feedbacks in courses with groups
     And I should see "Username 3"
 
   @javascript
-  Scenario: Anonymous feedback with groups in a course - insufficient responses
-    Given the following "mod_feedback > question" exists:
-      | activity        | feedback2                               |
+  Scenario: Anonymous individualfeedback with groups in a course - insufficient responses
+    Given the following "mod_individualfeedback > question" exists:
+      | activity        | individualfeedback2                               |
       | name            | Do you like this course?                |
       | questiontype    | multichoice                             |
       | label           | multichoice1                            |
       | subtype         | r                                       |
       | hidenoselect    | 1                                       |
       | values          | Yes of course\nNot at all\nI don't know |
-    And the following "mod_feedback > responses" exist:
+    And the following "mod_individualfeedback > responses" exist:
       | activity  | user  | Do you like this course? |
-      | feedback2 | user1 | Not at all               |
-    When I am on the "Course anon feedback" "feedback activity" page logged in as user1
+      | individualfeedback2 | user1 | Not at all               |
+    When I am on the "Course anon individualfeedback" "individualfeedback activity" page logged in as user1
     And I follow "Analysis"
     Then I should not see "Yes of course"
     And I should see "There are insufficient responses for this group"
 
   @javascript
-  Scenario: Anonymous feedback with groups in a course
-    Given the following "mod_feedback > question" exists:
-      | activity        | feedback2                               |
+  Scenario: Anonymous individualfeedback with groups in a course
+    Given the following "mod_individualfeedback > question" exists:
+      | activity        | individualfeedback2                               |
       | name            | Do you like this course?                |
       | questiontype    | multichoice                             |
       | label           | multichoice1                            |
       | subtype         | r                                       |
       | hidenoselect    | 1                                       |
       | values          | Yes of course\nNot at all\nI don't know |
-    And the following "mod_feedback > responses" exist:
+    And the following "mod_individualfeedback > responses" exist:
       | activity  | user  | Do you like this course? |
-      | feedback2 | user1 | Not at all               |
-      | feedback2 | user2 | I don't know             |
-      | feedback2 | user3 | Not at all               |
-      | feedback2 | user4 | Yes of course            |
-      | feedback2 | user5 | Yes of course            |
-      | feedback2 | user6 | Not at all               |
-      | feedback2 | user7 | I don't know             |
-      | feedback2 | user8 | Yes of course            |
+      | individualfeedback2 | user1 | Not at all               |
+      | individualfeedback2 | user2 | I don't know             |
+      | individualfeedback2 | user3 | Not at all               |
+      | individualfeedback2 | user4 | Yes of course            |
+      | individualfeedback2 | user5 | Yes of course            |
+      | individualfeedback2 | user6 | Not at all               |
+      | individualfeedback2 | user7 | I don't know             |
+      | individualfeedback2 | user8 | Yes of course            |
     # View analysis, user1 should only see one group - group 1
-    When I am on the "Course anon feedback" "feedback activity" page logged in as user1
+    When I am on the "Course anon individualfeedback" "individualfeedback activity" page logged in as user1
     And I follow "Analysis"
     And I should see "Separate groups: Group 1"
-    And I show chart data for the "multichoice1" feedback
+    And I show chart data for the "multichoice1" individualfeedback
     And I should see "2 (50.00 %)" in the "Yes of course" "table_row"
     And I should see "1 (25.00 %)" in the "Not at all" "table_row"
     And I log out
     # View analysis, user3 should only see one group - group 2
-    And I am on the "Course anon feedback" "feedback activity" page logged in as user3
+    And I am on the "Course anon individualfeedback" "individualfeedback activity" page logged in as user3
     And I follow "Analysis"
     And I should see "Separate groups: Group 2"
-    And I show chart data for the "multichoice1" feedback
+    And I show chart data for the "multichoice1" individualfeedback
     And I should see "0" in the "Yes of course" "table_row"
     And I should see "2 (66.67 %)" in the "Not at all" "table_row"
     And I log out
     # View analysis, user2 should see a group selector and be able to change the group but not view all.
-    And I am on the "Course anon feedback" "feedback activity" page logged in as user2
+    And I am on the "Course anon individualfeedback" "individualfeedback activity" page logged in as user2
     And I follow "Analysis"
     And the field "Separate groups" matches value "Group 1"
-    And I show chart data for the "multichoice1" feedback
+    And I show chart data for the "multichoice1" individualfeedback
     And I should see "2 (50.00 %)" in the "Yes of course" "table_row"
     And I should see "1 (25.00 %)" in the "Not at all" "table_row"
     And I select "Group 2" from the "Separate groups" singleselect
-    And I show chart data for the "multichoice1" feedback
+    And I show chart data for the "multichoice1" individualfeedback
     And I should see "0" in the "Yes of course" "table_row"
     And I should see "2 (66.67 %)" in the "Not at all" "table_row"
     And the "Separate groups" select box should not contain "All participants"
     And I log out
     # User without group can see all participants only
-    And I am on the "Course anon feedback" "feedback activity" page logged in as user7
+    And I am on the "Course anon individualfeedback" "individualfeedback activity" page logged in as user7
     And I follow "Analysis"
     And I should see "Separate groups: All participants"
-    And I show chart data for the "multichoice1" feedback
+    And I show chart data for the "multichoice1" individualfeedback
     And I should see "3 (37.50 %)" in the "Yes of course" "table_row"
     And I should see "3 (37.50 %)" in the "Not at all" "table_row"
     And I should see "2 (25.00 %)" in the "I don't know" "table_row"
     And I log out
     # User in non-participation group is the same as no groups.
-    And I am on the "Course anon feedback" "feedback activity" page logged in as user8
+    And I am on the "Course anon individualfeedback" "individualfeedback activity" page logged in as user8
     And I follow "Analysis"
     And I should see "Separate groups: All participants"
-    And I show chart data for the "multichoice1" feedback
+    And I show chart data for the "multichoice1" individualfeedback
     And I should see "3 (37.50 %)" in the "Yes of course" "table_row"
     And I should see "3 (37.50 %)" in the "Not at all" "table_row"
     And I should see "2 (25.00 %)" in the "I don't know" "table_row"
     And I log out
     # Teacher can browse everybody
-    And I am on the "Course anon feedback" "feedback activity" page logged in as teacher
+    And I am on the "Course anon individualfeedback" "individualfeedback activity" page logged in as teacher
     And I navigate to "Analysis" in current page administration
     And the field "Separate groups" matches value "All participants"
-    And I show chart data for the "multichoice1" feedback
+    And I show chart data for the "multichoice1" individualfeedback
     And I should see "3 (37.50 %)" in the "Yes of course" "table_row"
     And I should see "3 (37.50 %)" in the "Not at all" "table_row"
     And I should see "2 (25.00 %)" in the "I don't know" "table_row"
     And I select "Group 1" from the "Separate groups" singleselect
-    And I show chart data for the "multichoice1" feedback
+    And I show chart data for the "multichoice1" individualfeedback
     And I should see "2 (50.00 %)" in the "Yes of course" "table_row"
     And I should see "1 (25.00 %)" in the "Not at all" "table_row"
     And I select "Group 2" from the "Separate groups" singleselect
-    And I show chart data for the "multichoice1" feedback
+    And I show chart data for the "multichoice1" individualfeedback
     And I should see "0" in the "Yes of course" "table_row"
     And I should see "2 (66.67 %)" in the "Not at all" "table_row"
-    And I am on the "Course anon feedback" "feedback activity" page
+    And I am on the "Course anon individualfeedback" "individualfeedback activity" page
     And I navigate to "Responses" in current page administration
     # The response numbers were randomly allocated, we only can assert the number of visible responses here:
     And the field "Separate groups" matches value "Group 2"

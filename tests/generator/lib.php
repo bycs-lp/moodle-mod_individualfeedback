@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * mod_feedback data generator.
+ * mod_individualfeedback data generator.
  *
- * @package    mod_feedback
+ * @package    mod_individualfeedback
  * @category   test
  * @copyright  2013 Ankit Agarwal
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -26,22 +26,22 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * mod_feedback data generator class.
+ * mod_individualfeedback data generator class.
  *
- * @package    mod_feedback
+ * @package    mod_individualfeedback
  * @category   test
  * @copyright  2013 Ankit Agarwal
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_feedback_generator extends testing_module_generator {
+class mod_individualfeedback_generator extends testing_module_generator {
 
     public function create_instance($record = null, ?array $options = null) {
         global $CFG;
-        require_once($CFG->dirroot.'/mod/feedback/lib.php');
+        require_once($CFG->dirroot.'/mod/individualfeedback/lib.php');
         $record = (object)(array)$record;
 
         if (!isset($record->anonymous)) {
-            $record->anonymous = FEEDBACK_ANONYMOUS_YES;
+            $record->anonymous = INDIVIDUALFEEDBACK_ANONYMOUS_YES;
         }
         if (!isset($record->email_notification)) {
             $record->email_notification = 0;
@@ -77,7 +77,7 @@ class mod_feedback_generator extends testing_module_generator {
             $record->completionsubmit = 0;
         }
 
-        // Hack to bypass draft processing of feedback_add_instance.
+        // Hack to bypass draft processing of individualfeedback_add_instance.
         $record->page_after_submit_editor['itemid'] = false;
 
         return parent::create_instance($record, (array)$options);
@@ -93,8 +93,8 @@ class mod_feedback_generator extends testing_module_generator {
         global $DB;
 
         $questiontype = $data['questiontype'] ?? 'textfield';
-        $cm = get_coursemodule_from_id('feedback', $data['cmid']);
-        $feedback = $DB->get_record('feedback', ['id' => $cm->instance]);
+        $cm = get_coursemodule_from_id('individualfeedback', $data['cmid']);
+        $individualfeedback = $DB->get_record('individualfeedback', ['id' => $cm->instance]);
 
         unset($data['questiontype']);
         unset($data['cmid']);
@@ -109,29 +109,29 @@ class mod_feedback_generator extends testing_module_generator {
                 $data['dependitem'],
                 $data['dependitem'],
             ];
-            $dependid = $DB->get_field_select('feedback_item', 'id', $select, $params, MUST_EXIST);
+            $dependid = $DB->get_field_select('individualfeedback_item', 'id', $select, $params, MUST_EXIST);
             $data['dependitem'] = $dependid;
         } else {
             // Make sure `dependvalue` is not set if we are not creating a dependent item.
             unset($data['dependvalue']);
         }
 
-        return call_user_func([$this, "create_item_{$questiontype}"], $feedback, $data);
+        return call_user_func([$this, "create_item_{$questiontype}"], $individualfeedback, $data);
     }
 
     /**
      * Create response.
      *
      * @param array $data Response data.
-     * @return stdClass feedback_completed response instance.
+     * @return stdClass individualfeedback_completed response instance.
      */
     public function create_response(array $data): stdClass {
         global $DB;
 
         $userid = $data['userid'];
         $responsenumber = null;
-        $cm = get_coursemodule_from_id('feedback', $data['cmid']);
-        $feedback = $DB->get_record('feedback', ['id' => $cm->instance]);
+        $cm = get_coursemodule_from_id('individualfeedback', $data['cmid']);
+        $individualfeedback = $DB->get_record('individualfeedback', ['id' => $cm->instance]);
         $answers = [];
 
         if (isset($data['responsenumber']) && trim($data['responsenumber']) !== '') {
@@ -140,7 +140,7 @@ class mod_feedback_generator extends testing_module_generator {
 
         if (isset($data['anonymous']) && trim($data['anonymous']) !== '') {
             $anonymous = filter_var(trim($data['anonymous']), FILTER_VALIDATE_BOOLEAN);
-            $feedback->anonymous = $anonymous ? FEEDBACK_ANONYMOUS_YES : FEEDBACK_ANONYMOUS_NO;
+            $individualfeedback->anonymous = $anonymous ? INDIVIDUALFEEDBACK_ANONYMOUS_YES : INDIVIDUALFEEDBACK_ANONYMOUS_NO;
         }
 
         unset($data['cmid']);
@@ -149,36 +149,36 @@ class mod_feedback_generator extends testing_module_generator {
         unset($data['responsenumber']);
 
         foreach ($data as $question => $response) {
-            $item = $DB->get_record('feedback_item', ['name' => trim($question)], '*', MUST_EXIST);
+            $item = $DB->get_record('individualfeedback_item', ['name' => trim($question)], '*', MUST_EXIST);
 
             $answers["{$item->typ}_{$item->id}"] = $this->get_item_response_value($item, $response);
         }
 
-        $feedbackcompletion = new mod_feedback_completion(
-            $feedback,
+        $individualfeedbackcompletion = new mod_individualfeedback_completion(
+            $individualfeedback,
             $cm,
             $cm->course,
             false,
             null,
-            $feedback->anonymous === FEEDBACK_ANONYMOUS_YES ? null : $userid,
+            $individualfeedback->anonymous === INDIVIDUALFEEDBACK_ANONYMOUS_YES ? null : $userid,
             $userid
         );
 
-        if (!$feedbackcompletion->can_complete()) {
-            throw new coding_exception("User {$userid} cannot complete this feedback activity.");
+        if (!$individualfeedbackcompletion->can_complete()) {
+            throw new coding_exception("User {$userid} cannot complete this individualfeedback activity.");
         }
 
-        if (!$feedbackcompletion->is_open()) {
+        if (!$individualfeedbackcompletion->is_open()) {
             throw new coding_exception("This activity is not open.");
         }
 
-        $feedbackcompletion->set_module_viewed();
-        $feedbackcompletion->save_response_tmp((object) $answers);
-        $feedbackcompletion->save_response();
-        $completed = $feedbackcompletion->get_completed();
+        $individualfeedbackcompletion->set_module_viewed();
+        $individualfeedbackcompletion->save_response_tmp((object) $answers);
+        $individualfeedbackcompletion->save_response();
+        $completed = $individualfeedbackcompletion->get_completed();
 
         if (!is_null($responsenumber)) {
-            $DB->update_record('feedback_completed', [
+            $DB->update_record('individualfeedback_completed', [
                 'id' => $completed->id,
                 'random_response' => $responsenumber,
             ]);
@@ -190,25 +190,25 @@ class mod_feedback_generator extends testing_module_generator {
     /**
      * Create info question item.
      *
-     * @param object $feedback feedback record
+     * @param object $individualfeedback individualfeedback record
      * @param array $record (optional) to override default values
      * @return stdClass
      */
-    public function create_item_info($feedback, $record = array()) {
+    public function create_item_info($individualfeedback, $record = array()) {
         global $DB, $CFG;
 
-        require_once($CFG->dirroot.'/mod/feedback/lib.php');
+        require_once($CFG->dirroot.'/mod/individualfeedback/lib.php');
 
-        $itemobj = feedback_get_item_class('info');
-        $position = $DB->count_records('feedback_item', array('feedback' => $feedback->id)) + 1;
+        $itemobj = individualfeedback_get_item_class('info');
+        $position = $DB->count_records('individualfeedback_item', array('individualfeedback' => $individualfeedback->id)) + 1;
 
         $record = (array)$record + array(
             'id' => 0,
-            'feedback' => $feedback->id,
+            'individualfeedback' => $individualfeedback->id,
             'template' => 0,
-            'name' => 'Feedback question item ' . $position,
-            'label' => 'Feedback label ' . $position,
-            'presentation' => \feedback_item_info::MODE_COURSE,
+            'name' => 'Individualfeedback question item ' . $position,
+            'label' => 'Individualfeedback label ' . $position,
+            'presentation' => \individualfeedback_item_info::MODE_COURSE,
             'typ' => 'info',
             'hasvalue' => 0,
             'position' => $position,
@@ -225,21 +225,21 @@ class mod_feedback_generator extends testing_module_generator {
     /**
      * Create label question item.
      *
-     * @param object $feedback feedback record
+     * @param object $individualfeedback individualfeedback record
      * @param array $record (optional) to override default values
      * @return stdClass
      */
-    public function create_item_label($feedback, $record = array()) {
+    public function create_item_label($individualfeedback, $record = array()) {
         global $DB, $CFG;
 
-        require_once($CFG->dirroot.'/mod/feedback/lib.php');
+        require_once($CFG->dirroot.'/mod/individualfeedback/lib.php');
 
-        $itemobj = feedback_get_item_class('label');
-        $position = $DB->count_records('feedback_item', array('feedback' => $feedback->id)) + 1;
+        $itemobj = individualfeedback_get_item_class('label');
+        $position = $DB->count_records('individualfeedback_item', array('individualfeedback' => $individualfeedback->id)) + 1;
 
         $record = (array)$record + array(
             'id' => 0,
-            'feedback' => $feedback->id,
+            'individualfeedback' => $individualfeedback->id,
             'template' => 0,
             'name' => 'label',
             'label' => '',
@@ -268,24 +268,24 @@ class mod_feedback_generator extends testing_module_generator {
     /**
      * Create multichoice question item.
      *
-     * @param object $feedback feedback record
+     * @param object $individualfeedback individualfeedback record
      * @param array $record (optional) to override default values
      * @return stdClass
      */
-    public function create_item_multichoice($feedback, $record = array()) {
+    public function create_item_multichoice($individualfeedback, $record = array()) {
         global $DB, $CFG;
 
-        require_once($CFG->dirroot.'/mod/feedback/lib.php');
+        require_once($CFG->dirroot.'/mod/individualfeedback/lib.php');
 
-        $itemobj = feedback_get_item_class('multichoice');
-        $position = $DB->count_records('feedback_item', array('feedback' => $feedback->id)) + 1;
+        $itemobj = individualfeedback_get_item_class('multichoice');
+        $position = $DB->count_records('individualfeedback_item', array('individualfeedback' => $individualfeedback->id)) + 1;
 
         $record = (array)$record + array(
             'id' => 0,
-            'feedback' => $feedback->id,
+            'individualfeedback' => $individualfeedback->id,
             'template' => 0,
-            'name' => 'Feedback question item ' . $position,
-            'label' => 'Feedback label ' . $position,
+            'name' => 'Individualfeedback question item ' . $position,
+            'label' => 'Individualfeedback label ' . $position,
             'presentation' => '',
             'typ' => 'multichoice',
             'hasvalue' => 0,
@@ -301,12 +301,12 @@ class mod_feedback_generator extends testing_module_generator {
             'values' => "a\nb\nc\nd\ne"
         );
 
-        $presentation = str_replace("\n", FEEDBACK_MULTICHOICE_LINE_SEP, trim($record['values']));
+        $presentation = str_replace("\n", INDIVIDUALFEEDBACK_MULTICHOICE_LINE_SEP, trim($record['values']));
 
         if ($record['horizontal'] == 1 AND $record['subtype'] != 'd') {
-            $presentation .= FEEDBACK_MULTICHOICE_ADJUST_SEP.'1';
+            $presentation .= INDIVIDUALFEEDBACK_MULTICHOICE_ADJUST_SEP.'1';
         }
-        $record['presentation'] = $record['subtype'].FEEDBACK_MULTICHOICE_TYPE_SEP.$presentation;
+        $record['presentation'] = $record['subtype'].INDIVIDUALFEEDBACK_MULTICHOICE_TYPE_SEP.$presentation;
 
         $itemobj->set_data((object) $record);
         return $itemobj->save_item();
@@ -315,24 +315,24 @@ class mod_feedback_generator extends testing_module_generator {
     /**
      * Create multichoicerated question item.
      *
-     * @param object $feedback feedback record
+     * @param object $individualfeedback individualfeedback record
      * @param array $record (optional) to override default values
      * @return stdClass
      */
-    public function create_item_multichoicerated($feedback, $record = array()) {
+    public function create_item_multichoicerated($individualfeedback, $record = array()) {
         global $DB, $CFG;
 
-        require_once($CFG->dirroot.'/mod/feedback/lib.php');
+        require_once($CFG->dirroot.'/mod/individualfeedback/lib.php');
 
-        $itemobj = feedback_get_item_class('multichoicerated');
-        $position = $DB->count_records('feedback_item', array('feedback' => $feedback->id)) + 1;
+        $itemobj = individualfeedback_get_item_class('multichoicerated');
+        $position = $DB->count_records('individualfeedback_item', array('individualfeedback' => $individualfeedback->id)) + 1;
 
         $record = (array)$record + array(
             'id' => 0,
-            'feedback' => $feedback->id,
+            'individualfeedback' => $individualfeedback->id,
             'template' => 0,
-            'name' => 'Feedback question item ' . $position,
-            'label' => 'Feedback label ' . $position,
+            'name' => 'Individualfeedback question item ' . $position,
+            'label' => 'Individualfeedback label ' . $position,
             'presentation' => '',
             'typ' => 'multichoicerated',
             'hasvalue' => 0,
@@ -348,14 +348,14 @@ class mod_feedback_generator extends testing_module_generator {
             'values' => "0/a\n1/b\n2/c\n3/d\n4/e"
         );
 
-        $itemobj = new feedback_item_multichoicerated();
+        $itemobj = new individualfeedback_item_multichoicerated();
         $presentation = $itemobj->prepare_presentation_values_save(trim($record['values']),
-            FEEDBACK_MULTICHOICERATED_VALUE_SEP2, FEEDBACK_MULTICHOICERATED_VALUE_SEP);
+            INDIVIDUALFEEDBACK_MULTICHOICERATED_VALUE_SEP2, INDIVIDUALFEEDBACK_MULTICHOICERATED_VALUE_SEP);
 
         if ($record['horizontal'] == 1 AND $record['subtype'] != 'd') {
-            $presentation .= FEEDBACK_MULTICHOICERATED_ADJUST_SEP.'1';
+            $presentation .= INDIVIDUALFEEDBACK_MULTICHOICERATED_ADJUST_SEP.'1';
         }
-        $record['presentation'] = $record['subtype'].FEEDBACK_MULTICHOICERATED_TYPE_SEP.$presentation;
+        $record['presentation'] = $record['subtype'].INDIVIDUALFEEDBACK_MULTICHOICERATED_TYPE_SEP.$presentation;
 
         $itemobj->set_data((object) $record);
         return $itemobj->save_item();
@@ -364,24 +364,24 @@ class mod_feedback_generator extends testing_module_generator {
     /**
      * Create numeric question item.
      *
-     * @param object $feedback feedback record
+     * @param object $individualfeedback individualfeedback record
      * @param array $record (optional) to override default values
      * @return stdClass
      */
-    public function create_item_numeric($feedback, $record = array()) {
+    public function create_item_numeric($individualfeedback, $record = array()) {
         global $DB, $CFG;
 
-        require_once($CFG->dirroot.'/mod/feedback/lib.php');
+        require_once($CFG->dirroot.'/mod/individualfeedback/lib.php');
 
-        $itemobj = feedback_get_item_class('numeric');
-        $position = $DB->count_records('feedback_item', array('feedback' => $feedback->id)) + 1;
+        $itemobj = individualfeedback_get_item_class('numeric');
+        $position = $DB->count_records('individualfeedback_item', array('individualfeedback' => $individualfeedback->id)) + 1;
 
         $record = (array)$record + array(
             'id' => 0,
-            'feedback' => $feedback->id,
+            'individualfeedback' => $individualfeedback->id,
             'template' => 0,
-            'name' => 'Feedback question item ' . $position,
-            'label' => 'Feedback label ' . $position,
+            'name' => 'Individualfeedback question item ' . $position,
+            'label' => 'Individualfeedback label ' . $position,
             'presentation' => '',
             'typ' => 'numeric',
             'hasvalue' => 0,
@@ -409,24 +409,24 @@ class mod_feedback_generator extends testing_module_generator {
     /**
      * Create textarea question item.
      *
-     * @param object $feedback feedback record
+     * @param object $individualfeedback individualfeedback record
      * @param array $record (optional) to override default values
      * @return stdClass
      */
-    public function create_item_textarea($feedback, $record = array()) {
+    public function create_item_textarea($individualfeedback, $record = array()) {
         global $DB, $CFG;
 
-        require_once($CFG->dirroot.'/mod/feedback/lib.php');
+        require_once($CFG->dirroot.'/mod/individualfeedback/lib.php');
 
-        $itemobj = feedback_get_item_class('textarea');
-        $position = $DB->count_records('feedback_item', array('feedback' => $feedback->id)) + 1;
+        $itemobj = individualfeedback_get_item_class('textarea');
+        $position = $DB->count_records('individualfeedback_item', array('individualfeedback' => $individualfeedback->id)) + 1;
 
         $record = (array)$record + array(
             'id' => 0,
-            'feedback' => $feedback->id,
+            'individualfeedback' => $individualfeedback->id,
             'template' => 0,
-            'name' => 'Feedback question item ' . $position,
-            'label' => 'Feedback label ' . $position,
+            'name' => 'Individualfeedback question item ' . $position,
+            'label' => 'Individualfeedback label ' . $position,
             'presentation' => '',
             'typ' => 'textarea',
             'hasvalue' => 0,
@@ -448,24 +448,24 @@ class mod_feedback_generator extends testing_module_generator {
     /**
      * Create textfield question item.
      *
-     * @param object $feedback feedback record
+     * @param object $individualfeedback individualfeedback record
      * @param array $record (optional) to override default values
      * @return stdClass
      */
-    public function create_item_textfield($feedback, $record = array()) {
+    public function create_item_textfield($individualfeedback, $record = array()) {
         global $DB, $CFG;
 
-        require_once($CFG->dirroot.'/mod/feedback/lib.php');
+        require_once($CFG->dirroot.'/mod/individualfeedback/lib.php');
 
-        $itemobj = feedback_get_item_class('textfield');
-        $position = $DB->count_records('feedback_item', array('feedback' => $feedback->id)) + 1;
+        $itemobj = individualfeedback_get_item_class('textfield');
+        $position = $DB->count_records('individualfeedback_item', array('individualfeedback' => $individualfeedback->id)) + 1;
 
         $record = (array)$record + array(
             'id' => 0,
-            'feedback' => $feedback->id,
+            'individualfeedback' => $individualfeedback->id,
             'template' => 0,
-            'name' => 'Feedback question item ' . $position,
-            'label' => 'Feedback label ' . $position,
+            'name' => 'Individualfeedback question item ' . $position,
+            'label' => 'Individualfeedback label ' . $position,
             'presentation' => '',
             'typ' => 'textfield',
             'hasvalue' => 0,
@@ -487,18 +487,18 @@ class mod_feedback_generator extends testing_module_generator {
     /**
      * Create pagebreak.
      *
-     * @param object $feedback feedback record
+     * @param object $individualfeedback individualfeedback record
      * @return int|false false if there already is a pagebreak on last position or the id of the pagebreak-item
      */
-    public function create_item_pagebreak($feedback) {
+    public function create_item_pagebreak($individualfeedback) {
         global $CFG;
-        require_once($CFG->dirroot.'/mod/feedback/lib.php');
+        require_once($CFG->dirroot.'/mod/individualfeedback/lib.php');
 
-        return feedback_create_pagebreak($feedback->id);
+        return individualfeedback_create_pagebreak($individualfeedback->id);
     }
 
     /**
-     * Format feedback item values.
+     * Format individualfeedback item values.
      *
      * This method will replace newline characters with the proper line separator for each question type.
      *
@@ -509,23 +509,23 @@ class mod_feedback_generator extends testing_module_generator {
     protected function format_item_values(string $questiontype, string $values): string {
         global $CFG;
 
-        if (!file_exists($CFG->dirroot.'/mod/feedback/item/'.$questiontype.'/lib.php')) {
+        if (!file_exists($CFG->dirroot.'/mod/individualfeedback/item/'.$questiontype.'/lib.php')) {
             throw new coding_exception("Question type '$questiontype' not found");
         }
 
-        require_once($CFG->dirroot.'/mod/feedback/item/'.$questiontype.'/lib.php');
+        require_once($CFG->dirroot.'/mod/individualfeedback/item/'.$questiontype.'/lib.php');
 
         $questiontype = strtoupper($questiontype);
 
-        if (defined("FEEDBACK_{$questiontype}_LINE_SEP")) {
-            return implode(constant("FEEDBACK_{$questiontype}_LINE_SEP"), explode('\n', $values));
+        if (defined("INDIVIDUALFEEDBACK_{$questiontype}_LINE_SEP")) {
+            return implode(constant("INDIVIDUALFEEDBACK_{$questiontype}_LINE_SEP"), explode('\n', $values));
         }
 
         return $values;
     }
 
     /**
-     * Given a response to a feedback item, return its corresponding value.
+     * Given a response to a individualfeedback item, return its corresponding value.
      *
      * @param mixed $record Item record
      * @param string $response Response name
@@ -533,7 +533,7 @@ class mod_feedback_generator extends testing_module_generator {
      */
     protected function get_item_response_value($record, string $response) {
         if (strpos($record->typ, 'multichoice') === 0) {
-            $item = feedback_get_item_class($record->typ);
+            $item = individualfeedback_get_item_class($record->typ);
 
             return $this->get_choice_item_response_value($item, $record, $response);
         }
@@ -542,15 +542,15 @@ class mod_feedback_generator extends testing_module_generator {
     }
 
     /**
-     * Given a response to a feedback choice item, return its corresponding value.
+     * Given a response to a individualfeedback choice item, return its corresponding value.
      *
-     * @param feedback_item_base $item Feedback item
+     * @param individualfeedback_item_base $item Individualfeedback item
      * @param mixed $record Item record
      * @param string $response Response
      * @param int $offset Choice to start looking from
      * @return int Response choice index
      */
-    protected function get_choice_item_response_value(feedback_item_base $item, $record, string $response, int $offset = 1): int {
+    protected function get_choice_item_response_value(individualfeedback_item_base $item, $record, string $response, int $offset = 1): int {
         $printval = $item->get_printval($record, (object) ['value' => $offset]);
 
         if (empty($printval)) {

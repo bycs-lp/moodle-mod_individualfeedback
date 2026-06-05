@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This file keeps track of upgrades to the feedback module.
+ * This file keeps track of upgrades to the individualfeedback module.
  *
  * Sometimes, changes between versions involve
  * alterations to database structures and other
@@ -34,12 +34,12 @@
  * Please do not forget to use upgrade_set_timeout()
  * before any action that may take longer time to finish.
  *
- * @package   mod_feedback
+ * @package   mod_individualfeedback
  * @copyright Andreas Grabs
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-function xmldb_feedback_upgrade($oldversion) {
+function xmldb_individualfeedback_upgrade($oldversion) {
     global $DB;
     $dbman = $DB->get_manager();
 
@@ -56,22 +56,22 @@ function xmldb_feedback_upgrade($oldversion) {
     // Put any upgrade step following this.
 
     if ($oldversion < 2026022300) {
-        // Changing precision of field name on table feedback to (1333).
-        $table = new xmldb_table('feedback');
+        // Changing precision of field name on table individualfeedback to (1333).
+        $table = new xmldb_table('individualfeedback');
         $field = new xmldb_field('name', XMLDB_TYPE_CHAR, '1333', null, XMLDB_NOTNULL, null, null, 'course');
 
         // Launch change of precision for field name.
         $dbman->change_field_precision($table, $field);
 
-        // Changing precision of field name on table feedback_item to (1333).
-        $table = new xmldb_table('feedback_item');
+        // Changing precision of field name on table individualfeedback_item to (1333).
+        $table = new xmldb_table('individualfeedback_item');
         $field = new xmldb_field('name', XMLDB_TYPE_CHAR, '1333', null, XMLDB_NOTNULL, null, null, 'template');
 
         // Launch change of precision for field name.
         $dbman->change_field_precision($table, $field);
 
-        // Feedback savepoint reached.
-        upgrade_mod_savepoint(true, 2026022300, 'feedback');
+        // Individualfeedback savepoint reached.
+        upgrade_mod_savepoint(true, 2026022300, 'individualfeedback');
     }
 
     // Automatically generated Moodle v5.2.0 release upgrade line.

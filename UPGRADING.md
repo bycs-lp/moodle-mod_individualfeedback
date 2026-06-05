@@ -1,18 +1,18 @@
-# mod_feedback Upgrade notes
+# mod_individualfeedback Upgrade notes
 
 ## 5.2
 
 ### Deprecated
 
-- The method `feedback_init_feedback_session()` has been deprecated, along with all other direct access to `$SESSION` from the module
+- The method `individualfeedback_init_individualfeedback_session()` has been deprecated, along with all other direct access to `$SESSION` from the module
 
   For more information see [MDL-86607](https://tracker.moodle.org/browse/MDL-86607)
 
 ### Removed
 
 - - The following files have been removed:
-    - `public/mod/feedback/edit_form.php`.
-    - `public/mod/feedback/use_templ_form.php`.
+    - `public/mod/individualfeedback/edit_form.php`.
+    - `public/mod/individualfeedback/use_templ_form.php`.
 
   For more information see [MDL-87425](https://tracker.moodle.org/browse/MDL-87425)
 
@@ -20,7 +20,7 @@
 
 ### Added
 
-- Two new methods, `feedback_get_completeds` and `feedback_get_completeds_count`, have been added to the feedback API. These methods allow you to retrieve completed items based on multiple groups.
+- Two new methods, `individualfeedback_get_completeds` and `individualfeedback_get_completeds_count`, have been added to the individualfeedback API. These methods allow you to retrieve completed items based on multiple groups.
 
   For more information see [MDL-85850](https://tracker.moodle.org/browse/MDL-85850)
 
@@ -28,7 +28,7 @@
 
 ### Added
 
-- Added new `mod_feedback_questions_reorder` external function
+- Added new `mod_individualfeedback_questions_reorder` external function
 
   For more information see [MDL-81745](https://tracker.moodle.org/browse/MDL-81745)
 
@@ -48,9 +48,9 @@
 
 ### Deprecated
 
-- The `\feedback_check_is_switchrole()` function has been deprecated as it didn't work.
+- The `\individualfeedback_check_is_switchrole()` function has been deprecated as it didn't work.
 
   For more information see [MDL-72424](https://tracker.moodle.org/browse/MDL-72424)
-- The method `\mod_feedback\output\renderer::create_template_form()` has been deprecated. It is not used anymore.
+- The method `\mod_individualfeedback\output\renderer::create_template_form()` has been deprecated. It is not used anymore.
 
   For more information see [MDL-81742](https://tracker.moodle.org/browse/MDL-81742)
