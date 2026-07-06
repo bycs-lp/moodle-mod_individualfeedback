@@ -49,6 +49,9 @@ class individualfeedback_item_multichoice extends individualfeedback_item_base {
 
         $item->ignoreempty = $this->ignoreempty($item);
         $item->hidenoselect = $this->hidenoselect($item);
+        // +++ MBS-Hack (nersesov) : load negativeformulated flag from item options.
+        $item->negativeformulated = \mod_individualfeedback\hack\lib::get_negativeformulated($item);
+        // --- MBS-Hack
 
         //all items for dependitem
         $individualfeedbackitems = individualfeedback_get_depend_candidates_for_item($individualfeedback, $item);
@@ -83,6 +86,9 @@ class individualfeedback_item_multichoice extends individualfeedback_item_base {
 
         $this->set_ignoreempty($item, $item->ignoreempty);
         $this->set_hidenoselect($item, $item->hidenoselect);
+        // +++ MBS-Hack (nersesov) : persist negativeformulated flag in item options.
+        \mod_individualfeedback\hack\lib::set_negativeformulated($item, !empty($item->negativeformulated));
+        // --- MBS-Hack
 
         $item->hasvalue = $this->get_hasvalue();
         if (!$item->id) {

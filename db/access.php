@@ -167,6 +167,22 @@ $capabilities = array(
         )
     ),
 
+    // +++ MBS-Hack (nersesov) : selfassessment capability for the fork's self-assessment workflow.
+    // Must live in db/access.php: update_capabilities() runs after every plugin upgrade and
+    // DELETES capabilities that are not declared here (a purely programmatic insert does not survive).
+    'mod/individualfeedback:selfassessment' => array(
+
+        'riskbitmask' => RISK_PERSONAL,
+
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => array(
+            'teacher' => CAP_ALLOW,
+            'editingteacher' => CAP_ALLOW
+        )
+    ),
+    // --- MBS-Hack
+
 );
 
 

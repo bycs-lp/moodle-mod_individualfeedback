@@ -77,5 +77,12 @@ function xmldb_individualfeedback_upgrade($oldversion) {
     // Automatically generated Moodle v5.2.0 release upgrade line.
     // Put any upgrade step following this.
 
+    // +++ MBS-Hack (nersesov) : fork-specific schema additions (selfassessment, template userid, linked table).
+    if ($oldversion < 2026042001) {
+        \mod_individualfeedback\hack\db_schema::apply_fork_schema();
+        upgrade_mod_savepoint(true, 2026042001, 'individualfeedback');
+    }
+    // --- MBS-Hack
+
     return true;
 }
