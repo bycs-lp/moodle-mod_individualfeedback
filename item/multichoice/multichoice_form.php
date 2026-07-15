@@ -66,6 +66,10 @@ class individualfeedback_multichoice_form extends individualfeedback_item_form {
                            'ignoreempty',
                            get_string('do_not_analyse_empty_submits', 'individualfeedback'));
 
+        // +++ MBS-Hack (nersesov) : negatively formulated question selector.
+        \mod_individualfeedback\hack\lib::add_negativeformulated_form_element($mform);
+        // --- MBS-Hack
+
         $mform->addElement('textarea', 'values', get_string('multichoice_values', 'individualfeedback'),
             'wrap="virtual" rows="10" cols="65"');
 

@@ -1,0 +1,382 @@
+/* styles using by individualfeedback */
+.path-mod-individualfeedback span.individualfeedback_info {
+    font-weight: bold;
+}
+
+.path-mod-individualfeedback div.individualfeedback_is_dependent {
+    background: #ddd;
+}
+
+.path-mod-individualfeedback span.individualfeedback_depend {
+    color: #f00;
+}
+
+.path-mod-individualfeedback hr.individualfeedback_pagebreak {
+    height: 4px;
+    color: #aaa;
+    background-color: #aaa;
+    border: 0;
+    margin: 0;
+}
+
+.path-mod-individualfeedback .drag_target_active {
+    opacity: .25;
+}
+
+.path-mod-individualfeedback .drag_item_active {
+    opacity: .5;
+}
+
+.path-mod-individualfeedback .individualfeedback_bar_image {
+    height: 10px;
+}
+
+.path-mod-individualfeedback #analysis-form label {
+    display: inline;
+}
+
+.path-mod-individualfeedback .templateslist td.cell.action,
+.path-mod-individualfeedback .templateslist th.header.action {
+    width: 10%;
+}
+
+.path-mod-individualfeedback .individualfeedback-comparison {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 1.5rem;
+    row-gap: 1.5rem;
+}
+
+.path-mod-individualfeedback .individualfeedback-comparison__column {
+    min-width: 0;
+}
+
+.path-mod-individualfeedback .individualfeedback-comparison__column .chart-area,
+.path-mod-individualfeedback .individualfeedback-comparison__column .chart-container,
+.path-mod-individualfeedback .individualfeedback-comparison__column canvas {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    display: block;
+    margin: 0 auto;
+}
+
+.path-mod-individualfeedback .individualfeedback-comparison--compact .individualfeedback-comparison__column .chart-area,
+.path-mod-individualfeedback .individualfeedback-comparison--compact .individualfeedback-comparison__column .chart-container,
+.path-mod-individualfeedback .individualfeedback-comparison--compact .individualfeedback-comparison__column canvas {
+    transform: scale(0.75);
+    transform-origin: top left;
+}
+
+@media (max-width: 768px) {
+    .path-mod-individualfeedback .individualfeedback-comparison {
+        grid-template-columns: 1fr;
+    }
+    .path-mod-individualfeedback .individualfeedback-comparison--compact .individualfeedback-comparison__column .chart-area,
+    .path-mod-individualfeedback .individualfeedback-comparison--compact .individualfeedback-comparison__column .chart-container,
+    .path-mod-individualfeedback .individualfeedback-comparison--compact .individualfeedback-comparison__column canvas {
+        transform: none;
+    }
+}
+
+/* Analysis page */
+.path-mod-individualfeedback table.analysis {
+    width: 100%;
+    border-top: 1px solid #aaa;
+    margin-top: 10px;
+}
+
+.path-mod-individualfeedback table.analysis tr:first-child th {
+    padding-top: 10px;
+}
+
+.path-mod-individualfeedback table.analysis tr:hover {
+    background: #f5f5f5;
+}
+
+.path-mod-individualfeedback table.analysis td.singlevalue:before,
+.path-mod-individualfeedback table.analysis td.optionname:before {
+    content: '- ';
+}
+
+.path-mod-individualfeedback table.analysis.itemtype_textarea td {
+    padding: 4px 0;
+}
+
+.path-mod-individualfeedback table.analysis tr.isempty {
+    display: none;
+}
+
+/* Responses list */
+.path-mod-individualfeedback #showentrytable td.cell.completed_timemodified,
+.path-mod-individualfeedback #showentryanontable td.cell.random_response {
+    font-weight: bold;
+}
+
+.path-mod-individualfeedback #showentrytable td.cell.userpic,
+.path-mod-individualfeedback #showentrytable td.cell.deleteentry,
+.path-mod-individualfeedback #showentryanontable td.cell.deleteentry {
+    width: 10px;
+}
+
+/* Responses navigation */
+.path-mod-individualfeedback .response_navigation {
+    margin: .5em 0;
+}
+
+.path-mod-individualfeedback .response_navigation a {
+    display: inline-block;
+}
+
+.path-mod-individualfeedback .response_navigation a.back_to_list {
+    margin: auto;
+    float: right;
+    left: -50%;
+    position: relative;
+}
+
+.path-mod-individualfeedback .response_navigation .prev_response:before {
+    /*rtl:raw:
+    content: ' ► ';
+    */
+    /*rtl:remove*/
+    content: ' ◄ ';
+}
+
+.path-mod-individualfeedback .response_navigation .next_response:after {
+    /*rtl:raw:
+    content: ' ◄ ';
+    */
+    /*rtl:remove*/
+    content: ' ► ';
+}
+
+.path-mod-individualfeedback .response_navigation .next_response {
+    float: right;
+}
+
+.path-mod-individualfeedback .response_navigation .prev_response {
+    float: left;
+}
+
+.path-mod-individualfeedback div.individualfeedback_questiongroup_start {
+    border-top: 1px solid #00a8d5;
+    border-bottom: 1px solid #00a8d5;
+    margin-bottom: 30px;
+}
+
+/* Edit page: group start row like a normal row – no bar, no extra line */
+#page-mod-individualfeedback-edit div.individualfeedback_questiongroup_start {
+    border: none;
+    margin: 0;
+    padding: 0;
+    display: inline;
+}
+#page-mod-individualfeedback-edit div.individualfeedback_questiongroup_start .h3.individualfeedback_questiongroup {
+    display: inline;
+    border: none;
+    line-height: inherit;
+}
+/* Group start row: no card frame so it does not look like a separate box */
+#page-mod-individualfeedback-edit .mform .fitem:has(.individualfeedback_qgroup_zone_start) {
+    border: none;
+    background: transparent;
+    padding-left: 0;
+    margin-bottom: 0.25rem;
+}
+
+/* Flat question group: only indent "inside" and bottom "end"; start has no extra line */
+#page-mod-individualfeedback-edit .individualfeedback_qgroup_zone_start {
+    /* No border-top so it doesn’t feel like a separate line */
+}
+#page-mod-individualfeedback-edit .individualfeedback_qgroup_zone_inside {
+    border-left: 3px solid #00a8d5;
+    padding-left: 1rem;
+    margin-left: 0.5rem;
+}
+#page-mod-individualfeedback-edit .individualfeedback_qgroup_zone_end {
+    border-bottom: 2px solid #00a8d5;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.path-mod-individualfeedback div.movequestiongroup {
+    cursor: move;
+}
+
+.path-mod-individualfeedback div.subtabs_placeholder {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    font-size: 0.8em;
+}
+
+.path-mod-individualfeedback div.questiongroup_analysed {
+    border-top: 1px solid #00a8d5;
+    border-bottom: 1px solid #00a8d5;
+    margin-top: 40px;
+    margin-bottom: 20px;
+}
+
+.path-mod-individualfeedback select.questiongroup_select {
+    margin-left: 20px;
+}
+
+.path-mod-individualfeedback .clear {
+    clear: both;
+}
+
+.path-mod-individualfeedback .chart-table-data {
+    display: none;
+}
+
+.path-mod-individualfeedback .individualfeedbackprint {
+    padding-top: 20px !important;
+}
+
+.path-mod-individualfeedback .individualfeedbackprint .continuebutton:first-child {
+    margin-bottom: 20px;
+}
+
+
+#page-mod-individualfeedback-print .fitemtitle *,
+#page-mod-individualfeedback-complete .fitemtitle *,
+#page-mod-individualfeedback-use_templ .fitemtitle * {
+  font-weight: 550;
+}
+#page-mod-individualfeedback-print .felement.fgroup label,
+#page-mod-individualfeedback-complete .felement.fgroup label,
+#page-mod-individualfeedback-use_templ .felement.fgroup label {
+  font-weight: normal;
+}
+#page-mod-individualfeedback-print .itemhandle,
+#page-mod-individualfeedback-complete .itemhandle,
+#page-mod-individualfeedback-use_templ .itemhandle {
+  padding-left: 24px;
+}
+#page-mod-individualfeedback-print .mform .fitem div.fitemtitle,
+#page-mod-individualfeedback-complete .mform .fitem div.fitemtitle,
+#page-mod-individualfeedback-use_templ .mform .fitem div.fitemtitle {
+  width: 100%;
+}
+#page-mod-individualfeedback-print .mform .fitem div.fitemtitle > *,
+#page-mod-individualfeedback-complete .mform .fitem div.fitemtitle > *,
+#page-mod-individualfeedback-use_templ .mform .fitem div.fitemtitle > * {
+  float: left;
+}
+#page-mod-individualfeedback-print .mform .fitem div.fitemtitle,
+#page-mod-individualfeedback-complete .mform .fitem div.fitemtitle,
+#page-mod-individualfeedback-use_templ .mform .fitem div.fitemtitle {
+  text-align: left;
+}
+#page-mod-individualfeedback-print .mform .fitem div.felement,
+#page-mod-individualfeedback-print .mform .fitem fieldset.felement,
+#page-mod-individualfeedback-complete .mform .fitem div.felement,
+#page-mod-individualfeedback-complete .mform .fitem fieldset.felement,
+#page-mod-individualfeedback-use_templ .mform .fitem div.felement,
+#page-mod-individualfeedback-use_templ .mform .fitem fieldset.felement {
+  padding-left: 60px;
+  width: 100%;
+}
+#page-mod-individualfeedback-print .mform .fitem fieldset.felement.fgroup > span,
+#page-mod-individualfeedback-complete .mform .fitem fieldset.felement.fgroup > span,
+#page-mod-individualfeedback-use_templ .mform .fitem fieldset.felement.fgroup > span {
+  padding-right: 15px;
+}
+#page-mod-individualfeedback-analysis .h3 {
+  border-bottom: 2px solid #ff6600;
+  line-height: 2;
+}
+
+/* Responder / imprimir / usar template: título e fim do grupo apenas em negrito, sem linhas, pouco espaço */
+#page-mod-individualfeedback-print .individualfeedback_questiongroup,
+#page-mod-individualfeedback-complete .individualfeedback_questiongroup,
+#page-mod-individualfeedback-use_templ .individualfeedback_questiongroup {
+  font-weight: bold;
+  border: none;
+  line-height: inherit;
+  font-size: inherit;
+}
+#page-mod-individualfeedback-print .individualfeedback_questiongroupend,
+#page-mod-individualfeedback-complete .individualfeedback_questiongroupend,
+#page-mod-individualfeedback-use_templ .individualfeedback_questiongroupend {
+  font-weight: bold;
+}
+#page-mod-individualfeedback-print div.individualfeedback_questiongroup_start,
+#page-mod-individualfeedback-complete div.individualfeedback_questiongroup_start,
+#page-mod-individualfeedback-use_templ div.individualfeedback_questiongroup_start {
+  border: none;
+  margin-bottom: 0;
+}
+#page-mod-individualfeedback-print .mform .fitem:has(.individualfeedback_qgroup_zone_start),
+#page-mod-individualfeedback-complete .mform .fitem:has(.individualfeedback_qgroup_zone_start),
+#page-mod-individualfeedback-use_templ .mform .fitem:has(.individualfeedback_qgroup_zone_start) {
+  margin-bottom: 0;
+}
+#page-mod-individualfeedback-print .mform .fitem:has(.individualfeedback_qgroup_zone_start) + .fitem,
+#page-mod-individualfeedback-complete .mform .fitem:has(.individualfeedback_qgroup_zone_start) + .fitem,
+#page-mod-individualfeedback-use_templ .mform .fitem:has(.individualfeedback_qgroup_zone_start) + .fitem {
+  margin-top: 0.25rem;
+}
+#page-mod-individualfeedback-analysis th {
+    font-weight: normal;
+}
+
+/*changes for boost template*/
+#page-mod-individualfeedback-print div.col-md-3,
+#page-mod-individualfeedback-complete div.col-md-3,
+#page-mod-individualfeedback-use_templ div.col-md-3,
+#page-mod-individualfeedback-analysis div.col-md-3 {
+    width: 100%;
+}
+
+#page-mod-individualfeedback-analysis div.action-menu {
+    text-align: right;
+}
+
+/* Styles for edit page - matching mod_feedback behavior */
+/* These styles replicate what mod_feedback provides for .individualfeedback_itemlist */
+#page-mod-individualfeedback-edit .mform .fitem.individualfeedback_itemlist {
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    background-color: #fff;
+}
+
+#page-mod-individualfeedback-edit .mform .fitem.individualfeedback_itemlist:hover {
+    border-color: #adb5bd;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+/* Fix flexbox alignment for item actions menu */
+/* Override any Moodle form styles that might interfere with flexbox */
+#page-mod-individualfeedback-edit .col-form-label {
+    display: block !important;
+    width: 100%;
+}
+
+#page-mod-individualfeedback-edit .col-form-label .itemtitle {
+    display: flex !important;
+    align-items: center;
+    width: 100%;
+}
+
+/* Ensure the itemtitle container uses flexbox */
+#page-mod-individualfeedback-edit .itemtitle {
+    display: flex !important;
+    align-items: center;
+    width: 100%;
+}
+
+/* Make itemname expand to push itemactions to the right */
+#page-mod-individualfeedback-edit .itemtitle .itemname {
+    flex: 1 1 auto !important;
+    min-width: 0;
+}
+
+/* Ensure itemactions stays on the right */
+#page-mod-individualfeedback-edit .itemtitle .itemactions {
+    flex-shrink: 0 !important;
+    margin-left: auto !important;
+    padding-left: 0.5rem;
+}
