@@ -13,9 +13,11 @@ Feature: Anonymous feedback
       | user2    | Username  | 2        |
       | teacher  | Teacher   | 3        |
       | manager  | Manager   | 4        |
+    And the following config values are set as admin:
+      | enablelinearnav | 0 | format_topics |
     And the following "courses" exist:
-      | fullname | shortname | enablelinearnav |
-      | Course 1 | C1        | 0               |
+      | fullname | shortname |
+      | Course 1 | C1        |
     And the following "course enrolments" exist:
       | user  | course | role    |
       | user1 | C1     | student |

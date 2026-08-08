@@ -9,9 +9,11 @@ Feature: View activity completion in the feedback activity
       | username | firstname | lastname | email                |
       | student1 | Vinnie    | Student1 | student1@example.com |
       | teacher1 | Darrell   | Teacher1 | teacher1@example.com |
+    And the following config values are set as admin:
+      | enablelinearnav | 0 | format_topics |
     And the following "courses" exist:
-      | fullname | shortname | enablecompletion | showcompletionconditions | enablelinearnav |
-      | Course 1 | C1        | 1                | 1                        | 0               |
+      | fullname | shortname | enablecompletion | showcompletionconditions |
+      | Course 1 | C1        | 1                | 1                        |
     And the following "course enrolments" exist:
       | user | course | role           |
       | student1 | C1 | student        |

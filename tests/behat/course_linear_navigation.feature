@@ -99,9 +99,11 @@ Feature: Display the course linear navigation in the feedback pages
     And I should not see "Link to next activity"
 
   Scenario: The Link to next activity setting is shown when linear navigation is disabled
-    Given the following "courses" exist:
-      | fullname | shortname | format | enablelinearnav |
-      | Course 2 | C2        | topics | 0               |
+    Given the following config values are set as admin:
+      | enablelinearnav | 0 | format_topics |
+    And the following "courses" exist:
+      | fullname | shortname | format |
+      | Course 2 | C2        | topics |
     And the following "course enrolments" exist:
       | user     | course | role           |
       | student1 | C2     | student        |
