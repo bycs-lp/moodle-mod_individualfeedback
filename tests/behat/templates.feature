@@ -116,7 +116,9 @@ Feature: Saving, using and deleting individualfeedback templates
     And I press "Actions"
     And I choose "Save as template" in the open action menu
     And I set the field "Name" to "My first template"
-    And I set the field "Available for all courses" to "1"
+    # +++ MBS-Hack (nersesov) : core checkbox "Available for all courses" is a Course/User/Public radio in the fork (H14).
+    And I set the field "Public" to "1"
+    # --- MBS-Hack
     And I click on "Save" "button" in the ".modal-dialog" "css_element"
     And I log out
     And I am on the "Learning experience course 2" "individualfeedback activity" page logged in as teacher
@@ -135,7 +137,9 @@ Feature: Saving, using and deleting individualfeedback templates
     And I press "Actions"
     And I choose "Save as template" in the open action menu
     And I set the field "Name" to "My public template"
-    And I set the field "Available for all courses" to "1"
+    # +++ MBS-Hack (nersesov) : core checkbox "Available for all courses" is a Course/User/Public radio in the fork (H14).
+    And I set the field "Public" to "1"
+    # --- MBS-Hack
     And I click on "Save" "button" in the ".modal-dialog" "css_element"
     And I press "Actions"
     And I choose "Save as template" in the open action menu
@@ -168,7 +172,9 @@ Feature: Saving, using and deleting individualfeedback templates
     And I press "Actions"
     And I choose "Save as template" in the open action menu
     And I set the field "Name" to "My public template"
-    And I set the field "Available for all courses" to "1"
+    # +++ MBS-Hack (nersesov) : core checkbox "Available for all courses" is a Course/User/Public radio in the fork (H14).
+    And I set the field "Public" to "1"
+    # --- MBS-Hack
     And I click on "Save" "button" in the ".modal-dialog" "css_element"
     And I press "Actions"
     And I choose "Save as template" in the open action menu

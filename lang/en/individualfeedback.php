@@ -312,3 +312,57 @@ $string['public'] = 'Public';
 
 // Deprecated since Moodle 5.2.
 $string['selected_dump'] = 'Selected indexes of $SESSION variable are dumped below:';
+
+// +++ MBS-Hack (nersesov) : additional string definitions (custom question types, question groups, comparison/detail analysis, selfassessment, privacy).
+$string['all_results'] = 'All results';
+$string['analysis_questiongroup'] = 'Question group with {$a} questions.';
+$string['average_given_answer'] = 'Average given answer';
+$string['comparison_groups'] = 'Comparison (Groups)';
+$string['comparison_questions'] = 'Comparison (Questions)';
+$string['confirmdeleteitem_questiongroup'] = 'Are you sure you want to delete this element?
+Please note: all questions within this group will be deleted.';
+$string['delete_questiongroup'] = 'Delete question group';
+$string['detail_groups'] = 'Detail (Groups)';
+$string['detail_questions'] = 'Detail (Questions)';
+$string['edit_questiongroup'] = 'Edit question group';
+$string['end_of_questiongroup'] = 'End of question group';
+$string['error_calculating_averages'] = 'There are questions with varying numbers of answers in this group. No averages could be calculated.';
+$string['error_subtab'] = 'No valid subtab selected, can\'t load this page.';
+$string['evaluations'] = 'Evaluations';
+$string['filter_questiongroups'] = 'Filter question group:';
+$string['fivelevelapproval'] = '5 level approval';
+$string['fivelevelapproval_options'] = 'Strongly disagree
+Disagree
+Neither agree nor disagree
+Agree
+Strongly agree';
+$string['fivelevelapprovaltype'] = '5 level approval type';
+$string['fourlevelapproval'] = '4 level approval';
+$string['fourlevelapproval_options'] = 'Strongly disagree
+Disagree
+Agree
+Strongly agree';
+$string['fourlevelapprovaltype'] = '4 level approval type';
+$string['fourlevelfrequency'] = '4 level frequency';
+$string['fourlevelfrequency_options'] = 'Never
+Sometimes
+Often
+Always';
+$string['fourlevelfrequencytype'] = '4 level frequency type';
+$string['individualfeedback_not_linked'] = 'This individual feedback is not linked to other activities.';
+$string['individualfeedback_questions_not_equal'] = 'The questions of the linked individual feedback activities are not equal and can therefore not be compared.';
+$string['individualfeedback:selfassessment'] = 'Self assessment';
+$string['move_questiongroup'] = 'Move this question group';
+$string['negative_formulated'] = 'Control question';
+$string['negative_formulated_help'] = 'Control questions are semantically inverted question, i. e. negatively formulated. In the calculation of averages (in case of question groups) the answer values are inverted.';
+$string['no_questions_in_group'] = 'No questions in this group';
+$string['overview_groups'] = 'Overview (Groups)';
+$string['overview_questions'] = 'Overview (Questions)';
+$string['privacy:metadata'] = 'The plugin "individual feedback" anonymizes data and does not allow to assign responses to a single user.';
+$string['privacy:metadata:completed:selfassessment'] = 'Whether the submission is a self-assessment response.';
+$string['privacy:metadata:template'] = 'A record of feedback templates, which may be linked to the user who created them.';
+$string['privacy:metadata:template:userid'] = 'The ID of the user who created the private template.';
+$string['questiongroup'] = 'Question group';
+$string['questiongroup_name'] = 'Question group name';
+$string['selfassessment'] = 'Self assessment';
+// --- MBS-Hack
