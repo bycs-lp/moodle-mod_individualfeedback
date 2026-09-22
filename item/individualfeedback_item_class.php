@@ -16,6 +16,10 @@
 
 abstract class individualfeedback_item_base {
 
+    // +++ MBS-Hack (nersesov) : inject extended item methods used by analysis features.
+    use \mod_individualfeedback\local\extended_item_base_trait;
+    // --- MBS-Hack
+
     /** @var string type of the element, should be overridden by each item type */
     protected $type;
 
@@ -121,7 +125,9 @@ abstract class individualfeedback_item_base {
      * @return bool
      */
     public function can_switch_require() {
-        return true;
+        // +++ MBS-Hack (nersesov) : required flag is managed by the fork (selfassessment workflow).
+        return \mod_individualfeedback\hack\lib::can_switch_require_default();
+        // --- MBS-Hack
     }
 
     /**
