@@ -14,29 +14,29 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 /**
- * Unit tests for (some of) mod/feedback/lib.php.
+ * Unit tests for (some of) mod/individualfeedback/lib.php.
  *
- * @package    mod_feedback
+ * @package    mod_individualfeedback
  * @copyright  2016 Stephen Bourget
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-namespace mod_feedback;
+namespace mod_individualfeedback;
 
-use mod_feedback_completion;
+use mod_individualfeedback_completion;
 
 defined('MOODLE_INTERNAL') || die();
 global $CFG;
-require_once($CFG->dirroot . '/mod/feedback/lib.php');
+require_once($CFG->dirroot . '/mod/individualfeedback/lib.php');
 
 /**
- * Unit tests for (some of) mod/feedback/lib.php.
+ * Unit tests for (some of) mod/individualfeedback/lib.php.
  *
  * @copyright  2016 Stephen Bourget
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class lib_test extends \advanced_testcase {
 
-    public function test_feedback_initialise(): void {
+    public function test_individualfeedback_initialise(): void {
         $this->resetAfterTest();
         $this->setAdminUser();
 
@@ -46,33 +46,33 @@ final class lib_test extends \advanced_testcase {
         $params['timeclose'] = time() + DAYSECS;
         $params['anonymous'] = 1;
         $params['intro'] = 'Some introduction text';
-        $feedback = $this->getDataGenerator()->create_module('feedback', $params);
+        $individualfeedback = $this->getDataGenerator()->create_module('individualfeedback', $params);
 
         // Test different ways to construct the structure object.
-        $pseudocm = get_coursemodule_from_instance('feedback', $feedback->id); // Object similar to cm_info.
-        $cm = get_fast_modinfo($course)->instances['feedback'][$feedback->id]; // Instance of cm_info.
+        $pseudocm = get_coursemodule_from_instance('individualfeedback', $individualfeedback->id); // Object similar to cm_info.
+        $cm = get_fast_modinfo($course)->instances['individualfeedback'][$individualfeedback->id]; // Instance of cm_info.
 
         $constructorparams = [
-            [$feedback, null],
+            [$individualfeedback, null],
             [null, $pseudocm],
             [null, $cm],
-            [$feedback, $pseudocm],
-            [$feedback, $cm],
+            [$individualfeedback, $pseudocm],
+            [$individualfeedback, $cm],
         ];
 
         foreach ($constructorparams as $params) {
-            $structure = new mod_feedback_completion($params[0], $params[1], 0);
+            $structure = new mod_individualfeedback_completion($params[0], $params[1], 0);
             $this->assertTrue($structure->is_open());
             $this->assertTrue($structure->get_cm() instanceof \cm_info);
-            $this->assertEquals($feedback->cmid, $structure->get_cm()->id);
-            $this->assertEquals($feedback->intro, $structure->get_feedback()->intro);
+            $this->assertEquals($individualfeedback->cmid, $structure->get_cm()->id);
+            $this->assertEquals($individualfeedback->intro, $structure->get_individualfeedback()->intro);
         }
     }
 
     /**
-     * Tests for mod_feedback_refresh_events.
+     * Tests for mod_individualfeedback_refresh_events.
      */
-    public function test_feedback_refresh_events(): void {
+    public function test_individualfeedback_refresh_events(): void {
         global $DB;
         $this->resetAfterTest();
         $this->setAdminUser();
@@ -81,34 +81,34 @@ final class lib_test extends \advanced_testcase {
         $timeclose = time() + 86400;
 
         $course = $this->getDataGenerator()->create_course();
-        $generator = $this->getDataGenerator()->get_plugin_generator('mod_feedback');
+        $generator = $this->getDataGenerator()->get_plugin_generator('mod_individualfeedback');
         $params['course'] = $course->id;
         $params['timeopen'] = $timeopen;
         $params['timeclose'] = $timeclose;
-        $feedback = $generator->create_instance($params);
-        $cm = get_coursemodule_from_instance('feedback', $feedback->id);
+        $individualfeedback = $generator->create_instance($params);
+        $cm = get_coursemodule_from_instance('individualfeedback', $individualfeedback->id);
         $context = \context_module::instance($cm->id);
 
         // Normal case, with existing course.
-        $this->assertTrue(feedback_refresh_events($course->id));
-        $eventparams = array('modulename' => 'feedback', 'instance' => $feedback->id, 'eventtype' => 'open');
+        $this->assertTrue(individualfeedback_refresh_events($course->id));
+        $eventparams = array('modulename' => 'individualfeedback', 'instance' => $individualfeedback->id, 'eventtype' => 'open');
         $openevent = $DB->get_record('event', $eventparams, '*', MUST_EXIST);
         $this->assertEquals($openevent->timestart, $timeopen);
 
-        $eventparams = array('modulename' => 'feedback', 'instance' => $feedback->id, 'eventtype' => 'close');
+        $eventparams = array('modulename' => 'individualfeedback', 'instance' => $individualfeedback->id, 'eventtype' => 'close');
         $closeevent = $DB->get_record('event', $eventparams, '*', MUST_EXIST);
         $this->assertEquals($closeevent->timestart, $timeclose);
         // In case the course ID is passed as a numeric string.
-        $this->assertTrue(feedback_refresh_events('' . $course->id));
+        $this->assertTrue(individualfeedback_refresh_events('' . $course->id));
         // Course ID not provided.
-        $this->assertTrue(feedback_refresh_events());
-        $eventparams = array('modulename' => 'feedback');
+        $this->assertTrue(individualfeedback_refresh_events());
+        $eventparams = array('modulename' => 'individualfeedback');
         $events = $DB->get_records('event', $eventparams);
         foreach ($events as $event) {
-            if ($event->modulename === 'feedback' && $event->instance === $feedback->id && $event->eventtype === 'open') {
+            if ($event->modulename === 'individualfeedback' && $event->instance === $individualfeedback->id && $event->eventtype === 'open') {
                 $this->assertEquals($event->timestart, $timeopen);
             }
-            if ($event->modulename === 'feedback' && $event->instance === $feedback->id && $event->eventtype === 'close') {
+            if ($event->modulename === 'individualfeedback' && $event->instance === $individualfeedback->id && $event->eventtype === 'close') {
                 $this->assertEquals($event->timestart, $timeclose);
             }
         }
@@ -135,16 +135,16 @@ final class lib_test extends \advanced_testcase {
         $record = array(
             'course' => $course->id,
             'custom' => 0,
-            'feedback' => 1,
+            'individualfeedback' => 1,
         );
-        $feedback = $this->getDataGenerator()->create_module('feedback', $record);
-        $cm = get_coursemodule_from_instance('feedback', $feedback->id, $course->id);
+        $individualfeedback = $this->getDataGenerator()->create_module('individualfeedback', $record);
+        $cm = get_coursemodule_from_instance('individualfeedback', $individualfeedback->id, $course->id);
         $cm = \cm_info::create($cm);
 
         $this->setUser($student);
         // Check that upon creation, the updates are only about the new configuration created.
         $onehourago = time() - HOURSECS;
-        $updates = feedback_check_updates_since($cm, $onehourago);
+        $updates = individualfeedback_check_updates_since($cm, $onehourago);
         foreach ($updates as $el => $val) {
             if ($el == 'configuration') {
                 $this->assertTrue($val->updated);
@@ -155,18 +155,18 @@ final class lib_test extends \advanced_testcase {
         }
 
         $record = [
-            'feedback' => $feedback->id,
+            'individualfeedback' => $individualfeedback->id,
             'userid' => $student->id,
             'timemodified' => time(),
             'random_response' => 0,
-            'anonymous_response' => FEEDBACK_ANONYMOUS_NO,
+            'anonymous_response' => INDIVIDUALFEEDBACK_ANONYMOUS_NO,
             'courseid' => $course->id,
         ];
-        $DB->insert_record('feedback_completed', (object)$record);
-        $DB->insert_record('feedback_completedtmp', (object)$record);
+        $DB->insert_record('individualfeedback_completed', (object)$record);
+        $DB->insert_record('individualfeedback_completedtmp', (object)$record);
 
         // Check now for finished and unfinished attempts.
-        $updates = feedback_check_updates_since($cm, $onehourago);
+        $updates = individualfeedback_check_updates_since($cm, $onehourago);
         $this->assertTrue($updates->attemptsunfinished->updated);
         $this->assertCount(1, $updates->attemptsunfinished->itemids);
 
@@ -177,23 +177,23 @@ final class lib_test extends \advanced_testcase {
     /**
      * Test calendar event provide action open.
      */
-    public function test_feedback_core_calendar_provide_event_action_open(): void {
+    public function test_individualfeedback_core_calendar_provide_event_action_open(): void {
         $this->resetAfterTest();
         $this->setAdminUser();
 
         $now = time();
         $course = $this->getDataGenerator()->create_course();
-        // Enrol admin as a student so they can complete the feedback.
+        // Enrol admin as a student so they can complete the individualfeedback.
         $this->getDataGenerator()->enrol_user(get_admin()->id, $course->id, 'student');
-        $feedback = $this->getDataGenerator()->create_module('feedback', ['course' => $course->id,
+        $individualfeedback = $this->getDataGenerator()->create_module('individualfeedback', ['course' => $course->id,
                 'timeopen' => $now - DAYSECS, 'timeclose' => $now + DAYSECS]);
-        $event = $this->create_action_event($course->id, $feedback->id, FEEDBACK_EVENT_TYPE_OPEN);
+        $event = $this->create_action_event($course->id, $individualfeedback->id, INDIVIDUALFEEDBACK_EVENT_TYPE_OPEN);
 
         $factory = new \core_calendar\action_factory();
-        $actionevent = mod_feedback_core_calendar_provide_event_action($event, $factory);
+        $actionevent = mod_individualfeedback_core_calendar_provide_event_action($event, $factory);
 
         $this->assertInstanceOf('\core_calendar\local\event\value_objects\action', $actionevent);
-        $this->assertEquals(get_string('answerquestions', 'feedback'), $actionevent->get_name());
+        $this->assertEquals(get_string('answerquestions', 'individualfeedback'), $actionevent->get_name());
         $this->assertInstanceOf('moodle_url', $actionevent->get_url());
         $this->assertEquals(1, $actionevent->get_item_count());
         $this->assertTrue($actionevent->is_actionable());
@@ -202,7 +202,7 @@ final class lib_test extends \advanced_testcase {
     /**
      * Test calendar event provide action open, viewed by a different user.
      */
-    public function test_feedback_core_calendar_provide_event_action_open_for_user(): void {
+    public function test_individualfeedback_core_calendar_provide_event_action_open_for_user(): void {
         global $DB;
 
         $this->resetAfterTest();
@@ -215,21 +215,21 @@ final class lib_test extends \advanced_testcase {
         $course = $this->getDataGenerator()->create_course();
         $this->getDataGenerator()->enrol_user($user->id, $course->id, $studentrole->id, 'manual');
 
-        $feedback = $this->getDataGenerator()->create_module('feedback', ['course' => $course->id,
+        $individualfeedback = $this->getDataGenerator()->create_module('individualfeedback', ['course' => $course->id,
             'timeopen' => $now - DAYSECS, 'timeclose' => $now + DAYSECS]);
-        $event = $this->create_action_event($course->id, $feedback->id, FEEDBACK_EVENT_TYPE_OPEN);
+        $event = $this->create_action_event($course->id, $individualfeedback->id, INDIVIDUALFEEDBACK_EVENT_TYPE_OPEN);
         $factory = new \core_calendar\action_factory();
 
         $this->setUser($user2);
 
         // User2 checking their events.
-        $actionevent = mod_feedback_core_calendar_provide_event_action($event, $factory, $user2->id);
+        $actionevent = mod_individualfeedback_core_calendar_provide_event_action($event, $factory, $user2->id);
         $this->assertNull($actionevent);
 
         // User2 checking $user's events.
-        $actionevent = mod_feedback_core_calendar_provide_event_action($event, $factory, $user->id);
+        $actionevent = mod_individualfeedback_core_calendar_provide_event_action($event, $factory, $user->id);
         $this->assertInstanceOf('\core_calendar\local\event\value_objects\action', $actionevent);
-        $this->assertEquals(get_string('answerquestions', 'feedback'), $actionevent->get_name());
+        $this->assertEquals(get_string('answerquestions', 'individualfeedback'), $actionevent->get_name());
         $this->assertInstanceOf('moodle_url', $actionevent->get_url());
         $this->assertEquals(1, $actionevent->get_item_count());
         $this->assertTrue($actionevent->is_actionable());
@@ -238,26 +238,26 @@ final class lib_test extends \advanced_testcase {
     /**
      * Test calendar event provide action closed.
      */
-    public function test_feedback_core_calendar_provide_event_action_closed(): void {
+    public function test_individualfeedback_core_calendar_provide_event_action_closed(): void {
         $this->resetAfterTest();
         $this->setAdminUser();
 
         $course = $this->getDataGenerator()->create_course();
-        $feedback = $this->getDataGenerator()->create_module('feedback', array('course' => $course->id,
+        $individualfeedback = $this->getDataGenerator()->create_module('individualfeedback', array('course' => $course->id,
                 'timeclose' => time() - DAYSECS));
-        $event = $this->create_action_event($course->id, $feedback->id, FEEDBACK_EVENT_TYPE_OPEN);
+        $event = $this->create_action_event($course->id, $individualfeedback->id, INDIVIDUALFEEDBACK_EVENT_TYPE_OPEN);
 
         $factory = new \core_calendar\action_factory();
-        $actionevent = mod_feedback_core_calendar_provide_event_action($event, $factory);
+        $actionevent = mod_individualfeedback_core_calendar_provide_event_action($event, $factory);
 
-        // No event on the dashboard if feedback is closed.
+        // No event on the dashboard if individualfeedback is closed.
         $this->assertNull($actionevent);
     }
 
     /**
      * Test calendar event provide action closed, viewed by a different user.
      */
-    public function test_feedback_core_calendar_provide_event_action_closed_for_user(): void {
+    public function test_individualfeedback_core_calendar_provide_event_action_closed_for_user(): void {
         global $DB;
 
         $this->resetAfterTest();
@@ -269,20 +269,20 @@ final class lib_test extends \advanced_testcase {
         $studentrole = $DB->get_record('role', array('shortname' => 'student'));
         $this->getDataGenerator()->enrol_user($user->id, $course->id, $studentrole->id, 'manual');
 
-        $feedback = $this->getDataGenerator()->create_module('feedback', array('course' => $course->id,
+        $individualfeedback = $this->getDataGenerator()->create_module('individualfeedback', array('course' => $course->id,
             'timeclose' => time() - DAYSECS));
-        $event = $this->create_action_event($course->id, $feedback->id, FEEDBACK_EVENT_TYPE_OPEN);
+        $event = $this->create_action_event($course->id, $individualfeedback->id, INDIVIDUALFEEDBACK_EVENT_TYPE_OPEN);
         $factory = new \core_calendar\action_factory();
         $this->setUser($user2);
 
         // User2 checking their events.
-        $actionevent = mod_feedback_core_calendar_provide_event_action($event, $factory, $user2->id);
+        $actionevent = mod_individualfeedback_core_calendar_provide_event_action($event, $factory, $user2->id);
         $this->assertNull($actionevent);
 
         // User2 checking $user's events.
-        $actionevent = mod_feedback_core_calendar_provide_event_action($event, $factory, $user->id);
+        $actionevent = mod_individualfeedback_core_calendar_provide_event_action($event, $factory, $user->id);
 
-        // No event on the dashboard if feedback is closed.
+        // No event on the dashboard if individualfeedback is closed.
         $this->assertNull($actionevent);
     }
 
@@ -291,22 +291,22 @@ final class lib_test extends \advanced_testcase {
      *
      * @throws coding_exception
      */
-    public function test_feedback_core_calendar_provide_event_action_open_in_future(): void {
+    public function test_individualfeedback_core_calendar_provide_event_action_open_in_future(): void {
         $this->resetAfterTest();
         $this->setAdminUser();
 
         $course = $this->getDataGenerator()->create_course();
-        // Enrol admin as a student so they can complete the feedback.
+        // Enrol admin as a student so they can complete the individualfeedback.
         $this->getDataGenerator()->enrol_user(get_admin()->id, $course->id, 'student');
-        $feedback = $this->getDataGenerator()->create_module('feedback', ['course' => $course->id,
+        $individualfeedback = $this->getDataGenerator()->create_module('individualfeedback', ['course' => $course->id,
                 'timeopen' => time() + DAYSECS]);
-        $event = $this->create_action_event($course->id, $feedback->id, FEEDBACK_EVENT_TYPE_OPEN);
+        $event = $this->create_action_event($course->id, $individualfeedback->id, INDIVIDUALFEEDBACK_EVENT_TYPE_OPEN);
 
         $factory = new \core_calendar\action_factory();
-        $actionevent = mod_feedback_core_calendar_provide_event_action($event, $factory);
+        $actionevent = mod_individualfeedback_core_calendar_provide_event_action($event, $factory);
 
         $this->assertInstanceOf('\core_calendar\local\event\value_objects\action', $actionevent);
-        $this->assertEquals(get_string('answerquestions', 'feedback'), $actionevent->get_name());
+        $this->assertEquals(get_string('answerquestions', 'individualfeedback'), $actionevent->get_name());
         $this->assertInstanceOf('moodle_url', $actionevent->get_url());
         $this->assertEquals(1, $actionevent->get_item_count());
         $this->assertFalse($actionevent->is_actionable());
@@ -317,7 +317,7 @@ final class lib_test extends \advanced_testcase {
      *
      * @throws coding_exception
      */
-    public function test_feedback_core_calendar_provide_event_action_open_in_future_for_user(): void {
+    public function test_individualfeedback_core_calendar_provide_event_action_open_in_future_for_user(): void {
         global $DB;
 
         $this->resetAfterTest();
@@ -329,22 +329,22 @@ final class lib_test extends \advanced_testcase {
         $studentrole = $DB->get_record('role', array('shortname' => 'student'));
         $this->getDataGenerator()->enrol_user($user->id, $course->id, $studentrole->id, 'manual');
 
-        $feedback = $this->getDataGenerator()->create_module('feedback', ['course' => $course->id,
+        $individualfeedback = $this->getDataGenerator()->create_module('individualfeedback', ['course' => $course->id,
             'timeopen' => time() + DAYSECS]);
-        $event = $this->create_action_event($course->id, $feedback->id, FEEDBACK_EVENT_TYPE_OPEN);
+        $event = $this->create_action_event($course->id, $individualfeedback->id, INDIVIDUALFEEDBACK_EVENT_TYPE_OPEN);
 
         $factory = new \core_calendar\action_factory();
         $this->setUser($user2);
 
         // User2 checking their events.
-        $actionevent = mod_feedback_core_calendar_provide_event_action($event, $factory, $user2->id);
+        $actionevent = mod_individualfeedback_core_calendar_provide_event_action($event, $factory, $user2->id);
         $this->assertNull($actionevent);
 
         // User2 checking $user's events.
-        $actionevent = mod_feedback_core_calendar_provide_event_action($event, $factory, $user->id);
+        $actionevent = mod_individualfeedback_core_calendar_provide_event_action($event, $factory, $user->id);
 
         $this->assertInstanceOf('\core_calendar\local\event\value_objects\action', $actionevent);
-        $this->assertEquals(get_string('answerquestions', 'feedback'), $actionevent->get_name());
+        $this->assertEquals(get_string('answerquestions', 'individualfeedback'), $actionevent->get_name());
         $this->assertInstanceOf('moodle_url', $actionevent->get_url());
         $this->assertEquals(1, $actionevent->get_item_count());
         $this->assertFalse($actionevent->is_actionable());
@@ -355,21 +355,21 @@ final class lib_test extends \advanced_testcase {
      *
      * @throws coding_exception
      */
-    public function test_feedback_core_calendar_provide_event_action_no_time_specified(): void {
+    public function test_individualfeedback_core_calendar_provide_event_action_no_time_specified(): void {
         $this->resetAfterTest();
         $this->setAdminUser();
 
         $course = $this->getDataGenerator()->create_course();
-        // Enrol admin as a student so they can complete the feedback.
+        // Enrol admin as a student so they can complete the individualfeedback.
         $this->getDataGenerator()->enrol_user(get_admin()->id, $course->id, 'student');
-        $feedback = $this->getDataGenerator()->create_module('feedback', ['course' => $course->id]);
-        $event = $this->create_action_event($course->id, $feedback->id, FEEDBACK_EVENT_TYPE_OPEN);
+        $individualfeedback = $this->getDataGenerator()->create_module('individualfeedback', ['course' => $course->id]);
+        $event = $this->create_action_event($course->id, $individualfeedback->id, INDIVIDUALFEEDBACK_EVENT_TYPE_OPEN);
 
         $factory = new \core_calendar\action_factory();
-        $actionevent = mod_feedback_core_calendar_provide_event_action($event, $factory);
+        $actionevent = mod_individualfeedback_core_calendar_provide_event_action($event, $factory);
 
         $this->assertInstanceOf('\core_calendar\local\event\value_objects\action', $actionevent);
-        $this->assertEquals(get_string('answerquestions', 'feedback'), $actionevent->get_name());
+        $this->assertEquals(get_string('answerquestions', 'individualfeedback'), $actionevent->get_name());
         $this->assertInstanceOf('moodle_url', $actionevent->get_url());
         $this->assertEquals(1, $actionevent->get_item_count());
         $this->assertTrue($actionevent->is_actionable());
@@ -380,7 +380,7 @@ final class lib_test extends \advanced_testcase {
      *
      * @throws coding_exception
      */
-    public function test_feedback_core_calendar_provide_event_action_no_time_specified_for_user(): void {
+    public function test_individualfeedback_core_calendar_provide_event_action_no_time_specified_for_user(): void {
         global $DB;
 
         $this->resetAfterTest();
@@ -392,30 +392,30 @@ final class lib_test extends \advanced_testcase {
         $studentrole = $DB->get_record('role', array('shortname' => 'student'));
         $this->getDataGenerator()->enrol_user($user->id, $course->id, $studentrole->id, 'manual');
 
-        $feedback = $this->getDataGenerator()->create_module('feedback', ['course' => $course->id]);
-        $event = $this->create_action_event($course->id, $feedback->id, FEEDBACK_EVENT_TYPE_OPEN);
+        $individualfeedback = $this->getDataGenerator()->create_module('individualfeedback', ['course' => $course->id]);
+        $event = $this->create_action_event($course->id, $individualfeedback->id, INDIVIDUALFEEDBACK_EVENT_TYPE_OPEN);
 
         $factory = new \core_calendar\action_factory();
         $this->setUser($user2);
 
         // User2 checking their events.
-        $actionevent = mod_feedback_core_calendar_provide_event_action($event, $factory, $user2->id);
+        $actionevent = mod_individualfeedback_core_calendar_provide_event_action($event, $factory, $user2->id);
         $this->assertNull($actionevent);
 
         // User2 checking $user's events.
-        $actionevent = mod_feedback_core_calendar_provide_event_action($event, $factory, $user->id);
+        $actionevent = mod_individualfeedback_core_calendar_provide_event_action($event, $factory, $user->id);
 
         $this->assertInstanceOf('\core_calendar\local\event\value_objects\action', $actionevent);
-        $this->assertEquals(get_string('answerquestions', 'feedback'), $actionevent->get_name());
+        $this->assertEquals(get_string('answerquestions', 'individualfeedback'), $actionevent->get_name());
         $this->assertInstanceOf('moodle_url', $actionevent->get_url());
         $this->assertEquals(1, $actionevent->get_item_count());
         $this->assertTrue($actionevent->is_actionable());
     }
 
     /**
-     * A user that can not submit feedback should not have an action.
+     * A user that can not submit individualfeedback should not have an action.
      */
-    public function test_feedback_core_calendar_provide_event_action_can_not_submit(): void {
+    public function test_individualfeedback_core_calendar_provide_event_action_can_not_submit(): void {
         global $DB;
 
         $this->resetAfterTest();
@@ -424,25 +424,25 @@ final class lib_test extends \advanced_testcase {
         $user = $this->getDataGenerator()->create_user();
         $studentrole = $DB->get_record('role', array('shortname' => 'student'));
         $course = $this->getDataGenerator()->create_course();
-        $feedback = $this->getDataGenerator()->create_module('feedback', ['course' => $course->id]);
-        $event = $this->create_action_event($course->id, $feedback->id, FEEDBACK_EVENT_TYPE_OPEN);
-        $cm = get_coursemodule_from_instance('feedback', $feedback->id);
+        $individualfeedback = $this->getDataGenerator()->create_module('individualfeedback', ['course' => $course->id]);
+        $event = $this->create_action_event($course->id, $individualfeedback->id, INDIVIDUALFEEDBACK_EVENT_TYPE_OPEN);
+        $cm = get_coursemodule_from_instance('individualfeedback', $individualfeedback->id);
         $context = \context_module::instance($cm->id);
         $this->getDataGenerator()->enrol_user($user->id, $course->id, $studentrole->id, 'manual');
 
         $this->setUser($user);
-        assign_capability('mod/feedback:complete', CAP_PROHIBIT, $studentrole->id, $context);
+        assign_capability('mod/individualfeedback:complete', CAP_PROHIBIT, $studentrole->id, $context);
 
         $factory = new \core_calendar\action_factory();
-        $action = mod_feedback_core_calendar_provide_event_action($event, $factory);
+        $action = mod_individualfeedback_core_calendar_provide_event_action($event, $factory);
 
         $this->assertNull($action);
     }
 
     /**
-     * A user that can not submit feedback should not have an action, viewed by a different user.
+     * A user that can not submit individualfeedback should not have an action, viewed by a different user.
      */
-    public function test_feedback_core_calendar_provide_event_action_can_not_submit_for_user(): void {
+    public function test_individualfeedback_core_calendar_provide_event_action_can_not_submit_for_user(): void {
         global $DB;
 
         $this->resetAfterTest();
@@ -452,31 +452,31 @@ final class lib_test extends \advanced_testcase {
         $user2 = $this->getDataGenerator()->create_user();
         $studentrole = $DB->get_record('role', array('shortname' => 'student'));
         $course = $this->getDataGenerator()->create_course();
-        $feedback = $this->getDataGenerator()->create_module('feedback', ['course' => $course->id]);
-        $event = $this->create_action_event($course->id, $feedback->id, FEEDBACK_EVENT_TYPE_OPEN);
-        $cm = get_coursemodule_from_instance('feedback', $feedback->id);
+        $individualfeedback = $this->getDataGenerator()->create_module('individualfeedback', ['course' => $course->id]);
+        $event = $this->create_action_event($course->id, $individualfeedback->id, INDIVIDUALFEEDBACK_EVENT_TYPE_OPEN);
+        $cm = get_coursemodule_from_instance('individualfeedback', $individualfeedback->id);
         $context = \context_module::instance($cm->id);
         $this->getDataGenerator()->enrol_user($user->id, $course->id, $studentrole->id, 'manual');
 
-        assign_capability('mod/feedback:complete', CAP_PROHIBIT, $studentrole->id, $context);
+        assign_capability('mod/individualfeedback:complete', CAP_PROHIBIT, $studentrole->id, $context);
         $factory = new \core_calendar\action_factory();
         $this->setUser($user2);
 
         // User2 checking their events.
 
-        $actionevent = mod_feedback_core_calendar_provide_event_action($event, $factory, $user2->id);
+        $actionevent = mod_individualfeedback_core_calendar_provide_event_action($event, $factory, $user2->id);
         $this->assertNull($actionevent);
 
         // User2 checking $user's events.
-        $actionevent = mod_feedback_core_calendar_provide_event_action($event, $factory, $user->id);
+        $actionevent = mod_individualfeedback_core_calendar_provide_event_action($event, $factory, $user->id);
 
         $this->assertNull($actionevent);
     }
 
     /**
-     * A user that has already submitted feedback should not have an action.
+     * A user that has already submitted individualfeedback should not have an action.
      */
-    public function test_feedback_core_calendar_provide_event_action_already_submitted(): void {
+    public function test_individualfeedback_core_calendar_provide_event_action_already_submitted(): void {
         global $DB;
 
         $this->resetAfterTest();
@@ -485,33 +485,33 @@ final class lib_test extends \advanced_testcase {
         $user = $this->getDataGenerator()->create_user();
         $studentrole = $DB->get_record('role', array('shortname' => 'student'));
         $course = $this->getDataGenerator()->create_course();
-        $feedback = $this->getDataGenerator()->create_module('feedback', ['course' => $course->id]);
-        $event = $this->create_action_event($course->id, $feedback->id, FEEDBACK_EVENT_TYPE_OPEN);
-        $cm = get_coursemodule_from_instance('feedback', $feedback->id);
+        $individualfeedback = $this->getDataGenerator()->create_module('individualfeedback', ['course' => $course->id]);
+        $event = $this->create_action_event($course->id, $individualfeedback->id, INDIVIDUALFEEDBACK_EVENT_TYPE_OPEN);
+        $cm = get_coursemodule_from_instance('individualfeedback', $individualfeedback->id);
         $context = \context_module::instance($cm->id);
 
         $this->setUser($user);
 
         $record = [
-            'feedback' => $feedback->id,
+            'individualfeedback' => $individualfeedback->id,
             'userid' => $user->id,
             'timemodified' => time(),
             'random_response' => 0,
-            'anonymous_response' => FEEDBACK_ANONYMOUS_NO,
+            'anonymous_response' => INDIVIDUALFEEDBACK_ANONYMOUS_NO,
             'courseid' => 0,
         ];
-        $DB->insert_record('feedback_completed', (object) $record);
+        $DB->insert_record('individualfeedback_completed', (object) $record);
 
         $factory = new \core_calendar\action_factory();
-        $action = mod_feedback_core_calendar_provide_event_action($event, $factory);
+        $action = mod_individualfeedback_core_calendar_provide_event_action($event, $factory);
 
         $this->assertNull($action);
     }
 
     /**
-     * A user that has already submitted feedback should not have an action, viewed by a different user.
+     * A user that has already submitted individualfeedback should not have an action, viewed by a different user.
      */
-    public function test_feedback_core_calendar_provide_event_action_already_submitted_for_user(): void {
+    public function test_individualfeedback_core_calendar_provide_event_action_already_submitted_for_user(): void {
         global $DB;
 
         $this->resetAfterTest();
@@ -521,51 +521,51 @@ final class lib_test extends \advanced_testcase {
         $user2 = $this->getDataGenerator()->create_user();
         $studentrole = $DB->get_record('role', array('shortname' => 'student'));
         $course = $this->getDataGenerator()->create_course();
-        $feedback = $this->getDataGenerator()->create_module('feedback', ['course' => $course->id]);
-        $event = $this->create_action_event($course->id, $feedback->id, FEEDBACK_EVENT_TYPE_OPEN);
-        $cm = get_coursemodule_from_instance('feedback', $feedback->id);
+        $individualfeedback = $this->getDataGenerator()->create_module('individualfeedback', ['course' => $course->id]);
+        $event = $this->create_action_event($course->id, $individualfeedback->id, INDIVIDUALFEEDBACK_EVENT_TYPE_OPEN);
+        $cm = get_coursemodule_from_instance('individualfeedback', $individualfeedback->id);
         $context = \context_module::instance($cm->id);
 
         $this->setUser($user);
 
         $record = [
-            'feedback' => $feedback->id,
+            'individualfeedback' => $individualfeedback->id,
             'userid' => $user->id,
             'timemodified' => time(),
             'random_response' => 0,
-            'anonymous_response' => FEEDBACK_ANONYMOUS_NO,
+            'anonymous_response' => INDIVIDUALFEEDBACK_ANONYMOUS_NO,
             'courseid' => 0,
         ];
-        $DB->insert_record('feedback_completed', (object) $record);
+        $DB->insert_record('individualfeedback_completed', (object) $record);
 
         $factory = new \core_calendar\action_factory();
         $this->setUser($user2);
 
         // User2 checking their events.
-        $actionevent = mod_feedback_core_calendar_provide_event_action($event, $factory, $user2->id);
+        $actionevent = mod_individualfeedback_core_calendar_provide_event_action($event, $factory, $user2->id);
         $this->assertNull($actionevent);
 
         // User2 checking $user's events.
-        $actionevent = mod_feedback_core_calendar_provide_event_action($event, $factory, $user->id);
+        $actionevent = mod_individualfeedback_core_calendar_provide_event_action($event, $factory, $user->id);
 
         $this->assertNull($actionevent);
     }
 
-    public function test_feedback_core_calendar_provide_event_action_already_completed(): void {
+    public function test_individualfeedback_core_calendar_provide_event_action_already_completed(): void {
         $this->resetAfterTest();
         set_config('enablecompletion', 1);
         $this->setAdminUser();
 
         // Create the activity.
         $course = $this->getDataGenerator()->create_course(array('enablecompletion' => 1));
-        $feedback = $this->getDataGenerator()->create_module('feedback', array('course' => $course->id),
+        $individualfeedback = $this->getDataGenerator()->create_module('individualfeedback', array('course' => $course->id),
             array('completion' => 2, 'completionview' => 1, 'completionexpected' => time() + DAYSECS));
 
         // Get some additional data.
-        $cm = get_coursemodule_from_instance('feedback', $feedback->id);
+        $cm = get_coursemodule_from_instance('individualfeedback', $individualfeedback->id);
 
         // Create a calendar event.
-        $event = $this->create_action_event($course->id, $feedback->id,
+        $event = $this->create_action_event($course->id, $individualfeedback->id,
             \core_completion\api::COMPLETION_EVENT_TYPE_DATE_COMPLETION_EXPECTED);
 
         // Mark the activity as completed.
@@ -576,30 +576,30 @@ final class lib_test extends \advanced_testcase {
         $factory = new \core_calendar\action_factory();
 
         // Decorate action event.
-        $actionevent = mod_feedback_core_calendar_provide_event_action($event, $factory);
+        $actionevent = mod_individualfeedback_core_calendar_provide_event_action($event, $factory);
 
         // Ensure result was null.
         $this->assertNull($actionevent);
     }
 
-    public function test_feedback_core_calendar_provide_event_action_already_completed_for_user(): void {
+    public function test_individualfeedback_core_calendar_provide_event_action_already_completed_for_user(): void {
         $this->resetAfterTest();
         set_config('enablecompletion', 1);
         $this->setAdminUser();
 
         // Create the activity.
         $course = $this->getDataGenerator()->create_course(array('enablecompletion' => 1));
-        $feedback = $this->getDataGenerator()->create_module('feedback', array('course' => $course->id),
+        $individualfeedback = $this->getDataGenerator()->create_module('individualfeedback', array('course' => $course->id),
             array('completion' => 2, 'completionview' => 1, 'completionexpected' => time() + DAYSECS));
 
         // Enrol a student in the course.
         $student = $this->getDataGenerator()->create_and_enrol($course, 'student');
 
         // Get some additional data.
-        $cm = get_coursemodule_from_instance('feedback', $feedback->id);
+        $cm = get_coursemodule_from_instance('individualfeedback', $individualfeedback->id);
 
         // Create a calendar event.
-        $event = $this->create_action_event($course->id, $feedback->id,
+        $event = $this->create_action_event($course->id, $individualfeedback->id,
             \core_completion\api::COMPLETION_EVENT_TYPE_DATE_COMPLETION_EXPECTED);
 
         // Mark the activity as completed for the student.
@@ -610,7 +610,7 @@ final class lib_test extends \advanced_testcase {
         $factory = new \core_calendar\action_factory();
 
         // Decorate action event for the student.
-        $actionevent = mod_feedback_core_calendar_provide_event_action($event, $factory, $student->id);
+        $actionevent = mod_individualfeedback_core_calendar_provide_event_action($event, $factory, $student->id);
 
         // Ensure result was null.
         $this->assertNull($actionevent);
@@ -620,14 +620,14 @@ final class lib_test extends \advanced_testcase {
      * Creates an action event.
      *
      * @param int $courseid The course id.
-     * @param int $instanceid The feedback id.
-     * @param string $eventtype The event type. eg. FEEDBACK_EVENT_TYPE_OPEN.
+     * @param int $instanceid The individualfeedback id.
+     * @param string $eventtype The event type. eg. INDIVIDUALFEEDBACK_EVENT_TYPE_OPEN.
      * @return bool|calendar_event
      */
     private function create_action_event($courseid, $instanceid, $eventtype) {
         $event = new \stdClass();
         $event->name = 'Calendar event';
-        $event->modulename = 'feedback';
+        $event->modulename = 'individualfeedback';
         $event->courseid = $courseid;
         $event->instance = $instanceid;
         $event->type = CALENDAR_EVENT_TYPE_ACTION;
@@ -642,24 +642,24 @@ final class lib_test extends \advanced_testcase {
      * This function should work given either an instance of the module (cm_info), such as when checking the active rules,
      * or if passed a stdClass of similar structure, such as when checking the the default completion settings for a mod type.
      */
-    public function test_mod_feedback_completion_get_active_rule_descriptions(): void {
+    public function test_mod_individualfeedback_completion_get_active_rule_descriptions(): void {
         $this->resetAfterTest();
         $this->setAdminUser();
 
         // Two activities, both with automatic completion. One has the 'completionsubmit' rule, one doesn't.
         $course = $this->getDataGenerator()->create_course(['enablecompletion' => 2]);
-        $feedback1 = $this->getDataGenerator()->create_module('feedback', [
+        $individualfeedback1 = $this->getDataGenerator()->create_module('individualfeedback', [
             'course' => $course->id,
             'completion' => 2,
             'completionsubmit' => 1
         ]);
-        $feedback2 = $this->getDataGenerator()->create_module('feedback', [
+        $individualfeedback2 = $this->getDataGenerator()->create_module('individualfeedback', [
             'course' => $course->id,
             'completion' => 2,
             'completionsubmit' => 0
         ]);
-        $cm1 = \cm_info::create(get_coursemodule_from_instance('feedback', $feedback1->id));
-        $cm2 = \cm_info::create(get_coursemodule_from_instance('feedback', $feedback2->id));
+        $cm1 = \cm_info::create(get_coursemodule_from_instance('individualfeedback', $individualfeedback1->id));
+        $cm2 = \cm_info::create(get_coursemodule_from_instance('individualfeedback', $individualfeedback2->id));
 
         // Data for the stdClass input type.
         // This type of input would occur when checking the default completion rules for an activity type, where we don't have
@@ -668,11 +668,11 @@ final class lib_test extends \advanced_testcase {
         $moddefaults->customdata = ['customcompletionrules' => ['completionsubmit' => 1]];
         $moddefaults->completion = 2;
 
-        $activeruledescriptions = [get_string('completionsubmit', 'feedback')];
-        $this->assertEquals(mod_feedback_get_completion_active_rule_descriptions($cm1), $activeruledescriptions);
-        $this->assertEquals(mod_feedback_get_completion_active_rule_descriptions($cm2), []);
-        $this->assertEquals(mod_feedback_get_completion_active_rule_descriptions($moddefaults), $activeruledescriptions);
-        $this->assertEquals(mod_feedback_get_completion_active_rule_descriptions(new \stdClass()), []);
+        $activeruledescriptions = [get_string('completionsubmit', 'individualfeedback')];
+        $this->assertEquals(mod_individualfeedback_get_completion_active_rule_descriptions($cm1), $activeruledescriptions);
+        $this->assertEquals(mod_individualfeedback_get_completion_active_rule_descriptions($cm2), []);
+        $this->assertEquals(mod_individualfeedback_get_completion_active_rule_descriptions($moddefaults), $activeruledescriptions);
+        $this->assertEquals(mod_individualfeedback_get_completion_active_rule_descriptions(new \stdClass()), []);
     }
 
     /**
@@ -686,13 +686,13 @@ final class lib_test extends \advanced_testcase {
         $this->setAdminUser();
         $generator = $this->getDataGenerator();
         $course = $generator->create_course();
-        $feedbackgenerator = $generator->get_plugin_generator('mod_feedback');
+        $individualfeedbackgenerator = $generator->get_plugin_generator('mod_individualfeedback');
         $timeopen = time();
         $timeclose = $timeopen + DAYSECS;
-        $feedback = $feedbackgenerator->create_instance(['course' => $course->id]);
-        $feedback->timeopen = $timeopen;
-        $feedback->timeclose = $timeclose;
-        $DB->update_record('feedback', $feedback);
+        $individualfeedback = $individualfeedbackgenerator->create_instance(['course' => $course->id]);
+        $individualfeedback->timeopen = $timeopen;
+        $individualfeedback->timeclose = $timeclose;
+        $DB->update_record('individualfeedback', $individualfeedback);
 
         $event = new \calendar_event([
             'name' => 'Test event',
@@ -701,21 +701,21 @@ final class lib_test extends \advanced_testcase {
             'courseid' => $course->id,
             'groupid' => 0,
             'userid' => 2,
-            'modulename' => 'feedback',
-            'instance' => $feedback->id,
+            'modulename' => 'individualfeedback',
+            'instance' => $individualfeedback->id,
             'eventtype' => 'SOME UNKNOWN EVENT',
             'timestart' => $timeopen,
             'timeduration' => 86400,
             'visible' => 1
         ]);
 
-        list($min, $max) = mod_feedback_core_calendar_get_valid_event_timestart_range($event, $feedback);
+        list($min, $max) = mod_individualfeedback_core_calendar_get_valid_event_timestart_range($event, $individualfeedback);
         $this->assertNull($min);
         $this->assertNull($max);
     }
 
     /**
-     * A FEEDBACK_EVENT_TYPE_OPEN should have a max timestart equal to the activity
+     * A INDIVIDUALFEEDBACK_EVENT_TYPE_OPEN should have a max timestart equal to the activity
      * close time.
      */
     public function test_get_valid_event_timestart_range_event_type_open(): void {
@@ -726,13 +726,13 @@ final class lib_test extends \advanced_testcase {
         $this->setAdminUser();
         $generator = $this->getDataGenerator();
         $course = $generator->create_course();
-        $feedbackgenerator = $generator->get_plugin_generator('mod_feedback');
+        $individualfeedbackgenerator = $generator->get_plugin_generator('mod_individualfeedback');
         $timeopen = time();
         $timeclose = $timeopen + DAYSECS;
-        $feedback = $feedbackgenerator->create_instance(['course' => $course->id]);
-        $feedback->timeopen = $timeopen;
-        $feedback->timeclose = $timeclose;
-        $DB->update_record('feedback', $feedback);
+        $individualfeedback = $individualfeedbackgenerator->create_instance(['course' => $course->id]);
+        $individualfeedback->timeopen = $timeopen;
+        $individualfeedback->timeclose = $timeclose;
+        $DB->update_record('individualfeedback', $individualfeedback);
 
         $event = new \calendar_event([
             'name' => 'Test event',
@@ -741,22 +741,22 @@ final class lib_test extends \advanced_testcase {
             'courseid' => $course->id,
             'groupid' => 0,
             'userid' => 2,
-            'modulename' => 'feedback',
-            'instance' => $feedback->id,
-            'eventtype' => FEEDBACK_EVENT_TYPE_OPEN,
+            'modulename' => 'individualfeedback',
+            'instance' => $individualfeedback->id,
+            'eventtype' => INDIVIDUALFEEDBACK_EVENT_TYPE_OPEN,
             'timestart' => $timeopen,
             'timeduration' => 86400,
             'visible' => 1
         ]);
 
-        list($min, $max) = mod_feedback_core_calendar_get_valid_event_timestart_range($event, $feedback);
+        list($min, $max) = mod_individualfeedback_core_calendar_get_valid_event_timestart_range($event, $individualfeedback);
         $this->assertNull($min);
         $this->assertEquals($timeclose, $max[0]);
         $this->assertNotEmpty($max[1]);
     }
 
     /**
-     * A FEEDBACK_EVENT_TYPE_OPEN should not have a max timestamp if the activity
+     * A INDIVIDUALFEEDBACK_EVENT_TYPE_OPEN should not have a max timestamp if the activity
      * doesn't have a close date.
      */
     public function test_get_valid_event_timestart_range_event_type_open_no_close(): void {
@@ -767,13 +767,13 @@ final class lib_test extends \advanced_testcase {
         $this->setAdminUser();
         $generator = $this->getDataGenerator();
         $course = $generator->create_course();
-        $feedbackgenerator = $generator->get_plugin_generator('mod_feedback');
+        $individualfeedbackgenerator = $generator->get_plugin_generator('mod_individualfeedback');
         $timeopen = time();
         $timeclose = $timeopen + DAYSECS;
-        $feedback = $feedbackgenerator->create_instance(['course' => $course->id]);
-        $feedback->timeopen = $timeopen;
-        $feedback->timeclose = 0;
-        $DB->update_record('feedback', $feedback);
+        $individualfeedback = $individualfeedbackgenerator->create_instance(['course' => $course->id]);
+        $individualfeedback->timeopen = $timeopen;
+        $individualfeedback->timeclose = 0;
+        $DB->update_record('individualfeedback', $individualfeedback);
 
         $event = new \calendar_event([
             'name' => 'Test event',
@@ -782,21 +782,21 @@ final class lib_test extends \advanced_testcase {
             'courseid' => $course->id,
             'groupid' => 0,
             'userid' => 2,
-            'modulename' => 'feedback',
-            'instance' => $feedback->id,
-            'eventtype' => FEEDBACK_EVENT_TYPE_OPEN,
+            'modulename' => 'individualfeedback',
+            'instance' => $individualfeedback->id,
+            'eventtype' => INDIVIDUALFEEDBACK_EVENT_TYPE_OPEN,
             'timestart' => $timeopen,
             'timeduration' => 86400,
             'visible' => 1
         ]);
 
-        list($min, $max) = mod_feedback_core_calendar_get_valid_event_timestart_range($event, $feedback);
+        list($min, $max) = mod_individualfeedback_core_calendar_get_valid_event_timestart_range($event, $individualfeedback);
         $this->assertNull($min);
         $this->assertNull($max);
     }
 
     /**
-     * A FEEDBACK_EVENT_TYPE_CLOSE should have a min timestart equal to the activity
+     * A INDIVIDUALFEEDBACK_EVENT_TYPE_CLOSE should have a min timestart equal to the activity
      * open time.
      */
     public function test_get_valid_event_timestart_range_event_type_close(): void {
@@ -807,13 +807,13 @@ final class lib_test extends \advanced_testcase {
         $this->setAdminUser();
         $generator = $this->getDataGenerator();
         $course = $generator->create_course();
-        $feedbackgenerator = $generator->get_plugin_generator('mod_feedback');
+        $individualfeedbackgenerator = $generator->get_plugin_generator('mod_individualfeedback');
         $timeopen = time();
         $timeclose = $timeopen + DAYSECS;
-        $feedback = $feedbackgenerator->create_instance(['course' => $course->id]);
-        $feedback->timeopen = $timeopen;
-        $feedback->timeclose = $timeclose;
-        $DB->update_record('feedback', $feedback);
+        $individualfeedback = $individualfeedbackgenerator->create_instance(['course' => $course->id]);
+        $individualfeedback->timeopen = $timeopen;
+        $individualfeedback->timeclose = $timeclose;
+        $DB->update_record('individualfeedback', $individualfeedback);
 
         $event = new \calendar_event([
             'name' => 'Test event',
@@ -822,22 +822,22 @@ final class lib_test extends \advanced_testcase {
             'courseid' => $course->id,
             'groupid' => 0,
             'userid' => 2,
-            'modulename' => 'feedback',
-            'instance' => $feedback->id,
-            'eventtype' => FEEDBACK_EVENT_TYPE_CLOSE,
+            'modulename' => 'individualfeedback',
+            'instance' => $individualfeedback->id,
+            'eventtype' => INDIVIDUALFEEDBACK_EVENT_TYPE_CLOSE,
             'timestart' => $timeopen,
             'timeduration' => 86400,
             'visible' => 1
         ]);
 
-        list($min, $max) = mod_feedback_core_calendar_get_valid_event_timestart_range($event, $feedback);
+        list($min, $max) = mod_individualfeedback_core_calendar_get_valid_event_timestart_range($event, $individualfeedback);
         $this->assertEquals($timeopen, $min[0]);
         $this->assertNotEmpty($min[1]);
         $this->assertNull($max);
     }
 
     /**
-     * A FEEDBACK_EVENT_TYPE_CLOSE should not have a minimum timestamp if the activity
+     * A INDIVIDUALFEEDBACK_EVENT_TYPE_CLOSE should not have a minimum timestamp if the activity
      * doesn't have an open date.
      */
     public function test_get_valid_event_timestart_range_event_type_close_no_open(): void {
@@ -848,13 +848,13 @@ final class lib_test extends \advanced_testcase {
         $this->setAdminUser();
         $generator = $this->getDataGenerator();
         $course = $generator->create_course();
-        $feedbackgenerator = $generator->get_plugin_generator('mod_feedback');
+        $individualfeedbackgenerator = $generator->get_plugin_generator('mod_individualfeedback');
         $timeopen = time();
         $timeclose = $timeopen + DAYSECS;
-        $feedback = $feedbackgenerator->create_instance(['course' => $course->id]);
-        $feedback->timeopen = 0;
-        $feedback->timeclose = $timeclose;
-        $DB->update_record('feedback', $feedback);
+        $individualfeedback = $individualfeedbackgenerator->create_instance(['course' => $course->id]);
+        $individualfeedback->timeopen = 0;
+        $individualfeedback->timeclose = $timeclose;
+        $DB->update_record('individualfeedback', $individualfeedback);
 
         $event = new \calendar_event([
             'name' => 'Test event',
@@ -863,23 +863,23 @@ final class lib_test extends \advanced_testcase {
             'courseid' => $course->id,
             'groupid' => 0,
             'userid' => 2,
-            'modulename' => 'feedback',
-            'instance' => $feedback->id,
-            'eventtype' => FEEDBACK_EVENT_TYPE_CLOSE,
+            'modulename' => 'individualfeedback',
+            'instance' => $individualfeedback->id,
+            'eventtype' => INDIVIDUALFEEDBACK_EVENT_TYPE_CLOSE,
             'timestart' => $timeopen,
             'timeduration' => 86400,
             'visible' => 1
         ]);
 
-        list($min, $max) = mod_feedback_core_calendar_get_valid_event_timestart_range($event, $feedback);
+        list($min, $max) = mod_individualfeedback_core_calendar_get_valid_event_timestart_range($event, $individualfeedback);
         $this->assertNull($min);
         $this->assertNull($max);
     }
 
     /**
-     * An unkown event type should not change the feedback instance.
+     * An unkown event type should not change the individualfeedback instance.
      */
-    public function test_mod_feedback_core_calendar_event_timestart_updated_unknown_event(): void {
+    public function test_mod_individualfeedback_core_calendar_event_timestart_updated_unknown_event(): void {
         global $CFG, $DB;
         require_once($CFG->dirroot . "/calendar/lib.php");
 
@@ -887,13 +887,13 @@ final class lib_test extends \advanced_testcase {
         $this->setAdminUser();
         $generator = $this->getDataGenerator();
         $course = $generator->create_course();
-        $feedbackgenerator = $generator->get_plugin_generator('mod_feedback');
+        $individualfeedbackgenerator = $generator->get_plugin_generator('mod_individualfeedback');
         $timeopen = time();
         $timeclose = $timeopen + DAYSECS;
-        $feedback = $feedbackgenerator->create_instance(['course' => $course->id]);
-        $feedback->timeopen = $timeopen;
-        $feedback->timeclose = $timeclose;
-        $DB->update_record('feedback', $feedback);
+        $individualfeedback = $individualfeedbackgenerator->create_instance(['course' => $course->id]);
+        $individualfeedback->timeopen = $timeopen;
+        $individualfeedback->timeclose = $timeclose;
+        $DB->update_record('individualfeedback', $individualfeedback);
 
         // Create a valid event.
         $event = new \calendar_event([
@@ -903,26 +903,26 @@ final class lib_test extends \advanced_testcase {
             'courseid' => $course->id,
             'groupid' => 0,
             'userid' => 2,
-            'modulename' => 'feedback',
-            'instance' => $feedback->id,
-            'eventtype' => FEEDBACK_EVENT_TYPE_OPEN . "SOMETHING ELSE",
+            'modulename' => 'individualfeedback',
+            'instance' => $individualfeedback->id,
+            'eventtype' => INDIVIDUALFEEDBACK_EVENT_TYPE_OPEN . "SOMETHING ELSE",
             'timestart' => 1,
             'timeduration' => 86400,
             'visible' => 1
         ]);
 
-        mod_feedback_core_calendar_event_timestart_updated($event, $feedback);
+        mod_individualfeedback_core_calendar_event_timestart_updated($event, $individualfeedback);
 
-        $feedback = $DB->get_record('feedback', ['id' => $feedback->id]);
-        $this->assertEquals($timeopen, $feedback->timeopen);
-        $this->assertEquals($timeclose, $feedback->timeclose);
+        $individualfeedback = $DB->get_record('individualfeedback', ['id' => $individualfeedback->id]);
+        $this->assertEquals($timeopen, $individualfeedback->timeopen);
+        $this->assertEquals($timeclose, $individualfeedback->timeclose);
     }
 
     /**
-     * A FEEDBACK_EVENT_TYPE_OPEN event should update the timeopen property of
-     * the feedback activity.
+     * A INDIVIDUALFEEDBACK_EVENT_TYPE_OPEN event should update the timeopen property of
+     * the individualfeedback activity.
      */
-    public function test_mod_feedback_core_calendar_event_timestart_updated_open_event(): void {
+    public function test_mod_individualfeedback_core_calendar_event_timestart_updated_open_event(): void {
         global $CFG, $DB;
         require_once($CFG->dirroot . "/calendar/lib.php");
 
@@ -930,16 +930,16 @@ final class lib_test extends \advanced_testcase {
         $this->setAdminUser();
         $generator = $this->getDataGenerator();
         $course = $generator->create_course();
-        $feedbackgenerator = $generator->get_plugin_generator('mod_feedback');
+        $individualfeedbackgenerator = $generator->get_plugin_generator('mod_individualfeedback');
         $timeopen = time();
         $timeclose = $timeopen + DAYSECS;
         $timemodified = 1;
         $newtimeopen = $timeopen - DAYSECS;
-        $feedback = $feedbackgenerator->create_instance(['course' => $course->id]);
-        $feedback->timeopen = $timeopen;
-        $feedback->timeclose = $timeclose;
-        $feedback->timemodified = $timemodified;
-        $DB->update_record('feedback', $feedback);
+        $individualfeedback = $individualfeedbackgenerator->create_instance(['course' => $course->id]);
+        $individualfeedback->timeopen = $timeopen;
+        $individualfeedback->timeclose = $timeclose;
+        $individualfeedback->timemodified = $timemodified;
+        $DB->update_record('individualfeedback', $individualfeedback);
 
         // Create a valid event.
         $event = new \calendar_event([
@@ -949,30 +949,30 @@ final class lib_test extends \advanced_testcase {
             'courseid' => $course->id,
             'groupid' => 0,
             'userid' => 2,
-            'modulename' => 'feedback',
-            'instance' => $feedback->id,
-            'eventtype' => FEEDBACK_EVENT_TYPE_OPEN,
+            'modulename' => 'individualfeedback',
+            'instance' => $individualfeedback->id,
+            'eventtype' => INDIVIDUALFEEDBACK_EVENT_TYPE_OPEN,
             'timestart' => $newtimeopen,
             'timeduration' => 86400,
             'visible' => 1
         ]);
 
-        mod_feedback_core_calendar_event_timestart_updated($event, $feedback);
+        mod_individualfeedback_core_calendar_event_timestart_updated($event, $individualfeedback);
 
-        $feedback = $DB->get_record('feedback', ['id' => $feedback->id]);
+        $individualfeedback = $DB->get_record('individualfeedback', ['id' => $individualfeedback->id]);
         // Ensure the timeopen property matches the event timestart.
-        $this->assertEquals($newtimeopen, $feedback->timeopen);
+        $this->assertEquals($newtimeopen, $individualfeedback->timeopen);
         // Ensure the timeclose isn't changed.
-        $this->assertEquals($timeclose, $feedback->timeclose);
+        $this->assertEquals($timeclose, $individualfeedback->timeclose);
         // Ensure the timemodified property has been changed.
-        $this->assertNotEquals($timemodified, $feedback->timemodified);
+        $this->assertNotEquals($timemodified, $individualfeedback->timemodified);
     }
 
     /**
-     * A FEEDBACK_EVENT_TYPE_CLOSE event should update the timeclose property of
-     * the feedback activity.
+     * A INDIVIDUALFEEDBACK_EVENT_TYPE_CLOSE event should update the timeclose property of
+     * the individualfeedback activity.
      */
-    public function test_mod_feedback_core_calendar_event_timestart_updated_close_event(): void {
+    public function test_mod_individualfeedback_core_calendar_event_timestart_updated_close_event(): void {
         global $CFG, $DB;
         require_once($CFG->dirroot . "/calendar/lib.php");
 
@@ -980,16 +980,16 @@ final class lib_test extends \advanced_testcase {
         $this->setAdminUser();
         $generator = $this->getDataGenerator();
         $course = $generator->create_course();
-        $feedbackgenerator = $generator->get_plugin_generator('mod_feedback');
+        $individualfeedbackgenerator = $generator->get_plugin_generator('mod_individualfeedback');
         $timeopen = time();
         $timeclose = $timeopen + DAYSECS;
         $timemodified = 1;
         $newtimeclose = $timeclose + DAYSECS;
-        $feedback = $feedbackgenerator->create_instance(['course' => $course->id]);
-        $feedback->timeopen = $timeopen;
-        $feedback->timeclose = $timeclose;
-        $feedback->timemodified = $timemodified;
-        $DB->update_record('feedback', $feedback);
+        $individualfeedback = $individualfeedbackgenerator->create_instance(['course' => $course->id]);
+        $individualfeedback->timeopen = $timeopen;
+        $individualfeedback->timeclose = $timeclose;
+        $individualfeedback->timemodified = $timemodified;
+        $DB->update_record('individualfeedback', $individualfeedback);
 
         // Create a valid event.
         $event = new \calendar_event([
@@ -999,23 +999,23 @@ final class lib_test extends \advanced_testcase {
             'courseid' => $course->id,
             'groupid' => 0,
             'userid' => 2,
-            'modulename' => 'feedback',
-            'instance' => $feedback->id,
-            'eventtype' => FEEDBACK_EVENT_TYPE_CLOSE,
+            'modulename' => 'individualfeedback',
+            'instance' => $individualfeedback->id,
+            'eventtype' => INDIVIDUALFEEDBACK_EVENT_TYPE_CLOSE,
             'timestart' => $newtimeclose,
             'timeduration' => 86400,
             'visible' => 1
         ]);
 
-        mod_feedback_core_calendar_event_timestart_updated($event, $feedback);
+        mod_individualfeedback_core_calendar_event_timestart_updated($event, $individualfeedback);
 
-        $feedback = $DB->get_record('feedback', ['id' => $feedback->id]);
+        $individualfeedback = $DB->get_record('individualfeedback', ['id' => $individualfeedback->id]);
         // Ensure the timeclose property matches the event timestart.
-        $this->assertEquals($newtimeclose, $feedback->timeclose);
+        $this->assertEquals($newtimeclose, $individualfeedback->timeclose);
         // Ensure the timeopen isn't changed.
-        $this->assertEquals($timeopen, $feedback->timeopen);
+        $this->assertEquals($timeopen, $individualfeedback->timeopen);
         // Ensure the timemodified property has been changed.
-        $this->assertNotEquals($timemodified, $feedback->timemodified);
+        $this->assertNotEquals($timemodified, $individualfeedback->timemodified);
     }
 
     /**
@@ -1035,16 +1035,16 @@ final class lib_test extends \advanced_testcase {
         $course = $generator->create_course();
         $context = \context_course::instance($course->id);
         $roleid = $generator->create_role();
-        $feedbackgenerator = $generator->get_plugin_generator('mod_feedback');
+        $individualfeedbackgenerator = $generator->get_plugin_generator('mod_individualfeedback');
         $timeopen = time();
         $timeclose = $timeopen + DAYSECS;
         $timemodified = 1;
         $newtimeclose = $timeclose + DAYSECS;
-        $feedback = $feedbackgenerator->create_instance(['course' => $course->id]);
-        $feedback->timeopen = $timeopen;
-        $feedback->timeclose = $timeclose;
-        $feedback->timemodified = $timemodified;
-        $DB->update_record('feedback', $feedback);
+        $individualfeedback = $individualfeedbackgenerator->create_instance(['course' => $course->id]);
+        $individualfeedback->timeopen = $timeopen;
+        $individualfeedback->timeclose = $timeclose;
+        $individualfeedback->timemodified = $timemodified;
+        $DB->update_record('individualfeedback', $individualfeedback);
 
         $generator->enrol_user($user->id, $course->id, 'student');
         $generator->role_assign($roleid, $user->id, $context->id);
@@ -1057,9 +1057,9 @@ final class lib_test extends \advanced_testcase {
             'courseid' => $course->id,
             'groupid' => 0,
             'userid' => $user->id,
-            'modulename' => 'feedback',
-            'instance' => $feedback->id,
-            'eventtype' => FEEDBACK_EVENT_TYPE_CLOSE,
+            'modulename' => 'individualfeedback',
+            'instance' => $individualfeedback->id,
+            'eventtype' => INDIVIDUALFEEDBACK_EVENT_TYPE_CLOSE,
             'timestart' => $newtimeclose,
             'timeduration' => 86400,
             'visible' => 1
@@ -1070,12 +1070,12 @@ final class lib_test extends \advanced_testcase {
 
         $this->setUser($user);
 
-        mod_feedback_core_calendar_event_timestart_updated($event, $feedback);
+        mod_individualfeedback_core_calendar_event_timestart_updated($event, $individualfeedback);
 
-        $newfeedback = $DB->get_record('feedback', ['id' => $feedback->id]);
+        $newindividualfeedback = $DB->get_record('individualfeedback', ['id' => $individualfeedback->id]);
         // The activity shouldn't have been updated because the user
         // doesn't have permissions to do it.
-        $this->assertEquals($timeclose, $newfeedback->timeclose);
+        $this->assertEquals($timeclose, $newindividualfeedback->timeclose);
     }
 
     /**
@@ -1094,16 +1094,16 @@ final class lib_test extends \advanced_testcase {
         $course = $generator->create_course();
         $context = \context_course::instance($course->id);
         $roleid = $generator->create_role();
-        $feedbackgenerator = $generator->get_plugin_generator('mod_feedback');
+        $individualfeedbackgenerator = $generator->get_plugin_generator('mod_individualfeedback');
         $timeopen = time();
         $timeclose = $timeopen + DAYSECS;
         $timemodified = 1;
         $newtimeclose = $timeclose + DAYSECS;
-        $feedback = $feedbackgenerator->create_instance(['course' => $course->id]);
-        $feedback->timeopen = $timeopen;
-        $feedback->timeclose = $timeclose;
-        $feedback->timemodified = $timemodified;
-        $DB->update_record('feedback', $feedback);
+        $individualfeedback = $individualfeedbackgenerator->create_instance(['course' => $course->id]);
+        $individualfeedback->timeopen = $timeopen;
+        $individualfeedback->timeclose = $timeclose;
+        $individualfeedback->timemodified = $timemodified;
+        $DB->update_record('individualfeedback', $individualfeedback);
 
         $generator->enrol_user($user->id, $course->id, 'teacher');
         $generator->role_assign($roleid, $user->id, $context->id);
@@ -1116,9 +1116,9 @@ final class lib_test extends \advanced_testcase {
             'courseid' => $course->id,
             'groupid' => 0,
             'userid' => $user->id,
-            'modulename' => 'feedback',
-            'instance' => $feedback->id,
-            'eventtype' => FEEDBACK_EVENT_TYPE_CLOSE,
+            'modulename' => 'individualfeedback',
+            'instance' => $individualfeedback->id,
+            'eventtype' => INDIVIDUALFEEDBACK_EVENT_TYPE_CLOSE,
             'timestart' => $newtimeclose,
             'timeduration' => 86400,
             'visible' => 1
@@ -1131,24 +1131,24 @@ final class lib_test extends \advanced_testcase {
 
         $sink = $this->redirectEvents();
 
-        mod_feedback_core_calendar_event_timestart_updated($event, $feedback);
+        mod_individualfeedback_core_calendar_event_timestart_updated($event, $individualfeedback);
 
         $triggeredevents = $sink->get_events();
         $moduleupdatedevents = array_filter($triggeredevents, function($e) {
             return is_a($e, 'core\event\course_module_updated');
         });
 
-        $newfeedback = $DB->get_record('feedback', ['id' => $feedback->id]);
+        $newindividualfeedback = $DB->get_record('individualfeedback', ['id' => $individualfeedback->id]);
         // The activity should have been updated because the user
         // has permissions to do it.
-        $this->assertEquals($newtimeclose, $newfeedback->timeclose);
+        $this->assertEquals($newtimeclose, $newindividualfeedback->timeclose);
         // A course_module_updated event should be fired if the module
         // was successfully modified.
         $this->assertNotEmpty($moduleupdatedevents);
     }
 
     /**
-     * A user who does not have capabilities to add events to the calendar should be able to create an feedback.
+     * A user who does not have capabilities to add events to the calendar should be able to create an individualfeedback.
      */
     public function test_creation_with_no_calendar_capabilities(): void {
         $this->resetAfterTest();
@@ -1158,7 +1158,7 @@ final class lib_test extends \advanced_testcase {
         $roleid = self::getDataGenerator()->create_role();
         self::getDataGenerator()->role_assign($roleid, $user->id, $context->id);
         assign_capability('moodle/calendar:manageentries', CAP_PROHIBIT, $roleid, $context, true);
-        $generator = self::getDataGenerator()->get_plugin_generator('mod_feedback');
+        $generator = self::getDataGenerator()->get_plugin_generator('mod_individualfeedback');
         // Create an instance as a user without the calendar capabilities.
         $this->setUser($user);
         $time = time();
@@ -1172,16 +1172,16 @@ final class lib_test extends \advanced_testcase {
 
     /**
      * Test that if a teacher (non editing) is not part of any group in separate group mode he will not receive notification emails.
-     * @covers ::feedback_get_receivemail_users
+     * @covers ::individualfeedback_get_receivemail_users
      */
-    public function test_feedback_get_receivemail_users(): void {
+    public function test_individualfeedback_get_receivemail_users(): void {
         $this->resetAfterTest();
         $generator = $this->getDataGenerator();
         $course = $generator->create_course(['groupmode' => SEPARATEGROUPS, 'groupmodeforce' => 1]);
         $group = $generator->create_group(['courseid' => $course->id, 'name' => 'group0']);
 
-        $feedbackgenerator = $generator->get_plugin_generator('mod_feedback');
-        $feedback = $feedbackgenerator->create_instance(['course' => $course->id, 'email_notification' => true]);
+        $individualfeedbackgenerator = $generator->get_plugin_generator('mod_individualfeedback');
+        $individualfeedback = $individualfeedbackgenerator->create_instance(['course' => $course->id, 'email_notification' => true]);
         $teacher = [];
         $data = [
             'teacher1' => 'teacher',
@@ -1205,29 +1205,29 @@ final class lib_test extends \advanced_testcase {
         $usergroup = $group->id;
         // Non editing Teachers (teacher1) in a group should receive notification emails.
         // Editing teachers (teacher4), in a group should also receive notification emails.
-        $teachersingroup = feedback_get_receivemail_users($feedback->cmid, $usergroup);
+        $teachersingroup = individualfeedback_get_receivemail_users($individualfeedback->cmid, $usergroup);
         $this->assertCount(2, $teachersingroup);
         $this->assertNotEmpty($teachersingroup[$teacher['teacher1']->id]);
         $this->assertNotEmpty($teachersingroup[$teacher['teacher4']->id]);
         // Here we should return only the editing teachers (teacher3 and 4) who have access to all groups.
-        $teacherwithnogroup = feedback_get_receivemail_users($feedback->cmid);
+        $teacherwithnogroup = individualfeedback_get_receivemail_users($individualfeedback->cmid);
         $this->assertCount(2, $teacherwithnogroup);
         $this->assertNotEmpty($teacherwithnogroup[$teacher['teacher3']->id]);
         $this->assertNotEmpty($teacherwithnogroup[$teacher['teacher4']->id]);
     }
 
     /**
-     * Test feedback_get_completeds().
+     * Test individualfeedback_get_completeds().
      *
-     * @covers ::feedback_get_completeds
-     * @covers ::feedback_get_completeds_count
-     * @dataProvider provider_feedback_get_completeds
+     * @covers ::individualfeedback_get_completeds
+     * @covers ::individualfeedback_get_completeds_count
+     * @dataProvider provider_individualfeedback_get_completeds
      *
      * @param int $groupmode The group mode of the course.
      * @param array $selectedgroups The groups selected for filtering.
      * @param int $expectedcount The expected number of completeds.
      */
-    public function test_feedback_get_completeds(
+    public function test_individualfeedback_get_completeds(
         int $groupmode,
         array $selectedgroups,
         int $expectedcount,
@@ -1266,26 +1266,26 @@ final class lib_test extends \advanced_testcase {
         ]);
         $teacher = $this->getDataGenerator()->create_and_enrol($course, 'editingteacher');
 
-        $activity = $this->getDataGenerator()->create_module('feedback', ['course' => $course->id]);
+        $activity = $this->getDataGenerator()->create_module('individualfeedback', ['course' => $course->id]);
         $cm = get_fast_modinfo($course)->get_cm($activity->cmid);
 
-        // Add a multichoice item to the feedback and create responses for it.
-        /** @var  \mod_feedback_generator $feedbackgenerator */
-        $feedbackgenerator = $this->getDataGenerator()->get_plugin_generator('mod_feedback');
-        $item = $feedbackgenerator->create_item_multichoice($activity, ['values' => "y\nn"]);
-        $feedbackgenerator->create_response([
+        // Add a multichoice item to the individualfeedback and create responses for it.
+        /** @var  \mod_individualfeedback_generator $individualfeedbackgenerator */
+        $individualfeedbackgenerator = $this->getDataGenerator()->get_plugin_generator('mod_individualfeedback');
+        $item = $individualfeedbackgenerator->create_item_multichoice($activity, ['values' => "y\nn"]);
+        $individualfeedbackgenerator->create_response([
             'userid' => $student1a->id,
             'cmid' => $cm->id,
             'anonymous' => false,
             $item->name => 'y',
         ]);
-        $feedbackgenerator->create_response([
+        $individualfeedbackgenerator->create_response([
             'userid' => $student2a->id,
             'cmid' => $cm->id,
             'anonymous' => false,
             $item->name => 'n',
         ]);
-        $feedbackgenerator->create_response([
+        $individualfeedbackgenerator->create_response([
             'userid' => $student3b->id,
             'cmid' => $cm->id,
             'anonymous' => false,
@@ -1304,21 +1304,21 @@ final class lib_test extends \advanced_testcase {
             }
         }
 
-        $result = feedback_get_completeds($activity, $groups);
-        $count = feedback_get_completeds_count($activity, $groups);
+        $result = individualfeedback_get_completeds($activity, $groups);
+        $count = individualfeedback_get_completeds_count($activity, $groups);
         $this->assertCount($expectedcount, $result);
         $this->assertEquals($expectedcount, $count);
         foreach ($result as $completed) {
-            $this->assertEquals($activity->id, $completed->feedback);
+            $this->assertEquals($activity->id, $completed->individualfeedback);
         }
     }
 
     /**
-     * Data provider for test_feedback_get_completeds().
+     * Data provider for test_individualfeedback_get_completeds().
      *
      * @return array
      */
-    public static function provider_feedback_get_completeds(): array {
+    public static function provider_individualfeedback_get_completeds(): array {
         return [
             'Separate groups - All completeds, without filtering by groups' => [
                 'groupmode' => SEPARATEGROUPS,

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace mod_feedback\output;
+namespace mod_individualfeedback\output;
 
 use action_link;
 use moodle_url;
@@ -26,21 +26,21 @@ use moodle_url;
  *
  * @copyright 2021 Peter Dias
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
- * @package mod_feedback
+ * @package mod_individualfeedback
  */
 class standard_action_bar extends base_action_bar {
     /** @var int $startpage The page to resume with. */
     private $startpage;
-    /** @var int $viewcompletion Whether or not the user can finish the feedback */
+    /** @var int $viewcompletion Whether or not the user can finish the individualfeedback */
     private $viewcompletion;
 
     /**
      * standard_action_bar constructor.
      *
      * @param int $cmid
-     * @param bool $viewcompletion Whether or not the user can finish the feedback
+     * @param bool $viewcompletion Whether or not the user can finish the individualfeedback
      * @param int|null $startpage The page to resume with.
-     * @param int|null $courseid The course that the feedback is being accessed from. If null, courseid will be
+     * @param int|null $courseid The course that the individualfeedback is being accessed from. If null, courseid will be
      *                              set via the $cmid relationship
      */
     public function __construct(int $cmid, bool $viewcompletion, ?int $startpage = null, ?int $courseid = null) {
@@ -61,36 +61,36 @@ class standard_action_bar extends base_action_bar {
     public function get_items(): array {
         $items = [];
 
-        if (has_capability('mod/feedback:edititems', $this->context)) {
-            $editurl = new moodle_url('/mod/feedback/edit.php', $this->urlparams);
-            $items['left'][]['actionlink'] = new action_link($editurl, get_string('edit_items', 'feedback'),
+        if (has_capability('mod/individualfeedback:edititems', $this->context)) {
+            $editurl = new moodle_url('/mod/individualfeedback/edit.php', $this->urlparams);
+            $items['left'][]['actionlink'] = new action_link($editurl, get_string('edit_items', 'individualfeedback'),
                 null, ['class' => 'btn btn-secondary']);
         }
 
         // The preview icon should be displayed only to users with capability to edit or view reports (to include
         // non-editing teachers too).
         $capabilities = [
-            'mod/feedback:edititems',
-            'mod/feedback:viewreports',
+            'mod/individualfeedback:edititems',
+            'mod/individualfeedback:viewreports',
         ];
         if (has_any_capability($capabilities, $this->context)) {
-            $previewlnk = new moodle_url('/mod/feedback/print.php', array('id' => $this->cmid));
+            $previewlnk = new moodle_url('/mod/individualfeedback/print.php', array('id' => $this->cmid));
             if ($this->course->id) {
                 $previewlnk->param('courseid', $this->course->id);
             }
-            $items['left'][]['actionlink'] = new action_link($previewlnk, get_string('previewquestions', 'feedback'),
+            $items['left'][]['actionlink'] = new action_link($previewlnk, get_string('previewquestions', 'individualfeedback'),
             null, ['class' => 'btn btn-secondary']);
         }
 
         if ($this->viewcompletion) {
-            // Display a link to complete feedback or resume.
-            $completeurl = new moodle_url('/mod/feedback/complete.php',
+            // Display a link to complete individualfeedback or resume.
+            $completeurl = new moodle_url('/mod/individualfeedback/complete.php',
                 ['id' => $this->cmid, 'courseid' => $this->course->id]);
             if ($this->startpage) {
                 $completeurl->param('gopage', $this->startpage);
-                $label = get_string('continue_the_form', 'feedback');
+                $label = get_string('continue_the_form', 'individualfeedback');
             } else {
-                $label = get_string('complete_the_form', 'feedback');
+                $label = get_string('complete_the_form', 'individualfeedback');
             }
             $items['left'][]['actionlink'] = new action_link($completeurl, $label, null, ['class' => 'btn btn-primary']);
         }

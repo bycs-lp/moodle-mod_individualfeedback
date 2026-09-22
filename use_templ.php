@@ -19,7 +19,7 @@
  *
  * @author Andreas Grabs
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
- * @package mod_feedback
+ * @package mod_individualfeedback
  */
 
 require_once("../../config.php");
@@ -31,46 +31,46 @@ $templateid = optional_param('templateid', false, PARAM_INT);
 if (!$templateid) {
     redirect('edit.php?id='.$id);
 }
-$template = $DB->get_record('feedback_template', ['id' => $templateid], '*', MUST_EXIST);
+$template = $DB->get_record('individualfeedback_template', ['id' => $templateid], '*', MUST_EXIST);
 
-$url = new moodle_url('/mod/feedback/use_templ.php', array('id'=>$id, 'templateid'=>$templateid));
+$url = new moodle_url('/mod/individualfeedback/use_templ.php', array('id'=>$id, 'templateid'=>$templateid));
 $PAGE->set_url($url);
 
-list($course, $cm) = get_course_and_cm_from_cmid($id, 'feedback');
+list($course, $cm) = get_course_and_cm_from_cmid($id, 'individualfeedback');
 $context = context_module::instance($cm->id);
 
 require_login($course, true, $cm);
 
-$feedback = $PAGE->activityrecord;
-$feedbackstructure = new mod_feedback_structure($feedback, $cm, 0, $templateid);
+$individualfeedback = $PAGE->activityrecord;
+$individualfeedbackstructure = new mod_individualfeedback_structure($individualfeedback, $cm, 0, $templateid);
 
-require_capability('mod/feedback:edititems', $context);
+require_capability('mod/individualfeedback:edititems', $context);
 
 /// Print the page header
-$strfeedbacks = get_string("modulenameplural", "feedback");
-$strfeedback  = get_string("modulename", "feedback");
+$strindividualfeedbacks = get_string("modulenameplural", "individualfeedback");
+$strindividualfeedback  = get_string("modulename", "individualfeedback");
 
 $params = ['id' => $id];
-$activeurl = new moodle_url('/mod/feedback/manage_templates.php', $params);
+$activeurl = new moodle_url('/mod/individualfeedback/manage_templates.php', $params);
 $PAGE->set_url($activeurl);
 
 $PAGE->set_heading($course->fullname);
-$PAGE->set_title($feedback->name);
+$PAGE->set_title($individualfeedback->name);
 $PAGE->add_body_class('limitedwidth');
 $PAGE->activityheader->set_attrs([
     "hidecompletion" => true,
     "description" => ''
 ]);
-$actionbar = new \mod_feedback\output\edit_template_action_bar($cm->id, $templateid);
-/** @var \mod_feedback\output\renderer $renderer */
-$renderer = $PAGE->get_renderer('mod_feedback');
+$actionbar = new \mod_individualfeedback\output\edit_template_action_bar($cm->id, $templateid);
+/** @var \mod_individualfeedback\output\renderer $renderer */
+$renderer = $PAGE->get_renderer('mod_individualfeedback');
 
 echo $OUTPUT->header();
-echo $OUTPUT->heading(get_string('previewtemplate', 'mod_feedback', $template->name), 3);
+echo $OUTPUT->heading(get_string('previewtemplate', 'mod_individualfeedback', $template->name), 3);
 echo $renderer->main_action_bar($actionbar);
 
-$form = new mod_feedback_complete_form(mod_feedback_complete_form::MODE_VIEW_TEMPLATE,
-        $feedbackstructure, 'feedback_preview_form', ['templateid' => $templateid]);
+$form = new mod_individualfeedback_complete_form(mod_individualfeedback_complete_form::MODE_VIEW_TEMPLATE,
+        $individualfeedbackstructure, 'individualfeedback_preview_form', ['templateid' => $templateid]);
 $form->display();
 
 echo $OUTPUT->footer();

@@ -15,24 +15,24 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Class for exporting a feedback temporary completion record.
+ * Class for exporting a individualfeedback temporary completion record.
  *
- * @package    mod_feedback
+ * @package    mod_individualfeedback
  * @copyright  2017 Juan Leyva <juan@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-namespace mod_feedback\external;
+namespace mod_individualfeedback\external;
 defined('MOODLE_INTERNAL') || die();
 
 use core\external\exporter;
 
 /**
- * Class for exporting a feedback temporary completion record.
+ * Class for exporting a individualfeedback temporary completion record.
  *
  * @copyright  2017 Juan Leyva <juan@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class feedback_completedtmp_exporter extends exporter {
+class individualfeedback_completedtmp_exporter extends exporter {
 
     /**
      * Return the list of properties.
@@ -45,13 +45,13 @@ class feedback_completedtmp_exporter extends exporter {
                 'type' => PARAM_INT,
                 'description' => 'The record id.',
             ),
-            'feedback' => array(
+            'individualfeedback' => array(
                 'type' => PARAM_INT,
-                'description' => 'The feedback instance id this records belongs to.',
+                'description' => 'The individualfeedback instance id this records belongs to.',
             ),
             'userid' => array(
                 'type' => PARAM_INT,
-                'description' => 'The user who completed the feedback (0 for anonymous).',
+                'description' => 'The user who completed the individualfeedback (0 for anonymous).',
             ),
             'guestid' => array(
                 'type' => PARAM_RAW,
@@ -59,7 +59,7 @@ class feedback_completedtmp_exporter extends exporter {
             ),
             'timemodified' => array(
                 'type' => PARAM_INT,
-                'description' => 'The last time the feedback was completed.',
+                'description' => 'The last time the individualfeedback was completed.',
             ),
             'random_response' => array(
                 'type' => PARAM_INT,
@@ -71,7 +71,7 @@ class feedback_completedtmp_exporter extends exporter {
             ),
             'courseid' => array(
                 'type' => PARAM_INT,
-                'description' => 'The course id where the feedback was completed.',
+                'description' => 'The course id where the individualfeedback was completed.',
             ),
         );
     }
