@@ -46,11 +46,17 @@ class create_template_form extends dynamic_form {
         $mform->setType('templatename', PARAM_TEXT);
         $mform->addRule('templatename', null, 'required', null, 'client');
 
-        if (has_capability('mod/individualfeedback:createpublictemplate', context_system::instance())) {
-            $mform->addElement('checkbox',
-                'ispublic', '',
-                get_string('availableforallcourses', 'individualfeedback'));
+        // +++ MBS-Hack (nersesov) : course/user/public template choice instead of the public checkbox.
+        if (!\mod_individualfeedback\hack\lib::add_template_visibility_elements($mform)) {
+        // --- MBS-Hack
+            if (has_capability('mod/individualfeedback:createpublictemplate', context_system::instance())) {
+                $mform->addElement('checkbox',
+                    'ispublic', '',
+                    get_string('availableforallcourses', 'individualfeedback'));
+            }
+        // +++ MBS-Hack (nersesov) : close visibility-choice fallback.
         }
+        // --- MBS-Hack
     }
 
     /**
@@ -86,7 +92,9 @@ class create_template_form extends dynamic_form {
     public function process_dynamic_submission(): array {
         global $PAGE;
         $formdata = $this->get_data();
-        $ispublic = !empty($formdata->ispublic) ? 1 : 0;
+        // +++ MBS-Hack (nersesov) : three-way ispublic + server-side createpublictemplate enforcement.
+        $ispublic = \mod_individualfeedback\hack\lib::normalize_template_ispublic($formdata);
+        // --- MBS-Hack
         $result = individualfeedback_save_as_template($PAGE->activityrecord, $formdata->templatename, $ispublic);
         return [
             'result' => $result,

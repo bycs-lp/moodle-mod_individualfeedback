@@ -33,6 +33,10 @@ defined('MOODLE_INTERNAL') || die();
  */
 class mod_individualfeedback_complete_form extends moodleform {
 
+    // +++ MBS-Hack (nersesov) : inject question-group layout helpers (zones, CSS classes).
+    use \mod_individualfeedback\local\complete_form_group_trait;
+    // --- MBS-Hack
+
     /** @var int */
     const MODE_COMPLETE = 1;
     /** @var int */
@@ -170,7 +174,11 @@ class mod_individualfeedback_complete_form extends moodleform {
      */
     protected function definition_preview() {
         $this->_form->addElement('html', html_writer::start_div('', ['data-region' => 'questions-sortable-list']));
-        foreach ($this->structure->get_items() as $individualfeedbackitem) {
+        // +++ MBS-Hack (nersesov) : build question group zone map for layout CSS classes.
+        $items = $this->structure->get_items();
+        $this->build_item_group_zones($items);
+        // --- MBS-Hack
+        foreach ($items as $individualfeedbackitem) {
             $itemobj = individualfeedback_get_item_class($individualfeedbackitem->typ);
             $itemobj->complete_form_element($individualfeedbackitem, $this);
         }
@@ -282,6 +290,9 @@ class mod_individualfeedback_complete_form extends moodleform {
      */
     protected function get_suggested_class($item) {
         $class = "individualfeedback_itemlist individualfeedback-item-{$item->typ}";
+        // +++ MBS-Hack (nersesov) : add question group drag/drop and dependency marker classes.
+        $class = \mod_individualfeedback\hack\lib::amend_item_css_class($class, $item);
+        // --- MBS-Hack
         if ($item->typ !== 'pagebreak') {
             $itemobj = individualfeedback_get_item_class($item->typ);
             if ($itemobj->get_hasvalue()) {
@@ -320,6 +331,9 @@ class mod_individualfeedback_complete_form extends moodleform {
         $attributes = $element->getAttributes();
         $class = !empty($attributes['class']) ? ' ' . $attributes['class'] : '';
         $attributes['class'] = $this->get_suggested_class($item) . $class;
+        // +++ MBS-Hack (nersesov) : append question group zone class (start/inside/end).
+        $attributes['class'] .= $this->get_group_zone_class($item);
+        // --- MBS-Hack
 
         $element->setAttributes($attributes);
 
@@ -433,6 +447,11 @@ class mod_individualfeedback_complete_form extends moodleform {
         if ($item->dependitem && ($this->mode == self::MODE_EDIT || $this->mode == self::MODE_VIEW_TEMPLATE)) {
             if (isset($allitems[$item->dependitem])) {
                 $dependitem = $allitems[$item->dependitem];
+                // +++ MBS-Hack (nersesov) : suppress dependency label for question group children.
+                if (\mod_individualfeedback\hack\lib::apply_questiongroup_dependency_label($element, $dependitem, $item)) {
+                    return;
+                }
+                // --- MBS-Hack
                 $name = $element->getLabel();
                 $name .= html_writer::span(' ('.format_string($dependitem->label).'-&gt;'.$item->dependvalue.')',
                         'individualfeedback_depend');

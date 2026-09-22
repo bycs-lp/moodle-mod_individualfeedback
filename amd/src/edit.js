@@ -40,6 +40,10 @@ const Selectors = {
     sortableElementTitle: '[data-region="item-title"] span',
     questionLabel: '[data-region="questions-sortable-list"] .col-form-label',
     actionsMenuData: '[data-item-actions-menu]',
+    // +++ MBS-Hack (nersesov) : question group selectors for sortable list names.
+    questionGroupName: '.individualfeedback_questiongroup',
+    questionGroupEnd: '.individualfeedback_questiongroupend',
+    // --- MBS-Hack
 };
 
 /**
@@ -95,6 +99,9 @@ export const init = async(cmId) => {
         'confirmdeleteitem',
         'questionmoved',
         'move_item',
+        // +++ MBS-Hack (nersesov) : name for question group end markers in the sortable list.
+        'end_of_questiongroup',
+        // --- MBS-Hack
     ]);
 
     await enhanceEditForm();
@@ -121,7 +128,22 @@ export const init = async(cmId) => {
 
     // Initialize sortable list to handle active conditions moving.
     const sortableList = new SortableList(document.querySelector(Selectors.sortableListRegion));
-    sortableList.getElementName = element => Promise.resolve(element[0].querySelector(Selectors.sortableElementTitle)?.textContent);
+    // +++ MBS-Hack (nersesov) : question-group-aware element names (group bar / end marker rows have no title span).
+    sortableList.getElementName = (element) => {
+        const el = element[0];
+        let name = el.querySelector(Selectors.sortableElementTitle)?.textContent?.trim() || '';
+        if (!name) {
+            const groupName = el.querySelector(Selectors.questionGroupName);
+            if (groupName) {
+                name = groupName.textContent?.trim() || '';
+            }
+        }
+        if (!name && el.querySelector(Selectors.questionGroupEnd)) {
+            return getString('end_of_questiongroup', 'mod_individualfeedback');
+        }
+        return Promise.resolve(name);
+    };
+    // --- MBS-Hack
 
     document.addEventListener(SortableList.EVENTS.elementDrop, event => {
         if (!event.detail.positionChanged) {

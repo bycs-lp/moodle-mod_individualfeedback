@@ -66,6 +66,10 @@ class provider implements
             'anonymous_response' => 'privacy:metadata:completed:anonymousresponse',
         ];
 
+        // +++ MBS-Hack (nersesov) : declare fork-specific privacy metadata (selfassessment, template userid) — DSGVO.
+        $completedfields = \mod_individualfeedback\hack\lib::add_privacy_metadata($collection, $completedfields);
+        // --- MBS-Hack
+
         $collection->add_database_table('individualfeedback_completed', $completedfields, 'privacy:metadata:completed');
         $collection->add_database_table('individualfeedback_completedtmp', $completedfields, 'privacy:metadata:completedtmp');
 
@@ -194,6 +198,9 @@ class provider implements
                     'timemodified' => transform::datetime($record->timemodified),
                     'answers' => []
                 ];
+                // +++ MBS-Hack (nersesov) : export selfassessment flag with each submission — DSGVO.
+                $data->submissions[$id] = \mod_individualfeedback\hack\lib::add_privacy_export_fields($data->submissions[$id], $record);
+                // --- MBS-Hack
             }
             $item = static::extract_item_record_from_record($record);
             $value = static::extract_value_record_from_record($record);
@@ -420,6 +427,7 @@ class provider implements
                        fc.id AS submissionid,
                        fc.anonymous_response AS anonymousresponse,
                        fc.timemodified AS timemodified,
+                       fc.selfassessment AS selfassessment, -- +++/--- MBS-Hack (nersesov) : selfassessment in privacy export.
 
                        fv.id AS valueid,
                        fv.course_id AS valuecourse_id,
