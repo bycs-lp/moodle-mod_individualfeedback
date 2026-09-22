@@ -16,9 +16,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Defines backup_feedback_activity_task class
+ * Defines backup_individualfeedback_activity_task class
  *
- * @package     mod_feedback
+ * @package     mod_individualfeedback
  * @category    backup
  * @copyright   2010 onwards Eloy Lafuente (stronk7) {@link http://stronk7.com}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -26,13 +26,13 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/mod/feedback/backup/moodle2/backup_feedback_stepslib.php');
-require_once($CFG->dirroot . '/mod/feedback/backup/moodle2/backup_feedback_settingslib.php');
+require_once($CFG->dirroot . '/mod/individualfeedback/backup/moodle2/backup_individualfeedback_stepslib.php');
+require_once($CFG->dirroot . '/mod/individualfeedback/backup/moodle2/backup_individualfeedback_settingslib.php');
 
 /**
- * Provides the steps to perform one complete backup of the Feedback instance
+ * Provides the steps to perform one complete backup of the Individualfeedback instance
  */
-class backup_feedback_activity_task extends backup_activity_task {
+class backup_individualfeedback_activity_task extends backup_activity_task {
 
     /**
      * No specific settings for this activity
@@ -41,11 +41,11 @@ class backup_feedback_activity_task extends backup_activity_task {
     }
 
     /**
-     * Defines a backup step to store the instance data in the feedback.xml file
+     * Defines a backup step to store the instance data in the individualfeedback.xml file
      */
     protected function define_my_steps() {
-        // feedback only has one structure step
-        $this->add_step(new backup_feedback_activity_structure_step('feedback structure', 'feedback.xml'));
+        // individualfeedback only has one structure step
+        $this->add_step(new backup_individualfeedback_activity_structure_step('individualfeedback structure', 'individualfeedback.xml'));
     }
 
     /**
@@ -59,20 +59,20 @@ class backup_feedback_activity_task extends backup_activity_task {
 
         $base = preg_quote($CFG->wwwroot, "/");
 
-        // Link to the list of feedbacks
-        $search="/(".$base."\/mod\/feedback\/index.php\?id\=)([0-9]+)/";
+        // Link to the list of individualfeedbacks
+        $search="/(".$base."\/mod\/individualfeedback\/index.php\?id\=)([0-9]+)/";
         $content= preg_replace($search, '$@FEEDBACKINDEX*$2@$', $content);
 
-        // Link to feedback view by moduleid
-        $search="/(".$base."\/mod\/feedback\/view.php\?id\=)([0-9]+)/";
+        // Link to individualfeedback view by moduleid
+        $search="/(".$base."\/mod\/individualfeedback\/view.php\?id\=)([0-9]+)/";
         $content= preg_replace($search, '$@FEEDBACKVIEWBYID*$2@$', $content);
 
-        // Link to feedback analyis by moduleid
-        $search="/(".$base."\/mod\/feedback\/analysis.php\?id\=)([0-9]+)/";
+        // Link to individualfeedback analyis by moduleid
+        $search="/(".$base."\/mod\/individualfeedback\/analysis.php\?id\=)([0-9]+)/";
         $content= preg_replace($search, '$@FEEDBACKANALYSISBYID*$2@$', $content);
 
-        // Link to feedback entries by moduleid
-        $search="/(".$base."\/mod\/feedback\/show_entries.php\?id\=)([0-9]+)/";
+        // Link to individualfeedback entries by moduleid
+        $search="/(".$base."\/mod\/individualfeedback\/show_entries.php\?id\=)([0-9]+)/";
         $content= preg_replace($search, '$@FEEDBACKSHOWENTRIESBYID*$2@$', $content);
 
         return $content;

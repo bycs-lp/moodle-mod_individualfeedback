@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace mod_feedback\courseformat;
+namespace mod_individualfeedback\courseformat;
 
 use core\url;
 use core\output\pix_icon;
@@ -27,7 +27,7 @@ use core_courseformat\local\overview\overviewitem;
 /**
  * Class overview
  *
- * @package    mod_feedback
+ * @package    mod_individualfeedback
  * @copyright  2025 Ferran Recio <ferran@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -43,12 +43,12 @@ class overview extends \core_courseformat\activityoverviewbase {
 
     #[\Override]
     public function get_actions_overview(): ?overviewitem {
-        if (!has_capability('mod/feedback:viewreports', $this->context)) {
+        if (!has_capability('mod/individualfeedback:viewreports', $this->context)) {
             return null;
         }
 
         $content = new action_link(
-            url: new url('/mod/feedback/show_entries.php', ['id' => $this->cm->id]),
+            url: new url('/mod/individualfeedback/show_entries.php', ['id' => $this->cm->id]),
             text: get_string('view', 'core'),
             attributes: ['class' => button::BODY_OUTLINE->classes()],
         );
@@ -70,13 +70,13 @@ class overview extends \core_courseformat\activityoverviewbase {
 
         if (empty($duedate)) {
             return new overviewitem(
-                name: get_string('duedate', 'mod_feedback'),
+                name: get_string('duedate', 'mod_individualfeedback'),
                 value: null,
                 content: '-',
             );
         }
         return new overviewitem(
-            name: get_string('duedate', 'mod_feedback'),
+            name: get_string('duedate', 'mod_individualfeedback'),
             value: $duedate,
             content: humandate::create_from_timestamp($duedate),
         );
@@ -90,13 +90,13 @@ class overview extends \core_courseformat\activityoverviewbase {
     private function get_extra_responses_overview(): ?overviewitem {
         global $CFG;
 
-        if (!has_capability('mod/feedback:viewreports', $this->context)) {
+        if (!has_capability('mod/individualfeedback:viewreports', $this->context)) {
             return null;
         }
 
-        require_once($CFG->dirroot . '/mod/feedback/lib.php');
+        require_once($CFG->dirroot . '/mod/individualfeedback/lib.php');
 
-        $submissions = feedback_get_completeds_count(
+        $submissions = individualfeedback_get_completeds_count(
             $this->cm->get_instance_record(),
             $this->get_groups_for_filtering(),
         );
@@ -106,7 +106,7 @@ class overview extends \core_courseformat\activityoverviewbase {
         }
 
         return new overviewitem(
-            name: get_string('responses', 'mod_feedback'),
+            name: get_string('responses', 'mod_individualfeedback'),
             value: $submissions,
             textalign: text_align::END,
         );
@@ -115,17 +115,17 @@ class overview extends \core_courseformat\activityoverviewbase {
     /**
      * Get the submitted status overview item.
      *
-     * @return overviewitem|null The overview item (or null if the user cannot complete the feedback).
+     * @return overviewitem|null The overview item (or null if the user cannot complete the individualfeedback).
      */
     private function get_extra_submitted_overview(): ?overviewitem {
         global $USER;
 
-        if (!has_capability('mod/feedback:complete', $this->context, $USER, false)) {
+        if (!has_capability('mod/individualfeedback:complete', $this->context, $USER, false)) {
             return null;
         }
 
-        $structure = new \mod_feedback_structure(
-            feedback: $this->cm->get_instance_record(),
+        $structure = new \mod_individualfeedback_structure(
+            individualfeedback: $this->cm->get_instance_record(),
             cm: $this->cm,
             courseid: $this->course->id,
             userid: $USER->id,
@@ -138,13 +138,13 @@ class overview extends \core_courseformat\activityoverviewbase {
             $value = true;
             $content = new pix_icon(
                 'i/checkedcircle',
-                alt: get_string('this_feedback_is_already_submitted', 'mod_feedback'),
+                alt: get_string('this_individualfeedback_is_already_submitted', 'mod_individualfeedback'),
                 attributes: ['class' => 'text-success'],
             );
         }
 
         return new overviewitem(
-            name: get_string('responded', 'mod_feedback'),
+            name: get_string('responded', 'mod_individualfeedback'),
             value: $value,
             content: $content,
             textalign: text_align::CENTER,

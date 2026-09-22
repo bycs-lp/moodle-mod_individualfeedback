@@ -14,28 +14,28 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace mod_feedback;
+namespace mod_individualfeedback;
 
-use mod_feedback_completion;
+use mod_individualfeedback_completion;
 
 defined('MOODLE_INTERNAL') || die();
 global $CFG;
-require_once($CFG->dirroot . '/mod/feedback/classes/completion.php');
+require_once($CFG->dirroot . '/mod/individualfeedback/classes/completion.php');
 
 /**
- * Unit tests for (some of) mod/feedback/classes/completion.php.
+ * Unit tests for (some of) mod/individualfeedback/classes/completion.php.
  *
- * @package    mod_feedback
+ * @package    mod_individualfeedback
  * @copyright  2019 Tobias Reischmann
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class completion_test extends \advanced_testcase {
     /**
-     * Returns the number of pages with visible elements for the current state of the feedback completion.
-     * @param mod_feedback_completion $completion
+     * Returns the number of pages with visible elements for the current state of the individualfeedback completion.
+     * @param mod_individualfeedback_completion $completion
      * @return int number of pages with at least one visible item.
      */
-    private function get_number_of_visible_pages(mod_feedback_completion $completion) {
+    private function get_number_of_visible_pages(mod_individualfeedback_completion $completion) {
         $pages = $completion->get_pages();
         $result = 0;
         foreach ($pages as $items) {
@@ -56,30 +56,30 @@ final class completion_test extends \advanced_testcase {
 
         // Setup test data.
         $course = $this->getDataGenerator()->create_course();
-        $feedback = $this->getDataGenerator()->create_module('feedback',
+        $individualfeedback = $this->getDataGenerator()->create_module('individualfeedback',
             array('course' => $course->id));
-        $cm = get_coursemodule_from_instance('feedback', $feedback->id);
+        $cm = get_coursemodule_from_instance('individualfeedback', $individualfeedback->id);
 
-        $feedbackgenerator = $this->getDataGenerator()->get_plugin_generator('mod_feedback');
+        $individualfeedbackgenerator = $this->getDataGenerator()->get_plugin_generator('mod_individualfeedback');
         $itemscreated = [];
 
         // Create at least one page.
-        $itemscreated[] = $feedbackgenerator->create_item_multichoice($feedback,
+        $itemscreated[] = $individualfeedbackgenerator->create_item_multichoice($individualfeedback,
             $record = ['values' => "y\nn"]);
-        $itemscreated[] = $feedbackgenerator->create_item_pagebreak($feedback);
-        $itemscreated[] = $feedbackgenerator->create_item_multichoice($feedback,
+        $itemscreated[] = $individualfeedbackgenerator->create_item_pagebreak($individualfeedback);
+        $itemscreated[] = $individualfeedbackgenerator->create_item_multichoice($individualfeedback,
             $record = ['values' => "y\nn", 'dependitem' => $itemscreated[0]->id, 'dependvalue' => 'n']);
-        $itemscreated[] = $feedbackgenerator->create_item_pagebreak($feedback);
-        $itemscreated[] = $feedbackgenerator->create_item_multichoice($feedback,
+        $itemscreated[] = $individualfeedbackgenerator->create_item_pagebreak($individualfeedback);
+        $itemscreated[] = $individualfeedbackgenerator->create_item_multichoice($individualfeedback,
             $record = ['values' => "y\nn", 'dependitem' => $itemscreated[0]->id, 'dependvalue' => 'y']);
-        $itemscreated[] = $feedbackgenerator->create_item_pagebreak($feedback);
-        $itemscreated[] = $feedbackgenerator->create_item_multichoice($feedback,
+        $itemscreated[] = $individualfeedbackgenerator->create_item_pagebreak($individualfeedback);
+        $itemscreated[] = $individualfeedbackgenerator->create_item_multichoice($individualfeedback,
             $record = ['values' => "y\nn", 'dependitem' => $itemscreated[2]->id, 'dependvalue' => 'y']);
 
         // Test hiding item since transitive dependency is not met.
         // Answering the first multichoice with 'y', should hide the second and therefor also the fourth.
         $user1 = $this->getDataGenerator()->create_and_enrol($course);
-        $completion = new mod_feedback_completion($feedback, $cm, $course,
+        $completion = new mod_individualfeedback_completion($individualfeedback, $cm, $course,
             false, null, $user1->id);
 
         // Initially, all pages should be visible.
@@ -102,7 +102,7 @@ final class completion_test extends \advanced_testcase {
         // Test showing item since transitive dependency is met.
         // Answering the first multichoice with 'n' should hide the third multichoice.
         $user2 = $this->getDataGenerator()->create_and_enrol($course);
-        $completion2 = new mod_feedback_completion($feedback, $cm, $course,
+        $completion2 = new mod_individualfeedback_completion($individualfeedback, $cm, $course,
             false, null, $user2->id);
 
         // Initially, all pages should be visible.

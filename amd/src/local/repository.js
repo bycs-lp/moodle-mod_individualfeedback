@@ -14,9 +14,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Module to handle feedback AJAX requests
+ * Module to handle individualfeedback AJAX requests
  *
- * @module     mod_feedback/local/repository
+ * @module     mod_individualfeedback/local/repository
  * @copyright  2024 Mikel Martín <mikel@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -24,7 +24,7 @@
 import Ajax from 'core/ajax';
 
 /**
- * Reorder questions for a given feedback course module
+ * Reorder questions for a given individualfeedback course module
  *
  * @param {Number} moduleId
  * @param {String} itemOrder
@@ -32,7 +32,7 @@ import Ajax from 'core/ajax';
  */
 export const reorderQuestions = (moduleId, itemOrder) => {
     const request = {
-        methodname: 'mod_feedback_questions_reorder',
+        methodname: 'mod_individualfeedback_questions_reorder',
         args: {cmid: moduleId, itemorder: itemOrder}
     };
 

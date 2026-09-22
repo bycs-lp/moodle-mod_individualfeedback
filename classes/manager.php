@@ -14,15 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace mod_feedback;
+namespace mod_individualfeedback;
 
 use cm_info;
 use stdClass;
 
 /**
- * Class manager for feedback
+ * Class manager for individualfeedback
  *
- * @package    mod_feedback
+ * @package    mod_individualfeedback
  * @copyright  2024 Mikel Martín <mikel@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -37,7 +37,7 @@ class manager {
     public static function get_template_record(int $templateid): stdClass {
         global $DB;
 
-        return $DB->get_record('feedback_template', ['id' => $templateid], '*', MUST_EXIST);
+        return $DB->get_record('individualfeedback_template', ['id' => $templateid], '*', MUST_EXIST);
     }
 
     /**

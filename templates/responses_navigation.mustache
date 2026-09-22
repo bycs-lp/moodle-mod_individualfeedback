@@ -15,7 +15,7 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{!
-    @template mod_feedback/responses_navigation
+    @template mod_individualfeedback/responses_navigation
 
     Template for displaying response navigation buttons (previous/next).
 
@@ -34,7 +34,7 @@
     {
         "navbuttons": [
             {
-                "url": "http://example.com/mod/feedback/show_entries.php?d=2",
+                "url": "http://example.com/mod/individualfeedback/show_entries.php?d=2",
                 "title": "Previous response title",
                 "arialabel": "Previous response",
                 "buttonicon": "i/previous",
@@ -42,7 +42,7 @@
                 "disabled": false
             },
             {
-                "url": "http://example.com/mod/feedback/show_entries.php?d=4",
+                "url": "http://example.com/mod/individualfeedback/show_entries.php?d=4",
                 "title": "Next response title",
                 "arialabel": "Next response",
                 "buttonicon": "i/next",
@@ -53,11 +53,11 @@
     }
 }}
 
-<nav class="responses-nav d-flex" aria-label="{{#str}}browseresponses, mod_feedback{{/str}}">
+<nav class="responses-nav d-flex" aria-label="{{#str}}browseresponses, mod_individualfeedback{{/str}}">
     <div class="d-flex gap-2 align-items-center ms-auto">
         {{#navbuttons}}
             <a
-               class="btn btn-icon border{{#disabled}} disabled{{/disabled}} feedback-navigation-button"
+               class="btn btn-icon border{{#disabled}} disabled{{/disabled}} individualfeedback-navigation-button"
                {{^disabled}}
                href="{{url}}"
                data-bs-toggle="tooltip"

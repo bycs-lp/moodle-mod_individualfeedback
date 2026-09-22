@@ -15,14 +15,14 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Behat data generator for mod_feedback.
+ * Behat data generator for mod_individualfeedback.
  *
- * @package   mod_feedback
+ * @package   mod_individualfeedback
  * @category  test
  * @copyright 2022 Noel De Martin
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class behat_mod_feedback_generator extends behat_generator_base {
+class behat_mod_individualfeedback_generator extends behat_generator_base {
 
     /**
      * Get a list of the entities that Behat can create using the generator step.
