@@ -66,16 +66,13 @@ Feature: Managing individualfeedback questions
     Given I am on the "Learning experience course 1" "individualfeedback activity" page logged in as teacher
     And I click on "Edit questions" "link" in the "region-main" "region"
     When I click on "Edit" "link" in the "Is it me you're looking for?" "mod_individualfeedback > Question"
-    And I choose "Set as required" in the open action menu
-    And I click on "Edit" "link" in the "Is it me you're looking for?" "mod_individualfeedback > Question"
-    And I choose "Edit question" in the open action menu
-    Then the field "Required" matches value "1"
-    And I press "Cancel"
-    And I click on "Edit" "link" in the "Is it me you're looking for?" "mod_individualfeedback > Question"
-    And I choose "Set as not required" in the open action menu
-    And I click on "Edit" "link" in the "Is it me you're looking for?" "mod_individualfeedback > Question"
-    And I choose "Edit question" in the open action menu
-    And the field "Required" matches value "0"
+    # +++ MBS-Hack (nersesov) : the fork manages the required flag itself (H18, can_switch_require() returns
+    # false), so the core "Set as required" / "Set as not required" toggle is not offered in the action menu.
+    # Core steps toggling the flag through the menu are replaced by the assertion that the toggle is absent.
+    Then "Set as required" "link" should not exist in the ".moodle-actionmenu .dropdown .dropdown-menu.show" "css_element"
+    And "Set as not required" "link" should not exist in the ".moodle-actionmenu .dropdown .dropdown-menu.show" "css_element"
+    And "Edit question" "link" should exist in the ".moodle-actionmenu .dropdown .dropdown-menu.show" "css_element"
+    # --- MBS-Hack
 
   @javascript
   Scenario: Teacher can move questions
