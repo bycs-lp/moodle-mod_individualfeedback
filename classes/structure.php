@@ -32,6 +32,11 @@ defined('MOODLE_INTERNAL') || die();
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mod_individualfeedback_structure {
+
+    // +++ MBS-Hack (nersesov) : inject question-group helpers (get_groups_and_items).
+    use \mod_individualfeedback\local\structure_groups_trait;
+    // --- MBS-Hack
+
     /** @var stdClass record from 'individualfeedback' table.
      * Reliably has fields: id, course, timeopen, timeclose, anonymous, completionsubmit.
      * For full object or to access any other field use $this->get_individualfeedback()

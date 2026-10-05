@@ -459,6 +459,9 @@ class mod_individualfeedback_completion extends mod_individualfeedback_structure
         }
         $record->timemodified = time();
         $record->anonymous_response = $this->individualfeedback->anonymous;
+        // +++ MBS-Hack (nersesov) : flag responses of users with the selfassessment capability.
+        $record = \mod_individualfeedback\hack\lib::flag_selfassessment_completedtmp($record, $this->cm, (int) $this->userid);
+        // --- MBS-Hack
         $id = $DB->insert_record('individualfeedback_completedtmp', $record);
         $this->completedtmp = $DB->get_record('individualfeedback_completedtmp', ['id' => $id]);
         $this->valuestmp = null;
@@ -614,7 +617,9 @@ class mod_individualfeedback_completion extends mod_individualfeedback_structure
 
         $context = context_module::instance($this->cm->id);
         if (has_capability('mod/individualfeedback:complete', $context, $this->userid, false)) {
-            return true;
+            // +++ MBS-Hack (nersesov) editingteacher has complete for selfassessment; guard core tests
+            return \mod_individualfeedback\hack\lib::can_complete_for_selfassessment($context, $this->userid);
+            // --- MBS-Hack
         }
 
         if (!empty($CFG->individualfeedback_allowfullanonymous)
