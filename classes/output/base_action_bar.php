@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace mod_feedback\output;
+namespace mod_individualfeedback\output;
 
 use context_module;
 use renderable;
@@ -24,9 +24,9 @@ use templatable;
 /**
  * Class base_action_bar
  *
- * Base class to be inherited by any other feedback action bar
+ * Base class to be inherited by any other individualfeedback action bar
  *
- * @package     mod_feedback
+ * @package     mod_individualfeedback
  * @copyright   2021 onwards Peter Dias
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -39,8 +39,8 @@ abstract class base_action_bar implements renderable, templatable {
     protected $course;
     /** @var array $urlparams The default params to be used when creating urls */
     protected $urlparams;
-    /** @var object $feedback The activity record that is being viewed */
-    protected $feedback;
+    /** @var object $individualfeedback The activity record that is being viewed */
+    protected $individualfeedback;
 
     /**
      * base_action_bar constructor.
@@ -56,7 +56,7 @@ abstract class base_action_bar implements renderable, templatable {
         $this->urlparams = [
             'id' => $cmid
         ];
-        $this->feedback = $PAGE->activityrecord;
+        $this->individualfeedback = $PAGE->activityrecord;
     }
 
     /**

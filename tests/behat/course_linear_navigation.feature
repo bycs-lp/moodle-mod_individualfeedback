@@ -1,8 +1,8 @@
-@mod @mod_feedback
-Feature: Display the course linear navigation in the feedback pages
+@mod @mod_individualfeedback
+Feature: Display the course linear navigation in the individualfeedback pages
   In order to quickly access the next and previous activities in a course
   As a user
-  I want to see the course linear navigation in feedback pages
+  I want to see the course linear navigation in individualfeedback pages
 
   Background:
     Given the following "users" exist:
@@ -20,23 +20,23 @@ Feature: Display the course linear navigation in the feedback pages
       | teacher  | C1     | editingteacher |
     And the following "activities" exist:
       | activity | name      | course | idnumber  | anonymous | publish_stats | multiple_submit | completion |
-      | feedback | Feedback1 | C1     | feedback1 | 1         | 1             | 1               | 1          |
-    Given the following "mod_feedback > question" exists:
-      | activity        | feedback1                |
+      | individualfeedback | Individualfeedback1 | C1     | individualfeedback1 | 1         | 1             | 1               | 1          |
+    Given the following "mod_individualfeedback > question" exists:
+      | activity        | individualfeedback1                |
       | name            | Do you like this course? |
       | questiontype    | multichoice              |
       | label           | q1                       |
       | subtype         | r                        |
       | hidenoselect    | 1                        |
       | values          | Yes\nNo                  |
-    And the following "mod_feedback > responses" exist:
+    And the following "mod_individualfeedback > responses" exist:
       | activity  | user     | Do you like this course? |
-      | feedback1 | student1 | No                       |
-      | feedback1 | student2 | Yes                      |
+      | individualfeedback1 | student1 | No                       |
+      | individualfeedback1 | student2 | Yes                      |
 
   @javascript
-  Scenario: As a student I should see the course linear navigation in feedback pages that allow it
-    When I am on the "Feedback1" "feedback activity" page logged in as "student1"
+  Scenario: As a student I should see the course linear navigation in individualfeedback pages that allow it
+    When I am on the "Individualfeedback1" "individualfeedback activity" page logged in as "student1"
     Then the course linear navigation should be visible
     And I should see "Mark as done" in the "sticky-footer" "region"
     And I should not see "Mark as done" in the "page-header" "region"
@@ -56,8 +56,8 @@ Feature: Display the course linear navigation in the feedback pages
     And I should not see "Mark as done" in the "page-header" "region"
 
   @javascript
-  Scenario: As a teacher I should see the course linear navigation in feedback pages that allow it
-    When I am on the "Feedback1" "feedback activity" page logged in as "teacher"
+  Scenario: As a teacher I should see the course linear navigation in individualfeedback pages that allow it
+    When I am on the "Individualfeedback1" "individualfeedback activity" page logged in as "teacher"
     Then the course linear navigation should be visible
     # Preview questions.
     But I click on "Preview questions" "link" in the "region-main" "region"
@@ -93,7 +93,7 @@ Feature: Display the course linear navigation in the feedback pages
     And the course linear navigation should not be visible
 
   Scenario: The Link to next activity setting is hidden when linear navigation is enabled
-    When I am on the "Feedback1" "feedback activity editing" page logged in as "teacher"
+    When I am on the "Individualfeedback1" "individualfeedback activity editing" page logged in as "teacher"
     And I expand all fieldsets
     Then I should see "After submission"
     And I should not see "Link to next activity"
@@ -110,14 +110,14 @@ Feature: Display the course linear navigation in the feedback pages
       | teacher  | C2     | editingteacher |
     And the following "activities" exist:
       | activity | name      | course | idnumber  |
-      | feedback | Feedback2 | C2     | feedback2 |
-    And the following "mod_feedback > questions" exist:
+      | individualfeedback | Individualfeedback2 | C2     | individualfeedback2 |
+    And the following "mod_individualfeedback > questions" exist:
       | activity  | label | name              |
-      | feedback2 | q2    | Do you like this? |
-    When I am on the "Feedback2" "feedback activity editing" page logged in as "teacher"
+      | individualfeedback2 | q2    | Do you like this? |
+    When I am on the "Individualfeedback2" "individualfeedback activity editing" page logged in as "teacher"
     And I expand all fieldsets
     Then I should see "Link to next activity"
-    When I am on the "Feedback2" "feedback activity" page logged in as "student1"
+    When I am on the "Individualfeedback2" "individualfeedback activity" page logged in as "student1"
     And I follow "Answer the questions"
     And I set the following fields to these values:
       | Do you like this? | Yes |

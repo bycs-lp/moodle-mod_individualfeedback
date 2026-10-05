@@ -14,18 +14,18 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace mod_feedback;
+namespace mod_individualfeedback;
 
 use advanced_testcase;
 
 /**
- * Class for unit testing mod_feedback\dates.
+ * Class for unit testing mod_individualfeedback\dates.
  *
  * @category  test
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @copyright 2025 Laurent David <laurent.david@moodle.com>
- * @package   mod_feedback
- * @covers \mod_feedback\manager
+ * @package   mod_individualfeedback
+ * @covers \mod_individualfeedback\manager
  */
 final class manager_test extends advanced_testcase {
     /**
@@ -107,9 +107,9 @@ final class manager_test extends advanced_testcase {
                 ['groupid' => $group->id, 'userid' => $user->id]
             );
         }
-        $feedback = $this->getDataGenerator()->create_module('feedback', ['course' => $course]);
+        $individualfeedback = $this->getDataGenerator()->create_module('individualfeedback', ['course' => $course]);
         $this->setUser($users[$username]);
-        $cm = get_fast_modinfo($course)->cms[$feedback->cmid];
+        $cm = get_fast_modinfo($course)->cms[$individualfeedback->cmid];
         $this->assertEquals($expected, manager::can_see_others_in_groups($cm));
     }
 }

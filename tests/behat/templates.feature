@@ -1,8 +1,8 @@
-@mod @mod_feedback
-Feature: Saving, using and deleting feedback templates
-  In order to quickly create feedbacks
+@mod @mod_individualfeedback
+Feature: Saving, using and deleting individualfeedback templates
+  In order to quickly create individualfeedbacks
   As a manager
-  I need to be able to create feedback templates
+  I need to be able to create individualfeedback templates
 
   Background:
     Given the following "users" exist:
@@ -22,12 +22,12 @@ Feature: Saving, using and deleting feedback templates
       | manager | Acceptance test site | manager |
     And the following "activities" exist:
       | activity   | name                         | course | idnumber    |
-      | feedback   | Learning experience course 1 | C1     | feedback1   |
-      | feedback   | Another feedback in course 1 | C1     | feedback2   |
-      | feedback   | Learning experience course 2 | C2     | feedback3   |
-    And I am on the "Learning experience course 1" "feedback activity" page logged in as teacher
+      | individualfeedback   | Learning experience course 1 | C1     | individualfeedback1   |
+      | individualfeedback   | Another individualfeedback in course 1 | C1     | individualfeedback2   |
+      | individualfeedback   | Learning experience course 2 | C2     | individualfeedback3   |
+    And I am on the "Learning experience course 1" "individualfeedback activity" page logged in as teacher
     And I navigate to "Questions" in current page administration
-    And I add a "Multiple choice" question to the feedback with:
+    And I add a "Multiple choice" question to the individualfeedback with:
       | Question         | this is a multiple choice 1 |
       | Label            | multichoice1                |
       | Multiple choice type | Multiple choice - single answer |
@@ -36,12 +36,12 @@ Feature: Saving, using and deleting feedback templates
 
   @javascript
   Scenario: Teacher can save template and re-use it in the same course only
-    # Go to feedback templates and make sure none exist yet
-    When I am on the "Learning experience course 1" "feedback activity" page logged in as teacher
+    # Go to individualfeedback templates and make sure none exist yet
+    When I am on the "Learning experience course 1" "individualfeedback activity" page logged in as teacher
     And I navigate to "Templates" in current page administration
     Then I should see "No templates available yet"
     # Save as a course template
-    And I navigate to "Feedback" in current page administration
+    And I navigate to "Individualfeedback" in current page administration
     And I click on "Edit questions" "link" in the "[role=main]" "css_element"
     And I press "Actions"
     And I choose "Save as template" in the open action menu
@@ -52,27 +52,27 @@ Feature: Saving, using and deleting feedback templates
     And I should see "Template saved"
     And I navigate to "Templates" in current page administration
     And I should see "My first template"
-    # Create a feedback from this template in the same course
-    And I am on the "Another feedback in course 1" "feedback activity" page
+    # Create a individualfeedback from this template in the same course
+    And I am on the "Another individualfeedback in course 1" "individualfeedback activity" page
     And I navigate to "Templates" in current page administration
     And I open the action menu in "My first template" "table_row"
     And I choose "Use template" in the open action menu
     And I click on "Save" "button" in the "Use template" "dialogue"
     And I should see "this is a multiple choice 1"
     # Make sure this template is not available in another course
-    And I am on the "Learning experience course 2" "feedback activity" page
+    And I am on the "Learning experience course 2" "individualfeedback activity" page
     And I navigate to "Templates" in current page administration
     And I should see "No templates available yet"
     # Make sure Template cannot be created without questions
-    And I am on the "Learning experience course 2" "feedback activity" page
+    And I am on the "Learning experience course 2" "individualfeedback activity" page
     And I navigate to "Questions" in current page administration
     And I press "Actions"
     And I should not see "Save as template"
 
   @javascript
   Scenario: Teacher can append template to existing questions or remove them
-    # Save feedback as a course template
-    When I am on the "Learning experience course 1" "feedback activity" page logged in as teacher
+    # Save individualfeedback as a course template
+    When I am on the "Learning experience course 1" "individualfeedback activity" page logged in as teacher
     And I navigate to "Questions" in current page administration
     And I press "Actions"
     And I choose "Save as template" in the open action menu
@@ -82,10 +82,10 @@ Feature: Saving, using and deleting feedback templates
     And I click on "Save" "button" in the ".modal-dialog" "css_element"
     And I press "Actions"
     And I choose "Save as template" in the open action menu
-    # Add questions to another feedback
-    And I am on the "Another feedback in course 1" "feedback activity" page
+    # Add questions to another individualfeedback
+    And I am on the "Another individualfeedback in course 1" "individualfeedback activity" page
     And I navigate to "Questions" in current page administration
-    And I add a "Multiple choice" question to the feedback with:
+    And I add a "Multiple choice" question to the individualfeedback with:
       | Question         | What is your favourite subject |
       | Label            | subjectchoice                  |
       | Multiple choice type | Multiple choice - single answer   |
@@ -111,7 +111,7 @@ Feature: Saving, using and deleting feedback templates
 
   @javascript
   Scenario: Manager can save template as public and it will be available in any course
-    When I am on the "Learning experience course 1" "feedback activity" page logged in as manager
+    When I am on the "Learning experience course 1" "individualfeedback activity" page logged in as manager
     And I navigate to "Questions" in current page administration
     And I press "Actions"
     And I choose "Save as template" in the open action menu
@@ -119,7 +119,7 @@ Feature: Saving, using and deleting feedback templates
     And I set the field "Available for all courses" to "1"
     And I click on "Save" "button" in the ".modal-dialog" "css_element"
     And I log out
-    And I am on the "Learning experience course 2" "feedback activity" page logged in as teacher
+    And I am on the "Learning experience course 2" "individualfeedback activity" page logged in as teacher
     And I navigate to "Templates" in current page administration
     And I open the action menu in "My first template" "table_row"
     And I choose "Use template" in the open action menu
@@ -129,8 +129,8 @@ Feature: Saving, using and deleting feedback templates
 
   @javascript
   Scenario: Teacher can delete course templates but can not delete public templates
-    # Save feedback as both public and course template
-    When I am on the "Learning experience course 1" "feedback activity" page logged in as manager
+    # Save individualfeedback as both public and course template
+    When I am on the "Learning experience course 1" "individualfeedback activity" page logged in as manager
     And I navigate to "Questions" in current page administration
     And I press "Actions"
     And I choose "Save as template" in the open action menu
@@ -143,7 +143,7 @@ Feature: Saving, using and deleting feedback templates
     And I click on "Save" "button" in the ".modal-dialog" "css_element"
     And I log out
     # Login as teacher and try to delete templates
-    And I am on the "Another feedback in course 1" "feedback activity" page logged in as teacher
+    And I am on the "Another individualfeedback in course 1" "individualfeedback activity" page logged in as teacher
     And I navigate to "Templates" in current page administration
     And I open the action menu in "My public template" "table_row"
     Then I should not see "Delete"
@@ -161,8 +161,8 @@ Feature: Saving, using and deleting feedback templates
 
   @javascript @accessibility
   Scenario: Manager can delete both course and public templates
-    # Save feedback as both public and course template
-    When I am on the "Learning experience course 1" "feedback activity" page logged in as manager
+    # Save individualfeedback as both public and course template
+    When I am on the "Learning experience course 1" "individualfeedback activity" page logged in as manager
     And I navigate to "Questions" in current page administration
     And the "region-main" "region" should meet accessibility standards with "best-practice" extra tests
     And I press "Actions"

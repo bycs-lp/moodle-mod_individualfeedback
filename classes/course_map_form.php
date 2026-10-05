@@ -15,22 +15,22 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Contains class mod_feedback_course_map_form
+ * Contains class mod_individualfeedback_course_map_form
  *
- * @package   mod_feedback
+ * @package   mod_individualfeedback
  * @copyright 2016 Marina Glancy
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Form for mapping courses to the feedback
+ * Form for mapping courses to the individualfeedback
  *
- * @package   mod_feedback
+ * @package   mod_individualfeedback
  * @copyright 2016 Marina Glancy
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_feedback_course_map_form extends moodleform {
+class mod_individualfeedback_course_map_form extends moodleform {
     /**
      * Definition of the form
      */

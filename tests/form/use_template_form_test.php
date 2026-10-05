@@ -14,14 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace mod_feedback\form;
+namespace mod_individualfeedback\form;
 
 /**
  * Tests the confirm use template form
  *
  * @author Peter Dias
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
- * @package mod_feedback
+ * @package mod_individualfeedback
  */
 final class use_template_form_test extends \advanced_testcase {
     /**
@@ -33,29 +33,29 @@ final class use_template_form_test extends \advanced_testcase {
         $this->setAdminUser();
 
         $course = $this->getDataGenerator()->create_course();
-        $feedback = $this->getDataGenerator()->create_module('feedback', ['course' => $course->id]);
-        $cm = get_coursemodule_from_instance('feedback', $feedback->id, $course->id);
+        $individualfeedback = $this->getDataGenerator()->create_module('individualfeedback', ['course' => $course->id]);
+        $cm = get_coursemodule_from_instance('individualfeedback', $individualfeedback->id, $course->id);
         $user = $this->getDataGenerator()->create_user();
         $this->getDataGenerator()->enrol_user($user->id, $course->id, 'student');
 
-        $feedbackgenerator = $this->getDataGenerator()->get_plugin_generator('mod_feedback');
+        $individualfeedbackgenerator = $this->getDataGenerator()->get_plugin_generator('mod_individualfeedback');
 
         // Create at least one page.
-        $feedbackgenerator->create_item_multichoice($feedback, ['values' => "y\nn"]);
+        $individualfeedbackgenerator->create_item_multichoice($individualfeedback, ['values' => "y\nn"]);
 
-        feedback_save_as_template($feedback, 'my template', 0);
-        $feedbackgenerator->create_item_multichoice($feedback, ['values' => "0\n1"]);
-        feedback_save_as_template($feedback, 'mytemplate2', 1);
-        $records = array_keys($DB->get_records('feedback_template', null, 'id ASC'));
-        $feedbackparams = [
+        individualfeedback_save_as_template($individualfeedback, 'my template', 0);
+        $individualfeedbackgenerator->create_item_multichoice($individualfeedback, ['values' => "0\n1"]);
+        individualfeedback_save_as_template($individualfeedback, 'mytemplate2', 1);
+        $records = array_keys($DB->get_records('individualfeedback_template', null, 'id ASC'));
+        $individualfeedbackparams = [
             'id' => $cm->id,
             'privatetemplate' => $records[0],
             'publictemplate' => $records[1],
         ];
         $PAGE->set_cm($cm);
-        $PAGE->set_activity_record($feedback);
+        $PAGE->set_activity_record($individualfeedback);
 
-        return [$user, $feedbackparams];
+        return [$user, $individualfeedbackparams];
     }
 
     /**
@@ -67,7 +67,7 @@ final class use_template_form_test extends \advanced_testcase {
      * @dataProvider usetemplate_form_provider
      */
     public function test_usetemplate_form(string $loginas, bool $private, bool $expected): void {
-        [$user, $feedback] = $this->setup_instance();
+        [$user, $individualfeedback] = $this->setup_instance();
         switch($loginas) {
             case 'admin':
                 $this->setAdminUser();
@@ -78,8 +78,8 @@ final class use_template_form_test extends \advanced_testcase {
         }
 
         $data = [
-            'id' => $feedback['id'],
-            'templateid' => $private ? $feedback['privatetemplate'] : $feedback['publictemplate'],
+            'id' => $individualfeedback['id'],
+            'templateid' => $private ? $individualfeedback['privatetemplate'] : $individualfeedback['publictemplate'],
         ];
 
         $submitdata = use_template_form::mock_ajax_submit($data);

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace mod_feedback\external;
+namespace mod_individualfeedback\external;
 
 use core\external\exporter;
 use renderer_base;
@@ -22,13 +22,13 @@ use core_external\util as external_util;
 use core_external\external_files;
 
 /**
- * Class for exporting partial feedback data (some fields are only viewable by admins).
+ * Class for exporting partial individualfeedback data (some fields are only viewable by admins).
  *
  * @copyright  2017 Juan Leyva <juan@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @package    mod_feedback
+ * @package    mod_individualfeedback
  */
-class feedback_summary_exporter extends exporter {
+class individualfeedback_summary_exporter extends exporter {
 
     protected static function define_properties() {
         return array(
@@ -38,22 +38,22 @@ class feedback_summary_exporter extends exporter {
             ),
             'course' => array(
                 'type' => PARAM_INT,
-                'description' => 'Course id this feedback is part of.',
+                'description' => 'Course id this individualfeedback is part of.',
             ),
             'name' => array(
                 'type' => PARAM_TEXT,
-                'description' => 'Feedback name.',
+                'description' => 'Individualfeedback name.',
             ),
             'intro' => array(
                 'default' => '',
                 'type' => PARAM_RAW,
-                'description' => 'Feedback introduction text.',
+                'description' => 'Individualfeedback introduction text.',
             ),
             'introformat' => array(
                 'choices' => array(FORMAT_HTML, FORMAT_MOODLE, FORMAT_PLAIN, FORMAT_MARKDOWN),
                 'type' => PARAM_INT,
                 'default' => FORMAT_MOODLE,
-                'description' => 'Feedback intro text format.',
+                'description' => 'Individualfeedback intro text format.',
             ),
             'lang' => array(
                 'type' => PARAM_LANG,
@@ -62,7 +62,7 @@ class feedback_summary_exporter extends exporter {
             ),
             'anonymous' => array(
                 'type' => PARAM_INT,
-                'description' => 'Whether the feedback is anonymous.',
+                'description' => 'Whether the individualfeedback is anonymous.',
             ),
             'email_notification' => array(
                 'type' => PARAM_BOOL,
@@ -153,10 +153,10 @@ class feedback_summary_exporter extends exporter {
             'coursemodule' => $context->instanceid,
         );
 
-        $values['introfiles'] = external_util::get_area_files($context->id, 'mod_feedback', 'intro', false, false);
+        $values['introfiles'] = external_util::get_area_files($context->id, 'mod_individualfeedback', 'intro', false, false);
 
         if (!empty($this->data->page_after_submit)) {
-            $values['pageaftersubmitfiles'] = external_util::get_area_files($context->id, 'mod_feedback', 'page_after_submit');
+            $values['pageaftersubmitfiles'] = external_util::get_area_files($context->id, 'mod_individualfeedback', 'page_after_submit');
         }
 
         return $values;
@@ -169,7 +169,7 @@ class feedback_summary_exporter extends exporter {
      */
     protected function get_format_parameters_for_intro() {
         return [
-            'component' => 'mod_feedback',
+            'component' => 'mod_individualfeedback',
             'filearea' => 'intro',
             'options' => array('noclean' => true),
         ];
@@ -182,7 +182,7 @@ class feedback_summary_exporter extends exporter {
      */
     protected function get_format_parameters_for_page_after_submit() {
         return [
-            'component' => 'mod_feedback',
+            'component' => 'mod_individualfeedback',
             'filearea' => 'page_after_submit',
             'itemid' => 0
         ];
