@@ -14,14 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace mod_feedback\courseformat;
+namespace mod_individualfeedback\courseformat;
 
 use core_courseformat\local\overview\overviewfactory;
 
 /**
- * Tests for Feedback
+ * Tests for Individualfeedback
  *
- * @package    mod_feedback
+ * @package    mod_individualfeedback
  * @category   test
  * @copyright  2025 Ferran Recio <ferran@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -31,7 +31,7 @@ final class overview_test extends \advanced_testcase {
     #[\Override]
     public static function setUpBeforeClass(): void {
         global $CFG;
-        require_once($CFG->dirroot . '/mod/feedback/lib.php');
+        require_once($CFG->dirroot . '/mod/individualfeedback/lib.php');
         parent::setUpBeforeClass();
     }
 
@@ -52,7 +52,7 @@ final class overview_test extends \advanced_testcase {
 
         $course = $this->getDataGenerator()->create_course();
         $currentuser = $this->getDataGenerator()->create_and_enrol($course, $role);
-        $activity = $this->getDataGenerator()->create_module('feedback', ['course' => $course->id]);
+        $activity = $this->getDataGenerator()->create_module('individualfeedback', ['course' => $course->id]);
 
         $this->setUser($currentuser);
 
@@ -107,7 +107,7 @@ final class overview_test extends \advanced_testcase {
             'timeclose' => $hasduedate ? time() + 3600 : 0,
         ];
 
-        $activity = $this->getDataGenerator()->create_module('feedback', $moddata);
+        $activity = $this->getDataGenerator()->create_module('individualfeedback', $moddata);
         $cm = get_fast_modinfo($course)->get_cm($activity->cmid);
 
         $currentuser = ($user == 'teacher') ? $teacher : $student;
@@ -116,7 +116,7 @@ final class overview_test extends \advanced_testcase {
         $item = overviewfactory::create($cm)->get_due_date_overview();
 
         // Teachers should see item.
-        $this->assertEquals(get_string('duedate', 'mod_feedback'), $item->get_name());
+        $this->assertEquals(get_string('duedate', 'mod_individualfeedback'), $item->get_name());
         $expectedvalue = $hasduedate ? $moddata['timeclose'] : null;
         $this->assertEquals($expectedvalue, $item->get_value());
     }
@@ -161,18 +161,18 @@ final class overview_test extends \advanced_testcase {
         $student = $this->getDataGenerator()->create_and_enrol($course, 'student');
 
         $activity = $this->getDataGenerator()->create_module(
-            'feedback',
+            'individualfeedback',
             ['course' => $course->id],
         );
         $cm = get_fast_modinfo($course)->get_cm($activity->cmid);
 
-        $feedbackgenerator = $this->getDataGenerator()->get_plugin_generator('mod_feedback');
-        $itemcreated = $feedbackgenerator->create_item_multichoice($activity, ['values' => "y\nn"]);
+        $individualfeedbackgenerator = $this->getDataGenerator()->get_plugin_generator('mod_individualfeedback');
+        $itemcreated = $individualfeedbackgenerator->create_item_multichoice($activity, ['values' => "y\nn"]);
 
         $expectedresonses = 0;
         if ($hasresponses) {
             $this->setUser($student);
-            $feedbackgenerator->create_response([
+            $individualfeedbackgenerator->create_response([
                 'userid' => $student->id,
                 'cmid' => $cm->id,
                 'anonymous' => false,
@@ -197,7 +197,7 @@ final class overview_test extends \advanced_testcase {
         }
 
         // Teachers should see item.
-        $this->assertEquals(get_string('responses', 'mod_feedback'), $item->get_name());
+        $this->assertEquals(get_string('responses', 'mod_individualfeedback'), $item->get_name());
         $this->assertEquals($expectedresonses, $item->get_value());
     }
 
@@ -236,7 +236,7 @@ final class overview_test extends \advanced_testcase {
      * @param string $currentuser The user to set for the test.
      * @param int $expectedcount The expected number of completeds.
      */
-    #[\PHPUnit\Framework\Attributes\DataProvider('provider_feedback_get_extra_responses_overview_with_groups')]
+    #[\PHPUnit\Framework\Attributes\DataProvider('provider_individualfeedback_get_extra_responses_overview_with_groups')]
     public function test_get_extra_responses_overview_with_groups(
         int $groupmode,
         string $currentuser,
@@ -302,26 +302,26 @@ final class overview_test extends \advanced_testcase {
         $teachers['teacher5'] = $this->getDataGenerator()->create_and_enrol($course, 'teacher');
         $teachers['teacher6'] = $this->getDataGenerator()->create_and_enrol($course, 'editingteacher');
 
-        $activity = $this->getDataGenerator()->create_module('feedback', ['course' => $course->id]);
+        $activity = $this->getDataGenerator()->create_module('individualfeedback', ['course' => $course->id]);
         $cm = get_fast_modinfo($course)->get_cm($activity->cmid);
 
-        // Add a multichoice item to the feedback and create responses for it.
-        /** @var  \mod_feedback_generator $feedbackgenerator */
-        $feedbackgenerator = $this->getDataGenerator()->get_plugin_generator('mod_feedback');
-        $item = $feedbackgenerator->create_item_multichoice($activity, ['values' => "y\nn"]);
-        $feedbackgenerator->create_response([
+        // Add a multichoice item to the individualfeedback and create responses for it.
+        /** @var  \mod_individualfeedback_generator $individualfeedbackgenerator */
+        $individualfeedbackgenerator = $this->getDataGenerator()->get_plugin_generator('mod_individualfeedback');
+        $item = $individualfeedbackgenerator->create_item_multichoice($activity, ['values' => "y\nn"]);
+        $individualfeedbackgenerator->create_response([
             'userid' => $student1a->id,
             'cmid' => $cm->id,
             'anonymous' => false,
             $item->name => 'y',
         ]);
-        $feedbackgenerator->create_response([
+        $individualfeedbackgenerator->create_response([
             'userid' => $student2a->id,
             'cmid' => $cm->id,
             'anonymous' => false,
             $item->name => 'n',
         ]);
-        $feedbackgenerator->create_response([
+        $individualfeedbackgenerator->create_response([
             'userid' => $student3b->id,
             'cmid' => $cm->id,
             'anonymous' => false,
@@ -336,16 +336,16 @@ final class overview_test extends \advanced_testcase {
         $method->setAccessible(true);
         $item = $method->invoke($overview);
 
-        $this->assertEquals(get_string('responses', 'mod_feedback'), $item->get_name());
+        $this->assertEquals(get_string('responses', 'mod_individualfeedback'), $item->get_name());
         $this->assertEquals($expectedcount, $item->get_value());
     }
 
     /**
-     * Data provider for feedback_get_extra_responses_overview_with_groups.
+     * Data provider for individualfeedback_get_extra_responses_overview_with_groups.
      *
      * @return \Generator
      */
-    public static function provider_feedback_get_extra_responses_overview_with_groups(): \Generator {
+    public static function provider_individualfeedback_get_extra_responses_overview_with_groups(): \Generator {
         yield 'Separate groups - Editing teacher' => [
             'groupmode' => SEPARATEGROUPS,
             'currentuser' => 'teacher1',
@@ -453,17 +453,17 @@ final class overview_test extends \advanced_testcase {
         $student = $this->getDataGenerator()->create_and_enrol($course, 'student');
 
         $activity = $this->getDataGenerator()->create_module(
-            'feedback',
+            'individualfeedback',
             ['course' => $course->id],
         );
         $cm = get_fast_modinfo($course)->get_cm($activity->cmid);
 
-        $feedbackgenerator = $this->getDataGenerator()->get_plugin_generator('mod_feedback');
-        $itemcreated = $feedbackgenerator->create_item_multichoice($activity, ['values' => "y\nn"]);
+        $individualfeedbackgenerator = $this->getDataGenerator()->get_plugin_generator('mod_individualfeedback');
+        $itemcreated = $individualfeedbackgenerator->create_item_multichoice($activity, ['values' => "y\nn"]);
 
         if ($hasresponses) {
             $this->setUser($student);
-            $feedbackgenerator->create_response([
+            $individualfeedbackgenerator->create_response([
                 'userid' => $student->id,
                 'cmid' => $cm->id,
                 'anonymous' => false,
@@ -490,7 +490,7 @@ final class overview_test extends \advanced_testcase {
         }
 
         // Teachers should see item.
-        $this->assertEquals(get_string('responded', 'mod_feedback'), $item->get_name());
+        $this->assertEquals(get_string('responded', 'mod_individualfeedback'), $item->get_name());
         $this->assertEquals($hasresponses, $item->get_value());
     }
 

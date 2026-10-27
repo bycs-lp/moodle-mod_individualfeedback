@@ -14,15 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace mod_feedback;
+namespace mod_individualfeedback;
 
 use advanced_testcase;
 use ReflectionClass;
 
 /**
- * This file contains unit tests for the mod_feedback items.
+ * This file contains unit tests for the mod_individualfeedback items.
  *
- * @package    mod_feedback
+ * @package    mod_individualfeedback
  * @copyright  2020 Mikhail Golenkov <mikhailgolenkov@catalyst-au.net>
  * @author     2023 David Woloszyn <david.woloszyn@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -38,24 +38,24 @@ final class item_test extends advanced_testcase {
         global $DB;
         $this->resetAfterTest();
 
-        // Create a course, a feedback activity and an item.
+        // Create a course, a individualfeedback activity and an item.
         $course = $this->getDataGenerator()->create_course();
-        $feedback = $this->getDataGenerator()->create_module('feedback', ['course' => $course]);
-        $feedbackgenerator = $this->getDataGenerator()->get_plugin_generator('mod_feedback');
-        $item = $feedbackgenerator->create_item_textfield($feedback);
+        $individualfeedback = $this->getDataGenerator()->create_module('individualfeedback', ['course' => $course]);
+        $individualfeedbackgenerator = $this->getDataGenerator()->get_plugin_generator('mod_individualfeedback');
+        $item = $individualfeedbackgenerator->create_item_textfield($individualfeedback);
 
         // Expected text.
         $valuetext = "First line\nSecond line";
 
         // Create a temporary response.
-        $completedid = $DB->insert_record('feedback_completedtmp', (object)['feedback' => $feedback->id]);
-        $completed = $DB->get_record('feedback_completedtmp', ['id' => $completedid], '*', MUST_EXIST);
+        $completedid = $DB->insert_record('individualfeedback_completedtmp', (object)['individualfeedback' => $individualfeedback->id]);
+        $completed = $DB->get_record('individualfeedback_completedtmp', ['id' => $completedid], '*', MUST_EXIST);
         $value = (object)['course_id' => $course->id, 'item' => $item->id, 'completed' => $completedid, 'value' => $valuetext];
-        $DB->insert_record('feedback_valuetmp', $value);
-        feedback_save_tmp_values($completed);
+        $DB->insert_record('individualfeedback_valuetmp', $value);
+        individualfeedback_save_tmp_values($completed);
 
         // Set get_analysed() method accessibility.
-        $itemclass = feedback_get_item_class('textarea');
+        $itemclass = individualfeedback_get_item_class('textarea');
         $reflection = new ReflectionClass($itemclass);
         $method = $reflection->getMethod('get_analysed');
 
