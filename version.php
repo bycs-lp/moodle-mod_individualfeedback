@@ -24,7 +24,12 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2026042000;       // The current module version (Date: YYYYMMDDXX).
+// +++ MBS-Hack (nersesov) : fork base pin. This plugin is a rename of Moodle core mod_feedback taken from
+// MOODLE_502_STABLE at commit 3fef2ed3c955977e7759ff3d6924e3009a82d60e (weekly release 5.2.3+, 2026-09-16).
+// Future core updates are applied by rebasing the fork commits onto the filtered public/mod/feedback history
+// from that branch.
+// --- MBS-Hack
+$plugin->version   = 2026042002;       // The current module version (Date: YYYYMMDDXX).
 $plugin->requires  = 2026041000;    // Requires this Moodle version.
 $plugin->component = 'mod_individualfeedback';   // Full name of the plugin (used for diagnostics)
 $plugin->cron      = 0;

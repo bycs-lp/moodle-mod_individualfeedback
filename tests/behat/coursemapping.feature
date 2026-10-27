@@ -36,12 +36,9 @@ Feature: Mapping courses in a individualfeedback
       | activity   | name             | course               | idnumber  | anonymous | publish_stats | section |
       | individualfeedback   | Course individualfeedback  | Acceptance test site | individualfeedback0 | 1         | 1             | 1       |
       | individualfeedback   | Another individualfeedback | C1                   | individualfeedback1 | 1         | 1             | 0       |
-    And I enable "individualfeedback" "block" plugin
-    And the following "blocks" exist:
-      | blockname | contextlevel | reference | pagetypepattern | defaultregion |
-      | individualfeedback  | Course       | C1        | course-view-*   | side-pre      |
-      | individualfeedback  | Course       | C2        | course-view-*   | side-pre      |
-      | individualfeedback  | Course       | C3        | course-view-*   | side-pre      |
+    # +++ MBS-Hack (nersesov) : core enables block_feedback here; the fork has no block (the renamed
+    # "individualfeedback" block does not exist), so the block plugin and block instances are not created.
+    # --- MBS-Hack
     When I log in as "manager"
     And I am on site homepage
     And I follow "Course individualfeedback"
@@ -68,172 +65,11 @@ Feature: Mapping courses in a individualfeedback
     And I follow "Another individualfeedback"
     And I should not see "Mapped courses"
 
-  @javascript
-  Scenario: Site individualfeedback is not mapped to any course
-    And I log in as "user1"
-    And I am on site homepage
-    And I follow "Course individualfeedback"
-    And I follow "Answer the questions"
-    And I should see "Acceptance test site" in the ".individualfeedback_form" "css_element"
-    And I set the following fields to these values:
-      | option a                         | 1        |
-      | this is a simple multiple choice | option d |
-    And I press "Submit your answers"
-    And I press "Continue"
-    And I am on "Course 1" course homepage
-    And I click on "Course individualfeedback" "link" in the "Individualfeedback" "block"
-    And I follow "Answer the questions"
-    And I should not see "Acceptance test site" in the ".individualfeedback_form" "css_element"
-    And I should see "C1" in the ".individualfeedback_form" "css_element"
-    And I set the following fields to these values:
-      | option b                         | 1        |
-      | this is a simple multiple choice | option e |
-    And I press "Submit your answers"
-    And I press "Continue"
-    And I click on "Course individualfeedback" "link" in the "Individualfeedback" "block"
-    And I should not see "Answer the questions"
-    And I log out
-    And I log in as "user2"
-    And I am on "Course 1" course homepage
-    And I click on "Course individualfeedback" "link" in the "Individualfeedback" "block"
-    And I follow "Answer the questions"
-    And I should not see "Acceptance test site" in the ".individualfeedback_form" "css_element"
-    And I should see "C1" in the ".individualfeedback_form" "css_element"
-    And I set the following fields to these values:
-      | option c                         | 1        |
-      | this is a simple multiple choice | option e |
-    And I press "Submit your answers"
-    And I press "Continue"
-    And I log out
-    And I log in as "manager"
-    And I am on site homepage
-    And I follow "Course individualfeedback"
-
-    And I navigate to "Analysis" in current page administration
-    And I should see "All courses" in the "#individualfeedback_course_filter [data-fieldtype=autocomplete] .form-autocomplete-selection [role=option]" "css_element"
-    And I show chart data for the "multichoicerated" individualfeedback
-    And I should see "1 (33.33 %)" in the "option a" "table_row"
-    And I should see "1 (33.33 %)" in the "option b" "table_row"
-    And I should see "1 (33.33 %)" in the "option c" "table_row"
-    And I should see "Average: 2.00"
-    And I follow "Sort by course"
-    And I should see "2.50" in the "C1" "table_row"
-    And I should see "1.00" in the "Acceptance test site" "table_row"
-    And I click on "Back" "link" in the "region-main" "region"
-    And I set the field "Filter by course" to "Course 1"
-    And I press "Filter"
-    And I should see "Course 1" in the "#individualfeedback_course_filter [data-fieldtype=autocomplete] .form-autocomplete-selection [role=option]" "css_element"
-    And I show chart data for the "multichoicerated" individualfeedback
-    And I should see "0" in the "option a" "table_row"
-    And I should see "1 (50.00 %)" in the "option b" "table_row"
-    And I should see "1 (50.00 %)" in the "option c" "table_row"
-    And I log out
-
-  @javascript
-  Scenario: Site individualfeedback is mapped to courses
-    And I log in as "manager"
-    And I am on site homepage
-    And I follow "Course individualfeedback"
-    And I navigate to "Mapped courses" in current page administration
-    And I set the field "Courses" to "Course 2, Course 3"
-    And I press "Save changes"
-    And I should see "Course mapping has been changed"
-    And I log out
-
-    And I log in as "user1"
-    And I am on site homepage
-    And I follow "Course individualfeedback"
-    And I should see "You can only access this individualfeedback from a course"
-    And I should not see "Answer the questions"
-
-    And I am on "Course 1" course homepage
-    And "Individualfeedback" "block" should not exist
-    And I should not see "Course individualfeedback"
-
-    And I am on "Course 2" course homepage
-    And I click on "Course individualfeedback" "link" in the "Individualfeedback" "block"
-    And I follow "Answer the questions"
-    And I should not see "Acceptance test site" in the ".individualfeedback_form" "css_element"
-    And I should see "C2" in the ".individualfeedback_form" "css_element"
-    And I set the following fields to these values:
-      | option b                         | 1        |
-      | this is a simple multiple choice | option e |
-    And I press "Submit your answers"
-    And I press "Continue"
-    And I click on "Course individualfeedback" "link" in the "Individualfeedback" "block"
-    And I should not see "Answer the questions"
-    And I log out
-    And I log in as "user2"
-    And I am on "Course 2" course homepage
-    And I click on "Course individualfeedback" "link" in the "Individualfeedback" "block"
-    And I follow "Answer the questions"
-    And I should not see "Acceptance test site" in the ".individualfeedback_form" "css_element"
-    And I should see "C2" in the ".individualfeedback_form" "css_element"
-    And I set the following fields to these values:
-      | option c                         | 1        |
-      | this is a simple multiple choice | option e |
-    And I press "Submit your answers"
-    And I press "Continue"
-    And I log out
-    And I log in as "user3"
-    And I am on "Course 3" course homepage
-    And I click on "Course individualfeedback" "link" in the "Individualfeedback" "block"
-    And I follow "Answer the questions"
-    And I should not see "Acceptance test site" in the ".individualfeedback_form" "css_element"
-    And I should see "C3" in the ".individualfeedback_form" "css_element"
-    And I set the following fields to these values:
-      | option c                         | 1        |
-      | this is a simple multiple choice | option d |
-    And I press "Submit your answers"
-    And I press "Continue"
-    And I log out
-    And I log in as "manager"
-    And I am on site homepage
-    And I follow "Course individualfeedback"
-    And I navigate to "Analysis" in current page administration
-    And I should see "All courses" in the "#individualfeedback_course_filter [data-fieldtype=autocomplete] .form-autocomplete-selection [role=option]" "css_element"
-    And I show chart data for the "multichoicerated" individualfeedback
-    And I should see "0" in the "option a" "table_row"
-    And I should see "1 (33.33 %)" in the "option b" "table_row"
-    And I should see "2 (66.67 %)" in the "option c" "table_row"
-    And I should see "Average: 3.67"
-    And I click on "Sort by course" "link"
-    And I should see "3.00" in the "C3" "table_row"
-    And I should see "2.50" in the "C2" "table_row"
-    And I click on "Back" "link" in the "region-main" "region"
-    And I set the field "Filter by course" to "Course 2"
-    And I press "Filter"
-    And I show chart data for the "multichoicerated" individualfeedback
-    And I should see "0" in the "option a" "table_row"
-    And I should see "1 (50.00 %)" in the "option b" "table_row"
-    And I should see "1 (50.00 %)" in the "option c" "table_row"
-    And I show chart data for the "multichoicesimple" individualfeedback
-    And I should see "2 (100.00 %)" in the "option e" "table_row"
-    And I set the field "Filter by course" to "Course 3"
-    And I press "Filter"
-    And I show chart data for the "multichoicerated" individualfeedback
-    And I should see "0" in the "option a" "table_row"
-    And I should see "0" in the "option b" "table_row"
-    And I should see "1 (100.00 %)" in the "option c" "table_row"
-    And I show chart data for the "multichoicesimple" individualfeedback
-    And I should see "1 (100.00 %)" in the "option d" "table_row"
-    And I follow "Show all"
-    And I show chart data for the "multichoicesimple" individualfeedback
-    And I should see "1 (33.33 %)" in the "option d" "table_row"
-    And I should see "2 (66.67 %)" in the "option e" "table_row"
-    And I should see "0" in the "option f" "table_row"
-
-  @block_site_main_menu
-  Scenario: Site individualfeedback deletion hides individualfeedback block completely
-    When I log in as "manager"
-    And I am on site homepage
-    And I turn editing mode on
-    And I add the "Individualfeedback" block
-    And I add the "Additional activities" block
-    And I click on "Delete" "link" in the "Course individualfeedback" activity
-    And I press "Delete"
-    And I turn editing mode off
-    And I am on site homepage
-    Then "Individualfeedback" "block" should not exist
-    And I am on "Course 1" course homepage
-    And "Individualfeedback" "block" should not exist
+  # +++ MBS-Hack (nersesov) : the following three core scenarios are removed in the fork:
+  #   - "Site individualfeedback is not mapped to any course"
+  #   - "Site individualfeedback is mapped to courses"
+  #   - "Site individualfeedback deletion hides individualfeedback block completely"
+  # They reach the site feedback from inside a course only through core block_feedback, which lists
+  # mod_feedback instances and cannot be renamed for the fork. Course mapping itself (mapcourse.php,
+  # per-course analysis) is inherited unchanged from core.
+  # --- MBS-Hack
