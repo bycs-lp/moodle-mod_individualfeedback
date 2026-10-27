@@ -28,6 +28,10 @@ require_once("lib.php");
 $id = required_param('id', PARAM_INT);  // Course module id.
 
 $url = new moodle_url('/mod/individualfeedback/analysis.php', array('id'=>$id));
+// +++ MBS-Hack (nersesov) : report mode of the analysis page (H25).
+$mode = \mod_individualfeedback\hack\lib::get_analysis_mode();
+$url->param('mode', $mode);
+// --- MBS-Hack
 $PAGE->set_url($url);
 
 list($course, $cm) = get_course_and_cm_from_cmid($id, 'individualfeedback');
@@ -64,6 +68,10 @@ $PAGE->add_body_class('limitedwidth');
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('analysis', 'mod_individualfeedback'), 3);
 
+// +++ MBS-Hack (nersesov) : render compare action bar (linked feedbacks comparison).
+echo \mod_individualfeedback\hack\lib::render_compare_action_bar($cm->id, $url, $renderer, $mode);
+// --- MBS-Hack
+
 //get the groupid
 $mygroupid = groups_get_activity_group($cm, true);
 groups_print_activity_menu($cm, $url);
@@ -72,6 +80,9 @@ groups_print_activity_menu($cm, $url);
 if (has_capability('mod/individualfeedback:viewreports', $context) && $individualfeedbackstructure->get_items()) {
     echo $OUTPUT->container_start('form-buttons');
     $aurl = new moodle_url('/mod/individualfeedback/analysis_to_excel.php', ['sesskey' => sesskey(), 'id' => $id]);
+    // +++ MBS-Hack (nersesov) : export of the selected report mode (H25).
+    $aurl = \mod_individualfeedback\hack\lib::get_analysis_export_url($mode, $aurl, $cm->id);
+    // --- MBS-Hack
     echo $OUTPUT->single_button($aurl, get_string('export_to_excel', 'individualfeedback'));
     echo $OUTPUT->container_end();
 }
@@ -91,6 +102,11 @@ if ($mygroupid > 0 AND $individualfeedback->anonymous == INDIVIDUALFEEDBACK_ANON
     }
 }
 
+// +++ MBS-Hack (nersesov) : report modes detail/overview/comparison × questions/groups (H25).
+if ($fragment = \mod_individualfeedback\hack\lib::get_analysis_report_fragment($mode)) {
+    require($fragment);
+} else {
+// --- MBS-Hack
 echo '<div>';
 if ($check_anonymously) {
     // Print the items in an analysed form.
@@ -105,5 +121,8 @@ if ($check_anonymously) {
                                     'individualfeedback', '', '', 3);
 }
 echo '</div>';
+// +++ MBS-Hack (nersesov) : end of the report-mode switch (H25).
+}
+// --- MBS-Hack
 
 echo $OUTPUT->footer();

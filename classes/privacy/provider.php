@@ -66,6 +66,10 @@ class provider implements
             'anonymous_response' => 'privacy:metadata:completed:anonymousresponse',
         ];
 
+        // +++ MBS-Hack (nersesov) : declare fork-specific privacy metadata (selfassessment, template userid) — DSGVO.
+        $completedfields = \mod_individualfeedback\hack\lib::add_privacy_metadata($collection, $completedfields);
+        // --- MBS-Hack
+
         $collection->add_database_table('individualfeedback_completed', $completedfields, 'privacy:metadata:completed');
         $collection->add_database_table('individualfeedback_completedtmp', $completedfields, 'privacy:metadata:completedtmp');
 
@@ -102,6 +106,9 @@ class provider implements
         $contextlist = new contextlist();
         $contextlist->add_from_sql(sprintf($sql, 'individualfeedback_completed'), $params);
         $contextlist->add_from_sql(sprintf($sql, 'individualfeedback_completedtmp'), $params);
+        // +++ MBS-Hack (nersesov) : contexts of templates owned by the user (H26, DSGVO).
+        \mod_individualfeedback\hack\lib::add_template_contexts($contextlist, $userid);
+        // --- MBS-Hack
         return $contextlist;
     }
 
@@ -113,6 +120,9 @@ class provider implements
      */
     public static function get_users_in_context(userlist $userlist) {
         $context = $userlist->get_context();
+        // +++ MBS-Hack (nersesov) : owners of templates in course/system contexts (H26, DSGVO).
+        \mod_individualfeedback\hack\lib::add_template_owners($userlist);
+        // --- MBS-Hack
 
         if (!is_a($context, \context_module::class)) {
             return;
@@ -144,6 +154,9 @@ class provider implements
      */
     public static function export_user_data(approved_contextlist $contextlist) {
         global $DB;
+        // +++ MBS-Hack (nersesov) : export templates owned by the user (H26, DSGVO).
+        \mod_individualfeedback\hack\lib::export_template_data($contextlist);
+        // --- MBS-Hack
 
         $user = $contextlist->get_user();
         $userid = $user->id;
@@ -194,6 +207,9 @@ class provider implements
                     'timemodified' => transform::datetime($record->timemodified),
                     'answers' => []
                 ];
+                // +++ MBS-Hack (nersesov) : export selfassessment flag with each submission — DSGVO.
+                $data->submissions[$id] = \mod_individualfeedback\hack\lib::add_privacy_export_fields($data->submissions[$id], $record);
+                // --- MBS-Hack
             }
             $item = static::extract_item_record_from_record($record);
             $value = static::extract_value_record_from_record($record);
@@ -224,6 +240,9 @@ class provider implements
      */
     public static function delete_data_for_all_users_in_context(\context $context) {
         global $DB;
+        // +++ MBS-Hack (nersesov) : template ownership in course/system contexts (H26, DSGVO).
+        \mod_individualfeedback\hack\lib::delete_template_data_in_context($context);
+        // --- MBS-Hack
 
         // This should not happen, but just in case.
         if ($context->contextlevel != CONTEXT_MODULE) {
@@ -267,6 +286,11 @@ class provider implements
      */
     public static function delete_data_for_user(approved_contextlist $contextlist) {
         global $DB;
+        // +++ MBS-Hack (nersesov) : template ownership of this user; stop when no module context is left (H26, DSGVO).
+        if (!\mod_individualfeedback\hack\lib::delete_template_data_for_user($contextlist)) {
+            return;
+        }
+        // --- MBS-Hack
         $userid = $contextlist->get_user()->id;
 
         // Ensure that we only act on module contexts.
@@ -314,6 +338,11 @@ class provider implements
      */
     public static function delete_data_for_users(approved_userlist $userlist) {
         global $DB;
+        // +++ MBS-Hack (nersesov) : template ownership of these users; only module contexts continue (H26, DSGVO).
+        if (!\mod_individualfeedback\hack\lib::delete_template_data_for_users($userlist)) {
+            return;
+        }
+        // --- MBS-Hack
 
         $context = $userlist->get_context();
         $userids = $userlist->get_userids();
@@ -420,6 +449,7 @@ class provider implements
                        fc.id AS submissionid,
                        fc.anonymous_response AS anonymousresponse,
                        fc.timemodified AS timemodified,
+                       fc.selfassessment AS selfassessment, -- +++/--- MBS-Hack (nersesov) : selfassessment in privacy export.
 
                        fv.id AS valueid,
                        fv.course_id AS valuecourse_id,

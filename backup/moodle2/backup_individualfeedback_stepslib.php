@@ -60,7 +60,11 @@ class backup_individualfeedback_activity_structure_step extends backup_activity_
                                                 'timemodified',
                                                 'random_response',
                                                 'anonymous_response',
-                                                'courseid'));
+                                                'courseid',
+                                                // +++ MBS-Hack (nersesov) : keep the fork's selfassessment flag in backups.
+                                                'selfassessment',
+                                                // --- MBS-Hack
+                                                ));
 
         $items = new backup_nested_element('items');
 

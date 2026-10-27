@@ -149,6 +149,9 @@ class mod_individualfeedback_templates_table extends core_table\flexible_table {
                 context_system::instance()
             );
         }
+        // +++ MBS-Hack (nersesov) : owners may delete their private user templates (ispublic == 2) (H24).
+        $showdelete = \mod_individualfeedback\hack\lib::adjust_template_delete_permission($showdelete, $template, context_module::instance($this->cmid));
+        // --- MBS-Hack
         if ($showdelete) {
             $exporturl = new moodle_url(
                 '/mod/individualfeedback/manage_templates.php',
