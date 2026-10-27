@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Feedback event handler definition.
+ * Individualfeedback event handler definition.
  *
- * @package mod_feedback
+ * @package mod_individualfeedback
  * @category event
  * @copyright 2016 Marina Glancy
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -28,7 +28,7 @@ $observers = array(
 
     array(
         'eventname'   => '\core\event\course_content_deleted',
-        'callback'    => 'mod_feedback_observer::course_content_deleted',
+        'callback'    => 'mod_individualfeedback_observer::course_content_deleted',
     ),
 
 );

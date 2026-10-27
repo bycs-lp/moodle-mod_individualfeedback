@@ -14,12 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-abstract class feedback_item_base {
+abstract class individualfeedback_item_base {
 
     /** @var string type of the element, should be overridden by each item type */
     protected $type;
 
-    /** @var feedback_item_form */
+    /** @var individualfeedback_item_form */
     protected $item_form;
 
     /** @var stdClass */
@@ -78,10 +78,10 @@ abstract class feedback_item_base {
      * Creates and returns an instance of the form for editing the item
      *
      * @param stdClass $item
-     * @param stdClass $feedback
+     * @param stdClass $individualfeedback
      * @param cm_info|stdClass $cm
      */
-    abstract public function build_editform($item, $feedback, $cm);
+    abstract public function build_editform($item, $individualfeedback, $cm);
 
     /**
      * Saves the item after it has been edited (or created)
@@ -90,7 +90,7 @@ abstract class feedback_item_base {
 
     /**
      * Converts the value from complete_form data to the string value that is stored in the db.
-     * @param mixed $value element from mod_feedback_complete_form::get_data() with the name $item->typ.'_'.$item->id
+     * @param mixed $value element from mod_individualfeedback_complete_form::get_data() with the name $item->typ.'_'.$item->id
      * @return string
      */
     public function create_value($value) {
@@ -130,7 +130,7 @@ abstract class feedback_item_base {
      * @param object $worksheet a reference to the pear_spreadsheet-object
      * @param integer $row_offset
      * @param stdClass $xls_formats see analysis_to_excel.php
-     * @param object $item the db-object from feedback_item
+     * @param object $item the db-object from individualfeedback_item
      * @param integer $groupid
      * @param integer $courseid
      * @return integer the new row_offset
@@ -142,7 +142,7 @@ abstract class feedback_item_base {
     /**
      * Prints analysis for the current item
      *
-     * @param $item the db-object from feedback_item
+     * @param $item the db-object from individualfeedback_item
      * @param string $itemnr
      * @param integer $groupid
      * @param integer $courseid
@@ -153,8 +153,8 @@ abstract class feedback_item_base {
     /**
      * Prepares the value for exporting to Excel
      *
-     * @param object $item the db-object from feedback_item
-     * @param object $value object with item-related value from feedback_values in the 'value' property
+     * @param object $item the db-object from individualfeedback_item
+     * @param object $value object with item-related value from individualfeedback_values in the 'value' property
      * @return string
      */
     abstract public function get_printval($item, $value);
@@ -185,11 +185,11 @@ abstract class feedback_item_base {
      * Adds an input element to the complete form
      *
      * This method is called:
-     * - to display the form when user completes feedback
-     * - to display existing elements when teacher edits the feedback items
-     * - to display the feedback preview (print.php)
+     * - to display the form when user completes individualfeedback
+     * - to display existing elements when teacher edits the individualfeedback items
+     * - to display the individualfeedback preview (print.php)
      * - to display the completed response
-     * - to preview a feedback template
+     * - to preview a individualfeedback template
      *
      * If it is important which mode the form is in, use $form->get_mode()
      *
@@ -210,7 +210,7 @@ abstract class feedback_item_base {
      * and create a static element instead.
      *
      * @param stdClass $item
-     * @param mod_feedback_complete_form $form
+     * @param mod_individualfeedback_complete_form $form
      */
     abstract public function complete_form_element($item, $form);
 
@@ -218,16 +218,16 @@ abstract class feedback_item_base {
      * Returns the list of actions allowed on this item in the edit mode
      *
      * @param stdClass $item
-     * @param stdClass $feedback
+     * @param stdClass $individualfeedback
      * @param cm_info $cm
      * @return action_menu_link[]
      */
-    public function edit_actions($item, $feedback, $cm) {
+    public function edit_actions($item, $individualfeedback, $cm) {
         $actions = [];
 
-        $strupdate = get_string('edit_item', 'feedback');
+        $strupdate = get_string('edit_item', 'individualfeedback');
         $actions['update'] = new action_menu_link_secondary(
-            new moodle_url('/mod/feedback/edit_item.php', ['id' => $item->id]),
+            new moodle_url('/mod/individualfeedback/edit_item.php', ['id' => $item->id]),
             new pix_icon('t/edit', $strupdate, 'moodle', ['class' => 'iconsmall', 'title' => '']),
             $strupdate,
             ['class' => 'editing_update', 'data-action' => 'update']
@@ -235,27 +235,27 @@ abstract class feedback_item_base {
 
         if ($this->can_switch_require()) {
             if ($item->required == 1) {
-                $buttontitle = get_string('switch_item_to_not_required', 'feedback');
+                $buttontitle = get_string('switch_item_to_not_required', 'individualfeedback');
                 $buttonimg = 'required';
             } else {
-                $buttontitle = get_string('switch_item_to_required', 'feedback');
+                $buttontitle = get_string('switch_item_to_required', 'individualfeedback');
                 $buttonimg = 'notrequired';
             }
             $actions['required'] = new action_menu_link_secondary(
                 new moodle_url(
-                    '/mod/feedback/edit.php',
+                    '/mod/individualfeedback/edit.php',
                     ['id' => $cm->id, 'switchitemrequired' => $item->id, 'sesskey' => sesskey()]
                 ),
-                new pix_icon($buttonimg, $buttontitle, 'feedback', array('class' => 'iconsmall', 'title' => '')),
+                new pix_icon($buttonimg, $buttontitle, 'individualfeedback', array('class' => 'iconsmall', 'title' => '')),
                 $buttontitle,
                 ['class' => 'editing_togglerequired', 'data-action' => 'togglerequired']
             );
         }
 
-        $strdelete = get_string('delete_item', 'feedback');
+        $strdelete = get_string('delete_item', 'individualfeedback');
         $actions['delete'] = new action_menu_link_secondary(
             new moodle_url(
-                '/mod/feedback/edit.php',
+                '/mod/individualfeedback/edit.php',
                 ['id' => $cm->id, 'deleteitem' => $item->id, 'sesskey' => sesskey()]
             ),
             new pix_icon('t/delete', $strdelete, 'moodle', array('class' => 'iconsmall', 'title' => '')),
@@ -293,7 +293,7 @@ abstract class feedback_item_base {
 }
 
 //a dummy class to realize pagebreaks
-class feedback_item_pagebreak extends feedback_item_base {
+class individualfeedback_item_pagebreak extends individualfeedback_item_base {
     protected $type = "pagebreak";
 
     public function show_editform() {
@@ -307,7 +307,7 @@ class feedback_item_pagebreak extends feedback_item_base {
     }
     public function get_data() {
     }
-    public function build_editform($item, $feedback, $cm) {
+    public function build_editform($item, $individualfeedback, $cm) {
     }
     public function save_item() {
     }
@@ -333,14 +333,14 @@ class feedback_item_pagebreak extends feedback_item_base {
      * Adds an input element to the complete form
      *
      * @param stdClass $item
-     * @param mod_feedback_complete_form $form
+     * @param mod_individualfeedback_complete_form $form
      */
     public function complete_form_element($item, $form) {
         $form->add_form_element($item,
             ['static',
                 $item->typ.'_'.$item->id,
-                get_string('pagebreak', 'feedback'),
-                html_writer::empty_tag('hr', ['class' => 'feedback_pagebreak', 'id' => 'feedback_item_' . $item->id])
+                get_string('pagebreak', 'individualfeedback'),
+                html_writer::empty_tag('hr', ['class' => 'individualfeedback_pagebreak', 'id' => 'individualfeedback_item_' . $item->id])
             ]);
     }
 
@@ -348,15 +348,15 @@ class feedback_item_pagebreak extends feedback_item_base {
      * Returns the list of actions allowed on this item in the edit mode
      *
      * @param stdClass $item
-     * @param stdClass $feedback
+     * @param stdClass $individualfeedback
      * @param cm_info $cm
      * @return action_menu_link[]
      */
-    public function edit_actions($item, $feedback, $cm) {
+    public function edit_actions($item, $individualfeedback, $cm) {
         $actions = array();
-        $strdelete = get_string('delete_pagebreak', 'feedback');
+        $strdelete = get_string('delete_pagebreak', 'individualfeedback');
         $actions['delete'] = new action_menu_link_secondary(
-            new moodle_url('/mod/feedback/edit.php', array('id' => $cm->id, 'deleteitem' => $item->id, 'sesskey' => sesskey())),
+            new moodle_url('/mod/individualfeedback/edit.php', array('id' => $cm->id, 'deleteitem' => $item->id, 'sesskey' => sesskey())),
             new pix_icon('t/delete', $strdelete, 'moodle', array('class' => 'iconsmall', 'title' => '')),
             $strdelete,
             ['class' => 'editing_delete text-danger', 'data-action' => 'delete']

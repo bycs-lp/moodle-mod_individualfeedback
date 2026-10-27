@@ -1,5 +1,5 @@
-@mod @mod_feedback
-Feature: As a teacher, I can see users who have responded or not responded to a feedback activity.
+@mod @mod_individualfeedback
+Feature: As a teacher, I can see users who have responded or not responded to a individualfeedback activity.
   As a non editing teacher not in a group I cannot see the responses.
 
   Background:
@@ -31,18 +31,18 @@ Feature: As a teacher, I can see users who have responded or not responded to a 
       | student2 | GI1   |
       | teacher2 | GI1   |
     When I log in as "teacher1"
-    And I add a feedback activity to course "Course 1" section "1" and I fill the form with:
+    And I add a individualfeedback activity to course "Course 1" section "1" and I fill the form with:
       | Name              | Frogs                                             |
       | Description       | x                                                 |
       | Record user names | User's name will be logged and shown with answers |
-    And I am on the Frogs "feedback activity" page
+    And I am on the Frogs "individualfeedback activity" page
     And I navigate to "Questions" in current page administration
-    And I add a "Short text answer" question to the feedback with:
+    And I add a "Short text answer" question to the individualfeedback with:
       | Question | Y/N? |
     And I log out
 
-    # Go in as student 1 and do the feedback.
-    And I am on the Frogs "feedback activity" page logged in as student1
+    # Go in as student 1 and do the individualfeedback.
+    And I am on the Frogs "individualfeedback activity" page logged in as student1
     And I follow "Answer the questions"
     And I set the field "Y/N?" to "Y"
     And I press "Submit your answers"
@@ -50,7 +50,7 @@ Feature: As a teacher, I can see users who have responded or not responded to a 
 
   Scenario Outline: If a teacher or non editing teacher is in a group, they can see the responses in separate group mode.
     # Go in as teacher and check the users who haven't completed it.
-    Given I am on the Frogs "feedback activity" page logged in as <user>
+    Given I am on the Frogs "individualfeedback activity" page logged in as <user>
     Then "Responses" "link" <existsornot> in current page administration
     Examples:
       | user     | existsornot      |
@@ -60,7 +60,7 @@ Feature: As a teacher, I can see users who have responded or not responded to a 
 
   Scenario Outline: Teachers and non editing teachers in a group can see the responses
     # Go in as teacher and check the users who haven't completed it.
-    Given I am on the Frogs "feedback activity" page logged in as <user>
+    Given I am on the Frogs "individualfeedback activity" page logged in as <user>
     And I navigate to "Responses" in current page administration
     And I select "Show non-respondents" from the "jump" singleselect
     # Should only show student 2; not student 1 (they did it) or 3 (not in grouping).

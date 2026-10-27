@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace mod_feedback\output;
+namespace mod_individualfeedback\output;
 
 use confirm_action;
 use context_system;
@@ -23,12 +23,12 @@ use pix_icon;
 use core\output\action_menu;
 use core\output\action_link;
 use core\output\action_menu\link as action_menu_link;
-use mod_feedback\manager;
+use mod_individualfeedback\manager;
 
 /**
  * Class actionbar - Display the action bar
  *
- * @package   mod_feedback
+ * @package   mod_individualfeedback
  * @copyright 2021 Peter Dias
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -61,33 +61,33 @@ class edit_template_action_bar extends base_action_bar {
     public function get_items(): array {
         global $PAGE;
 
-        $templateurl = new moodle_url('/mod/feedback/manage_templates.php', $this->urlparams);
+        $templateurl = new moodle_url('/mod/individualfeedback/manage_templates.php', $this->urlparams);
         $template = manager::get_template_record($this->templateid);
 
         // Back button.
         $items['left'][]['actionlink'] = new action_link($templateurl, get_string('back'), null, ['class' => 'btn btn-secondary']);
 
         // Actions.
-        if (has_capability('mod/feedback:edititems', $this->context)) {
+        if (has_capability('mod/individualfeedback:edititems', $this->context)) {
             $actionsselect = new action_menu();
             $actionsselect->set_menu_trigger(get_string('actions'), 'btn btn-outline-primary');
-            $PAGE->requires->js_call_amd('mod_feedback/usetemplate', 'init');
+            $PAGE->requires->js_call_amd('mod_individualfeedback/usetemplate', 'init');
 
             // Use template.
             $actionsselect->add(new action_menu_link(
                 new moodle_url('#'),
                 new pix_icon('i/files', get_string('preview')),
-                get_string('use_this_template', 'mod_feedback'),
+                get_string('use_this_template', 'mod_individualfeedback'),
                 false,
                 ['data-action' => 'usetemplate', 'data-dataid' => $this->cmid, 'data-templateid' => $this->templateid],
             ));
         }
 
         // Delete.
-        $showdelete = has_capability('mod/feedback:deletetemplate', $this->context);
+        $showdelete = has_capability('mod/individualfeedback:deletetemplate', $this->context);
         if ($template->ispublic) {
             $showdelete = has_all_capabilities(
-                ['mod/feedback:createpublictemplate', 'mod/feedback:deletetemplate'],
+                ['mod/individualfeedback:createpublictemplate', 'mod/individualfeedback:deletetemplate'],
                 context_system::instance()
             );
         }
@@ -96,13 +96,13 @@ class edit_template_action_bar extends base_action_bar {
                 'deletetemplate' => $this->templateid,
                 'sesskey' => sesskey()
             ];
-            $deleteurl = new moodle_url('/mod/feedback/manage_templates.php', $params);
+            $deleteurl = new moodle_url('/mod/individualfeedback/manage_templates.php', $params);
             $deleteaction = new action_link(
                 $deleteurl,
                 get_string('delete'),
-                new confirm_action(get_string('confirmdeletetemplate', 'feedback')),
+                new confirm_action(get_string('confirmdeletetemplate', 'individualfeedback')),
                 ['class' => 'text-danger'],
-                new pix_icon('t/delete', get_string('delete_template', 'feedback')),
+                new pix_icon('t/delete', get_string('delete_template', 'individualfeedback')),
             );
             $actionsselect->add_secondary_action($deleteaction);
         }

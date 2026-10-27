@@ -15,11 +15,11 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * print the form to add or edit a feedback-instance
+ * print the form to add or edit a individualfeedback-instance
  *
  * @author Andreas Grabs
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
- * @package mod_feedback
+ * @package mod_individualfeedback
  */
 
 //It must be included from a Moodle page
@@ -29,60 +29,60 @@ if (!defined('MOODLE_INTERNAL')) {
 
 require_once($CFG->dirroot.'/course/moodleform_mod.php');
 
-class mod_feedback_mod_form extends moodleform_mod {
+class mod_individualfeedback_mod_form extends moodleform_mod {
 
     public function definition() {
         global $CFG, $DB;
 
-        $editoroptions = feedback_get_editor_options();
+        $editoroptions = individualfeedback_get_editor_options();
 
         $mform    =& $this->_form;
 
         //-------------------------------------------------------------------------------
         $mform->addElement('header', 'general', get_string('general', 'form'));
 
-        $mform->addElement('text', 'name', get_string('name', 'feedback'), array('size'=>'64'));
+        $mform->addElement('text', 'name', get_string('name', 'individualfeedback'), array('size'=>'64'));
         $mform->setType('name', PARAM_TEXT);
         $mform->addRule('name', null, 'required', null, 'client');
         $mform->addRule('name', get_string('maximumchars', '', 1333), 'maxlength', 1333, 'client');
 
-        $this->standard_intro_elements(get_string('description', 'feedback'));
+        $this->standard_intro_elements(get_string('description', 'individualfeedback'));
 
         //-------------------------------------------------------------------------------
         $mform->addElement('header', 'timinghdr', get_string('availability'));
 
-        $mform->addElement('date_time_selector', 'timeopen', get_string('feedbackopen', 'feedback'),
+        $mform->addElement('date_time_selector', 'timeopen', get_string('individualfeedbackopen', 'individualfeedback'),
             array('optional' => true));
 
-        $mform->addElement('date_time_selector', 'timeclose', get_string('feedbackclose', 'feedback'),
+        $mform->addElement('date_time_selector', 'timeclose', get_string('individualfeedbackclose', 'individualfeedback'),
             array('optional' => true));
 
         //-------------------------------------------------------------------------------
-        $mform->addElement('header', 'feedbackhdr', get_string('questionandsubmission', 'feedback'));
+        $mform->addElement('header', 'individualfeedbackhdr', get_string('questionandsubmission', 'individualfeedback'));
 
         $options=array();
-        $options[1]  = get_string('anonymous', 'feedback');
-        $options[2]  = get_string('non_anonymous', 'feedback');
+        $options[1]  = get_string('anonymous', 'individualfeedback');
+        $options[2]  = get_string('non_anonymous', 'individualfeedback');
         $mform->addElement('select',
                            'anonymous',
-                           get_string('anonymous_edit', 'feedback'),
+                           get_string('anonymous_edit', 'individualfeedback'),
                            $options);
 
-        // check if there is existing responses to this feedback
+        // check if there is existing responses to this individualfeedback
         if (is_numeric($this->_instance) AND
                     $this->_instance AND
-                    $feedback = $DB->get_record("feedback", array("id"=>$this->_instance))) {
+                    $individualfeedback = $DB->get_record("individualfeedback", array("id"=>$this->_instance))) {
 
-            $completed_feedback_count = feedback_get_completeds_group_count($feedback);
+            $completed_individualfeedback_count = individualfeedback_get_completeds_group_count($individualfeedback);
         } else {
-            $completed_feedback_count = false;
+            $completed_individualfeedback_count = false;
         }
 
-        if ($completed_feedback_count) {
-            $multiple_submit_value = $feedback->multiple_submit ? get_string('yes') : get_string('no');
+        if ($completed_individualfeedback_count) {
+            $multiple_submit_value = $individualfeedback->multiple_submit ? get_string('yes') : get_string('no');
             $mform->addElement('text',
                                'multiple_submit_static',
-                               get_string('multiplesubmit', 'feedback'),
+                               get_string('multiplesubmit', 'individualfeedback'),
                                array('size'=>'4',
                                     'disabled'=>'disabled',
                                     'value'=>$multiple_submit_value));
@@ -90,29 +90,29 @@ class mod_feedback_mod_form extends moodleform_mod {
 
             $mform->addElement('hidden', 'multiple_submit', '');
             $mform->setType('multiple_submit', PARAM_INT);
-            $mform->addHelpButton('multiple_submit_static', 'multiplesubmit', 'feedback');
+            $mform->addHelpButton('multiple_submit_static', 'multiplesubmit', 'individualfeedback');
         } else {
             $mform->addElement('selectyesno',
                                'multiple_submit',
-                               get_string('multiplesubmit', 'feedback'));
+                               get_string('multiplesubmit', 'individualfeedback'));
 
-            $mform->addHelpButton('multiple_submit', 'multiplesubmit', 'feedback');
+            $mform->addHelpButton('multiple_submit', 'multiplesubmit', 'individualfeedback');
         }
 
-        $mform->addElement('selectyesno', 'email_notification', get_string('email_notification', 'feedback'));
-        $mform->addHelpButton('email_notification', 'email_notification', 'feedback');
+        $mform->addElement('selectyesno', 'email_notification', get_string('email_notification', 'individualfeedback'));
+        $mform->addHelpButton('email_notification', 'email_notification', 'individualfeedback');
 
-        $mform->addElement('selectyesno', 'autonumbering', get_string('autonumbering', 'feedback'));
-        $mform->addHelpButton('autonumbering', 'autonumbering', 'feedback');
+        $mform->addElement('selectyesno', 'autonumbering', get_string('autonumbering', 'individualfeedback'));
+        $mform->addHelpButton('autonumbering', 'autonumbering', 'individualfeedback');
 
         //-------------------------------------------------------------------------------
-        $mform->addElement('header', 'aftersubmithdr', get_string('after_submit', 'feedback'));
+        $mform->addElement('header', 'aftersubmithdr', get_string('after_submit', 'individualfeedback'));
 
-        $mform->addElement('selectyesno', 'publish_stats', get_string('show_analysepage_after_submit', 'feedback'));
+        $mform->addElement('selectyesno', 'publish_stats', get_string('show_analysepage_after_submit', 'individualfeedback'));
 
         $mform->addElement('editor',
                            'page_after_submit_editor',
-                           get_string("page_after_submit", "feedback"),
+                           get_string("page_after_submit", "individualfeedback"),
                            null,
                            $editoroptions);
 
@@ -120,11 +120,11 @@ class mod_feedback_mod_form extends moodleform_mod {
 
         $mform->addElement('text',
                            'site_after_submit',
-                           get_string('url_for_continue', 'feedback'),
+                           get_string('url_for_continue', 'individualfeedback'),
                            array('size'=>'64', 'maxlength'=>'255'));
 
         $mform->setType('site_after_submit', PARAM_TEXT);
-        $mform->addHelpButton('site_after_submit', 'url_for_continue', 'feedback');
+        $mform->addHelpButton('site_after_submit', 'url_for_continue', 'individualfeedback');
         //-------------------------------------------------------------------------------
         $this->standard_coursemodule_elements();
         //-------------------------------------------------------------------------------
@@ -134,25 +134,25 @@ class mod_feedback_mod_form extends moodleform_mod {
 
     public function data_preprocessing(&$default_values) {
 
-        $editoroptions = feedback_get_editor_options();
+        $editoroptions = individualfeedback_get_editor_options();
 
         if ($this->current->instance) {
-            // editing an existing feedback - let us prepare the added editor elements (intro done automatically)
+            // editing an existing individualfeedback - let us prepare the added editor elements (intro done automatically)
             $draftitemid = file_get_submitted_draft_itemid('page_after_submit');
             $default_values['page_after_submit_editor']['text'] =
                                     file_prepare_draft_area($draftitemid, $this->context->id,
-                                    'mod_feedback', 'page_after_submit', false,
+                                    'mod_individualfeedback', 'page_after_submit', false,
                                     $editoroptions,
                                     $default_values['page_after_submit']);
 
             $default_values['page_after_submit_editor']['format'] = $default_values['page_after_submitformat'];
             $default_values['page_after_submit_editor']['itemid'] = $draftitemid;
         } else {
-            // adding a new feedback instance
+            // adding a new individualfeedback instance
             $draftitemid = file_get_submitted_draft_itemid('page_after_submit_editor');
 
             // no context yet, itemid not used
-            file_prepare_draft_area($draftitemid, null, 'mod_feedback', 'page_after_submit', false);
+            file_prepare_draft_area($draftitemid, null, 'mod_individualfeedback', 'page_after_submit', false);
             $default_values['page_after_submit_editor']['text'] = '';
             $default_values['page_after_submit_editor']['format'] = editors_get_preferred_format();
             $default_values['page_after_submit_editor']['itemid'] = $draftitemid;
@@ -199,7 +199,7 @@ class mod_feedback_mod_form extends moodleform_mod {
         // Check open and close times are consistent.
         if ($data['timeopen'] && $data['timeclose'] &&
                 $data['timeclose'] < $data['timeopen']) {
-            $errors['timeclose'] = get_string('closebeforeopen', 'feedback');
+            $errors['timeclose'] = get_string('closebeforeopen', 'individualfeedback');
         }
         return $errors;
     }
@@ -212,7 +212,7 @@ class mod_feedback_mod_form extends moodleform_mod {
         $mform->addElement('checkbox',
             $completionsubmitel,
             '',
-            get_string('completionsubmit', 'feedback')
+            get_string('completionsubmit', 'individualfeedback')
         );
         // Enable this completion rule by default.
         $mform->setDefault($completionsubmitel, 1);
