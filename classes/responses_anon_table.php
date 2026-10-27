@@ -73,6 +73,9 @@ class mod_individualfeedback_responses_anon_table extends mod_individualfeedback
             'courseid' => $this->individualfeedbackstructure->get_courseid()];
 
         $fields = 'c.id, c.random_response, c.courseid';
+        // +++ MBS-Hack (nersesov) : include selfassessment flag in anonymous responses query.
+        $fields = \mod_individualfeedback\hack\lib::add_selfassessment_to_fields($fields);
+        // --- MBS-Hack
         $from = '{individualfeedback_completed} c';
         $where = 'c.anonymous_response = :anon AND c.individualfeedback = :instance';
         if ($this->individualfeedbackstructure->get_courseid()) {
@@ -104,11 +107,14 @@ class mod_individualfeedback_responses_anon_table extends mod_individualfeedback
      * @return string
      */
     public function col_random_response($row) {
+        // +++ MBS-Hack (nersesov) : mark self-assessment responses in the list.
+        $marker = \mod_individualfeedback\hack\lib::get_selfassessment_marker($row);
+        // --- MBS-Hack
         if ($this->is_downloading()) {
-            return $row->random_response;
+            return $row->random_response . strip_tags($marker);
         } else {
             return html_writer::link($this->get_link_single_entry($row),
-                    get_string('response_nr', 'individualfeedback').': '. $row->random_response);
+                    get_string('response_nr', 'individualfeedback').': '. $row->random_response . $marker);
         }
     }
 

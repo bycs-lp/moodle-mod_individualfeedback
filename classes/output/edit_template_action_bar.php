@@ -91,6 +91,9 @@ class edit_template_action_bar extends base_action_bar {
                 context_system::instance()
             );
         }
+        // +++ MBS-Hack (nersesov) : owners may delete their private user templates (ispublic == 2) (H24).
+        $showdelete = \mod_individualfeedback\hack\lib::adjust_template_delete_permission($showdelete, $template, $this->context);
+        // --- MBS-Hack
         if ($showdelete) {
             $params = $this->urlparams + [
                 'deletetemplate' => $this->templateid,

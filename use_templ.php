@@ -45,6 +45,9 @@ $individualfeedback = $PAGE->activityrecord;
 $individualfeedbackstructure = new mod_individualfeedback_structure($individualfeedback, $cm, 0, $templateid);
 
 require_capability('mod/individualfeedback:edititems', $context);
+// +++ MBS-Hack (nersesov) : private user templates (ispublic == 2) may only be previewed by their owner (H22).
+\mod_individualfeedback\hack\lib::require_template_access($template);
+// --- MBS-Hack
 
 /// Print the page header
 $strindividualfeedbacks = get_string("modulenameplural", "individualfeedback");

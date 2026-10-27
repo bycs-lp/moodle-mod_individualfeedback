@@ -32,6 +32,11 @@ defined('MOODLE_INTERNAL') || die();
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mod_individualfeedback_structure {
+
+    // +++ MBS-Hack (nersesov) : inject question-group helpers (get_groups_and_items).
+    use \mod_individualfeedback\local\structure_groups_trait;
+    // --- MBS-Hack
+
     /** @var stdClass record from 'individualfeedback' table.
      * Reliably has fields: id, course, timeopen, timeclose, anonymous, completionsubmit.
      * For full object or to access any other field use $this->get_individualfeedback()
@@ -305,6 +310,12 @@ class mod_individualfeedback_structure {
      */
     public function count_completed_responses($groupid = 0) {
         global $DB;
+        // +++ MBS-Hack (nersesov) : the anonymity threshold counts peer responses only, like the charts (H23).
+        $peercount = \mod_individualfeedback\hack\lib::count_peer_completed_responses((int) $this->individualfeedback->id, $this->courseid, $groupid);
+        if ($peercount !== null) {
+            return $peercount;
+        }
+        // --- MBS-Hack
         if (intval($groupid) > 0) {
             $query = "SELECT COUNT(DISTINCT fbc.id)
                         FROM {individualfeedback_completed} fbc, {groups_members} gm

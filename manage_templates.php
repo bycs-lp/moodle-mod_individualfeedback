@@ -60,7 +60,10 @@ if ($templateid) {
     require_capability('mod/individualfeedback:deletetemplate', $context);
     $template = $DB->get_record('individualfeedback_template', ['id' => $templateid], '*', MUST_EXIST);
 
-    if ($template->ispublic) {
+    // +++ MBS-Hack (nersesov) : private user templates (ispublic == 2) are owner-only; skip system checks for them.
+    \mod_individualfeedback\hack\lib::enforce_private_template_ownership($template, $url);
+    if ($template->ispublic == 1) { // MBS-Hack: was `if ($template->ispublic)` — ispublic == 2 means private user template.
+    // --- MBS-Hack
         require_capability('mod/individualfeedback:createpublictemplate', $systemcontext);
         require_capability('mod/individualfeedback:deletetemplate', $systemcontext);
     }
@@ -85,6 +88,10 @@ $baseurl = new moodle_url('/mod/individualfeedback/use_templ.php', $params);
 $tablecourse = new mod_individualfeedback_templates_table('individualfeedback_template_course_table', $baseurl);
 $tablecourse->display($templates);
 echo $OUTPUT->box_end();
+
+// +++ MBS-Hack (nersesov) : private user templates section.
+echo \mod_individualfeedback\hack\lib::render_private_templates_section($course, $params);
+// --- MBS-Hack
 
 $templates = individualfeedback_get_template_list($course, 'public');
 echo $OUTPUT->box_start('publictemplates');
